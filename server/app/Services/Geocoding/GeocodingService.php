@@ -3,7 +3,10 @@
 namespace App\Services\Geocoding;
 
 use App\DTOs\GeocodingResultDTO;
+use App\Enums\GoogleApiServiceType;
 use App\Exceptions\CustomException;
+use App\Models\GoogleApiUsage;
+use Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -37,6 +40,11 @@ class GeocodingService
         'key' => $this->apiKey,
         'language' => 'es',
         'region' => 'pe',
+      ]);
+
+      GoogleApiUsage::create([
+        'user_id' => Auth::user()?->id,
+        'type' => GoogleApiServiceType::GEOCODING,
       ]);
 
       if (!$response->successful() || !$response->json()) {
