@@ -4,6 +4,7 @@ namespace App\Services\Geocoding;
 
 use App\DTOs\GeocodingResultDTO;
 use App\Exceptions\CustomException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,6 +24,13 @@ class GeocodingService
 
   public function reverseGeocode(float $latitude, float $longitude): ?GeocodingResultDTO
   {
+    $cacheKey = $this->generateCacheKey($latitude, $longitude);
+
+    $cachedResult = Cache::get($cacheKey);
+    if ($cachedResult !== null) {
+      return $cachedResult;
+    }
+
     try {
       $response = Http::get(self::API_BASE_ENDPOINT, [
         'latlng' => "{$latitude},{$longitude}",
@@ -57,11 +65,21 @@ class GeocodingService
 
       $geocodingResult = $this->parseAddressComponents($addressComponents, $result);
 
+      Cache::put($cacheKey, $geocodingResult, now()->addHours(24));
+
       return $geocodingResult;
     } catch (\Exception $e) {
       Log::error('Error en geocodificación inversa', ['error' => $e->getMessage()]);
       return null;
     }
+  }
+
+  private function generateCacheKey(float $latitude, float $longitude): string
+  {
+    $roundedLat = round($latitude, 6);
+    $roundedLng = round($longitude, 6);
+
+    return "geocoding:reverse:{$roundedLat}:{$roundedLng}";
   }
 
   private function parseAddressComponents(array $components, array $result): GeocodingResultDTO
