@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Download\DownloadController;
 use App\Http\Controllers\Entities\EventoPedidoController;
@@ -343,6 +344,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/templates/csv/{lang}/{templateKey}/signed-url', [DownloadController::class, 'getSignedCsvTemplateUrl'])
       ->name('downloads.csv_template.get_signed_url')
       ->can('getSignedUrlCsvTemplate');
+  });
+
+  Route::prefix('geocoding')->group(function () {
+    Route::post('/reverse', [GeocodingController::class, 'reverseGeocode']);
   });
 });
 

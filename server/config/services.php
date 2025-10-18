@@ -39,6 +39,9 @@ return [
     'route_optimization' => [
       'credentials' => env('GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS', 'GOOGLE_APPLICATION_CREDENTIALS'),
       'project_id' => env('GOOGLE_ROUTE_OPTIMIZATION_PROJECT_ID'),
+    ],
+    'geocoding' => [
+      'api_key' => env('GOOGLE_GEOCODING_API_KEY')
     ]
   ]
 ];
