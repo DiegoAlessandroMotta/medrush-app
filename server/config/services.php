@@ -42,6 +42,9 @@ return [
     ],
     'geocoding' => [
       'api_key' => env('GOOGLE_GEOCODING_API_KEY')
+    ],
+    'directions' => [
+      'api_key' => env('GOOGLE_DIRECTIONS_API_KEY')
     ]
   ]
 ];

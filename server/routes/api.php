@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DirectionsController;
 use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Download\DownloadController;
@@ -348,6 +349,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
   Route::prefix('geocoding')->group(function () {
     Route::post('/reverse', [GeocodingController::class, 'reverseGeocode']);
+  });
+
+  Route::prefix('directions')->group(function () {
+    Route::post('/with-waypoints', [DirectionsController::class, 'getDirectionsWithWaypoints']);
+    Route::post('/route-info', [DirectionsController::class, 'getRouteInfo']);
   });
 });
 
