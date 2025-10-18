@@ -8,6 +8,7 @@ use App\DTOs\RouteInfoDTO;
 use App\Enums\GoogleApiServiceType;
 use App\Models\GoogleApiUsage;
 use Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -34,6 +35,13 @@ class DirectionsService
   ): ?DirectionsResponseDTO {
     if (!$this->isServiceAvailable()) {
       return null;
+    }
+
+    $cacheKey = $this->generateDirectionsCacheKey($origin, $destination, $waypoints, $optimizeWaypoints);
+
+    $cachedResult = Cache::get($cacheKey);
+    if ($cachedResult !== null) {
+      return $cachedResult;
     }
 
     try {
@@ -88,6 +96,8 @@ class DirectionsService
 
       $directionsResponse = $this->parseDirectionsResponse($route);
 
+      Cache::put($cacheKey, $directionsResponse, now()->addMinutes(15));
+
       return $directionsResponse;
     } catch (\Exception $e) {
       Log::error('Error en Directions API', ['error' => $e->getMessage()]);
@@ -102,6 +112,13 @@ class DirectionsService
   ): ?RouteInfoDTO {
     if (!$this->isServiceAvailable()) {
       return null;
+    }
+
+    $cacheKey = $this->generateRouteInfoCacheKey($origin, $destination, $waypoints);
+
+    $cachedResult = Cache::get($cacheKey);
+    if ($cachedResult !== null) {
+      return $cachedResult;
     }
 
     try {
@@ -141,58 +158,15 @@ class DirectionsService
         return null;
       }
 
-      return $this->parseRouteInfo($route);
+      $routeInfo = $this->parseRouteInfo($route);
+
+      Cache::put($cacheKey, $routeInfo, now()->addMinutes(15));
+
+      return $routeInfo;
     } catch (\Exception $e) {
       Log::error('Error obteniendo información de ruta', ['error' => $e->getMessage()]);
       return null;
     }
-  }
-
-  /**
-   * @return array{latitude: float, longitude: float}
-   */
-  public function decodePolyline(string $encoded): array
-  {
-    if (empty($encoded)) {
-      return [];
-    }
-
-    $points = [];
-    $index = 0;
-    $len = strlen($encoded);
-    $lat = 0;
-    $lng = 0;
-
-    $divisor = 100000.0;
-
-    while ($index < $len) {
-      $shift = 0;
-      $result = 0;
-      do {
-        $b = ord($encoded[$index++]) - 63;
-        $result |= ($b & 0x1f) << $shift;
-        $shift += 5;
-      } while ($b >= 0x20);
-      $dlat = (($result & 1) != 0) ? ~($result >> 1) : ($result >> 1);
-      $lat += $dlat;
-
-      $shift = 0;
-      $result = 0;
-      do {
-        $b = ord($encoded[$index++]) - 63;
-        $result |= ($b & 0x1f) << $shift;
-        $shift += 5;
-      } while ($b >= 0x20);
-      $dlng = (($result & 1) != 0) ? ~($result >> 1) : ($result >> 1);
-      $lng += $dlng;
-
-      $points[] = [
-        'latitude' => $lat / $divisor,
-        'longitude' => $lng / $divisor
-      ];
-    }
-
-    return $points;
   }
 
   private function parseDirectionsResponse(array $route): DirectionsResponseDTO
@@ -203,8 +177,6 @@ class DirectionsService
     $legInfos = [];
     $cumulativeDurationSeconds = 0;
     $cumulativeDistanceMeters = 0;
-
-    Log::info($route);
 
     foreach ($legs as $index => $leg) {
       $distanceMeters = $leg['distance']['value'] ?? 0;
@@ -266,5 +238,51 @@ class DirectionsService
       totalDistanceMeters: $totalDistanceMeters,
       totalDurationSeconds: $totalDurationSeconds,
     );
+  }
+
+  private function generateDirectionsCacheKey(
+    array $origin,
+    array $destination,
+    array $waypoints,
+    bool $optimizeWaypoints
+  ): string {
+    $originKey = $this->formatCoordinatesForCache($origin);
+    $destinationKey = $this->formatCoordinatesForCache($destination);
+
+    $waypointsKey = '';
+    if (!empty($waypoints)) {
+      if (!$optimizeWaypoints) {
+        $waypointsFormatted = array_map([$this, 'formatCoordinatesForCache'], $waypoints);
+      } else {
+        $waypointsFormatted = array_map([$this, 'formatCoordinatesForCache'], $waypoints);
+        sort($waypointsFormatted);
+      }
+      $waypointsKey = ':wp:' . implode('|', $waypointsFormatted);
+    }
+
+    $optimizeFlag = $optimizeWaypoints ? ':opt' : '';
+
+    return "directions:route:{$originKey}:{$destinationKey}{$waypointsKey}{$optimizeFlag}";
+  }
+
+  private function generateRouteInfoCacheKey(array $origin, array $destination, array $waypoints): string
+  {
+    $originKey = $this->formatCoordinatesForCache($origin);
+    $destinationKey = $this->formatCoordinatesForCache($destination);
+
+    $waypointsKey = '';
+    if (!empty($waypoints)) {
+      $waypointsFormatted = array_map([$this, 'formatCoordinatesForCache'], $waypoints);
+      $waypointsKey = ':wp:' . implode('|', $waypointsFormatted);
+    }
+
+    return "directions:info:{$originKey}:{$destinationKey}{$waypointsKey}";
+  }
+
+  private function formatCoordinatesForCache(array $coordinates): string
+  {
+    $lat = round($coordinates['latitude'], 4);
+    $lng = round($coordinates['longitude'], 4);
+    return "{$lat},{$lng}";
   }
 }

@@ -36,10 +36,12 @@ class DirectionsController extends Controller
       throw CustomException::serviceUnavailable();
     }
 
-    return ApiResponder::success(
+    $response = ApiResponder::success(
       message: 'Directions obtenido exitosamente',
       data: $result->toArray(),
     );
+
+    return $response;
   }
 
   public function getRouteInfo(RouteInfoRequest $request)
@@ -57,9 +59,12 @@ class DirectionsController extends Controller
     if ($result === null) {
       throw CustomException::serviceUnavailable();
     }
-    return ApiResponder::success(
+
+    $response = ApiResponder::success(
       message: 'Información de ruta obtenida exitosamente',
       data: $result->toArray(),
     );
+
+    return $response;
   }
 }
