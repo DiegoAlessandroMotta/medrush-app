@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="medrush">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>medrush</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+  
+  <!-- Google Maps - Cargado de forma asíncrona -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMgHYDRMHOOLGXWvMUBZWieIhsW3bb6Rg&libraries=places&language=es&region=US&loading=async"></script>
+  
+  <!-- Firebase Configuration -->
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyArSKv5PMjkHP26YIOZfczzAEo2266FVhE',
+      authDomain: 'med-rush-fcm.firebaseapp.com',
+      projectId: 'med-rush-fcm',
+      storageBucket: 'med-rush-fcm.firebasestorage.app',
+      messagingSenderId: '565098481245',
+      appId: '1:565098481245:web:your-web-app-id'
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

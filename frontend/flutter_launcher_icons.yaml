@@ -1,0 +1,19 @@
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  
+  # Configuración para Web
+  web:
+    generate: true
+    image_path: "assets/images/logoicon.png"
+    background_color: "#ffffff"
+    image_path_web: "assets/images/logoicon.png"
+  
+  # Imagen principal (1024x1024)
+  image_path: "assets/images/logoicon.png"
+  
+  # Configuración específica de Android
+  min_sdk_android: 21
+  
+  # Configuración específica de iOS
+  remove_alpha_ios: true

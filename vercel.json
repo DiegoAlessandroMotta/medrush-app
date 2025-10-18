@@ -1,0 +1,83 @@
+{
+    "outputDirectory": "frontend/build/web",
+    "framework": null,
+    "rewrites": [
+      { "source": "/api/(.*)", "destination": "http://138.68.38.65/api/$1" },
+      { "source": "/ws", "destination": "http://138.68.38.65/ws" },
+      { "source": "/manifest.json", "destination": "/frontend/manifest.json" },
+      { "source": "/flutter.js", "destination": "/frontend/flutter.js" },
+      { "source": "/flutter_service_worker.js", "destination": "/frontend/flutter_service_worker.js" },
+      { "source": "/main.dart.js", "destination": "/frontend/main.dart.js" },
+      { "source": "/assets/(.*)", "destination": "/frontend/assets/$1" },
+      { "source": "/(.*)", "destination": "/frontend/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "X-XSS-Protection",
+            "value": "1; mode=block"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=60, must-revalidate"
+          }
+          
+        ]
+      },
+      {
+        "source": "/frontend/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/frontend/flutter_service_worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/frontend/main.dart.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=60, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/frontend/flutter.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=60, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/frontend/assets/(.*)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      }
+    ]
+  } 

@@ -1,0 +1,29 @@
+{
+    "project_info": {
+      "project_number": "565098481245",
+      "project_id": "med-rush-fcm",
+      "storage_bucket": "med-rush-fcm.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:565098481245:android:087a6a4fe29941130e2fb4",
+          "android_client_info": {
+            "package_name": "com.medrushapp.notification"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyArSKv5PMjkHP26YIOZfczzAEo2266FVhE"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }

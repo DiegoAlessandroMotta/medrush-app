@@ -1,0 +1,54 @@
+# Backend
+backend/venv/
+
+# Variables de entorno
+.env
+*.env
+
+# Cachés y archivos temporales de Python
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# Logs
+*.log
+
+# la carpeta build (ignora todo por defecto)
+frontend/build/*
+
+# Si en algún momento necesitas mantener `build/web/` para hosting estático,
+# comenta la regla general de `build/` de arriba y añade una excepción explícita.
+# ¡En este repo NO se versiona `build/`!
+# Excepción para publicar en Vercel (incluir solo `build/web` completo):
+!frontend/build/web/
+!frontend/build/web/**
+
+# Archivos del sistema
+.DS_Store
+
+# Compilados de Cython o similares
+*.so
+
+# Archivos personales de prueba
+backend/test_env.py
+
+# Ignore temporal files
+temp
+CodigoFuente.rar
+
+# APK files (too large for GitHub)
+*.apk
+app-release.apk
+
+# Firebase SDK files (too large for GitHub)
+firebase_cpp_sdk_windows_*.zip
+firebase_*.lib
+libflutter.so
+
+# Flutter build files (too large for GitHub)
+*.dill
+kernel_blob.bin
+flutter_windows.dll.pdb
+
+# Large build artifacts
+*.cache.dill.track.dill
