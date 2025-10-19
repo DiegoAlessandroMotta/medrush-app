@@ -193,8 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
         ],
       ),
-      backgroundColor: MedRushTheme.backgroundPrimary,
-      body: DecoratedBox(
+      body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -202,237 +201,65 @@ class _LoginScreenState extends State<LoginScreen> {
             colors: [
               MedRushTheme.backgroundPrimary,
               MedRushTheme.backgroundSecondary,
-              MedRushTheme.neutralGrey50,
             ],
-            stops: [0.0, 0.6, 1.0],
           ),
         ),
         child: SafeArea(
-          child: Stack(
-            children: [
-              // Elementos decorativos de fondo
-              _buildBackgroundElements(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 1200 ? 500 : 400,
+                minWidth: 320,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MedRushTheme.spacingLg,
+                  vertical: MedRushTheme.spacingLg,
+                ),
+                child: Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: MedRushTheme.spacingXl),
 
-              // Overlay sutil para mejorar legibilidad
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.0),
-                      Colors.white.withValues(alpha: 0.02),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
+                        // Logo simplificado
+                        _buildHeader(),
+
+                        const SizedBox(height: MedRushTheme.spacingXl),
+
+                        // Indicador de conexión al servidor (solo si hay problemas)
+                        if (!_isServerConnected && !_isCheckingConnection) ...[
+                          _buildServerConnectionStatus(),
+                          const SizedBox(height: MedRushTheme.spacingMd),
+                        ],
+
+                        // Formulario de login
+                        _buildLoginForm(authProvider),
+
+                        if (authProvider.error != null) ...[
+                          const SizedBox(height: MedRushTheme.spacingMd),
+                          _buildErrorMessage(authProvider),
+                        ],
+
+                        const SizedBox(height: MedRushTheme.spacingXl),
+                      ],
+                    );
+                  },
                 ),
               ),
-
-              // Contenido principal
-              Consumer<AuthProvider>(
-                builder: (context, authProvider, child) {
-                  return Center(
-                      child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width > 1200
-                          ? 600
-                          : 500, // Más ancho en pantallas muy grandes
-                      minWidth: 320, // Ancho mínimo para móviles
-                    ),
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: MediaQuery.of(context).size.width > 1200
-                            ? MedRushTheme.spacingXl
-                            : MedRushTheme.spacingLg,
-                        vertical: MedRushTheme.spacingLg,
-                      ),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: MedRushTheme.spacingXl),
-
-                          // Logo y título mejorados
-                          _buildHeader(),
-
-                          const SizedBox(height: MedRushTheme.spacingSm),
-
-                          // Indicador de conexión al servidor (solo si hay problemas)
-                          if (!_isServerConnected && !_isCheckingConnection)
-                            _buildServerConnectionStatus(),
-
-                          if (!_isServerConnected && !_isCheckingConnection)
-                            const SizedBox(height: MedRushTheme.spacingMd),
-
-                          // Formulario con diseño mejorado
-                          _buildLoginForm(authProvider),
-
-                          if (authProvider.error != null) ...[
-                            const SizedBox(height: MedRushTheme.spacingMd),
-                            _buildErrorMessage(authProvider),
-                          ],
-
-                          const SizedBox(height: MedRushTheme.spacingXl),
-                        ],
-                      ),
-                    ),
-                  ));
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBackgroundElements() {
-    return Stack(
-      children: [
-        // Círculo decorativo superior izquierdo - Más sutil
-        Positioned(
-          top: -120,
-          left: -120,
-          child: Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  MedRushTheme.primaryGreen.withValues(alpha: 0.08),
-                  MedRushTheme.primaryGreen.withValues(alpha: 0.02),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 0.7, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // Círculo decorativo inferior derecho - Más grande y sutil
-        Positioned(
-          bottom: -180,
-          right: -180,
-          child: Container(
-            width: 360,
-            height: 360,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  MedRushTheme.primaryBlue.withValues(alpha: 0.06),
-                  MedRushTheme.primaryBlue.withValues(alpha: 0.02),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 0.6, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // Círculo decorativo central izquierdo - Más pequeño
-        Positioned(
-          top: MediaQuery.of(context).size.height * 0.25,
-          left: -60,
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  MedRushTheme.accentGreen.withValues(alpha: 0.1),
-                  MedRushTheme.accentGreen.withValues(alpha: 0.03),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 0.8, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // Elemento decorativo superior derecho
-        Positioned(
-          top: MediaQuery.of(context).size.height * 0.15,
-          right: -80,
-          child: Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  MedRushTheme.primaryBlueLight.withValues(alpha: 0.05),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // Líneas decorativas sutiles
-        Positioned(
-          top: MediaQuery.of(context).size.height * 0.1,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  MedRushTheme.primaryGreen.withValues(alpha: 0.1),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        Positioned(
-          bottom: MediaQuery.of(context).size.height * 0.1,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  MedRushTheme.primaryBlue.withValues(alpha: 0.1),
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildHeader() {
-    return Column(
-      children: [
-        // Logo responsivo
-        Container(
-          padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Ajustar tamaño del logo según el ancho disponible
-              final logoSize = constraints.maxWidth > 400 ? 180.0 : 150.0;
-              return Image.asset(
-                'assets/images/logo.png',
-                width: logoSize,
-                height: logoSize,
-                fit: BoxFit.contain,
-              );
-            },
-          ),
-        ),
-      ],
+    return Image.asset(
+      'assets/images/logo.png',
+      width: 160,
+      height: 160,
+      fit: BoxFit.contain,
     );
   }
 
@@ -456,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: MedRushTheme.spacingXl),
 
@@ -468,9 +295,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontWeight: MedRushTheme.fontWeightBold,
                   color: MedRushTheme.textPrimary,
                 ),
+                textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: MedRushTheme.spacingSm),
+              const SizedBox(height: MedRushTheme.spacingMd),
 
               const Text(
                 'Ingresa tus credenciales para continuar',
@@ -478,6 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   color: MedRushTheme.textSecondary,
                 ),
+                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: MedRushTheme.spacingXl),
