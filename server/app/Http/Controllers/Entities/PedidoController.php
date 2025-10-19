@@ -18,6 +18,7 @@ use App\Http\Requests\Pedido\UpdatePedidoRequest;
 use App\Http\Requests\UploadCsvFileRequest;
 use App\Http\Resources\Pedido\PedidoResource;
 use App\Http\Resources\Pedido\PedidoSimpleResource;
+use App\Jobs\Pedido\DeleteOldPedidoFilesJob;
 use App\Jobs\ProcessPedidosCsv;
 use App\Models\Pedido;
 use App\Models\PerfilRepartidor;
@@ -468,6 +469,21 @@ class PedidoController extends Controller
     return ApiResponder::success(
       message: 'El pedido ha sido marcado como fallido.',
       data: PedidoResource::make($pedido),
+    );
+  }
+
+  public function deleteAntiguos(Request $request)
+  {
+    $request->validate([
+      'semanas' => ['sometimes', 'integer', 'min:1', 'max:52'],
+    ]);
+
+    $semanas = (int) $request->input('semanas', 3);
+
+    DeleteOldPedidoFilesJob::dispatch($semanas);
+
+    return ApiResponder::accepted(
+      message: 'La eliminación de fotos y firmas de pedidos antiguos ha sido iniciada.'
     );
   }
 }

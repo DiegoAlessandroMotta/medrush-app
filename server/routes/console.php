@@ -8,9 +8,15 @@ Artisan::command('inspire', function () {
   $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Programar la limpieza automática de PDFs antiguos
 Schedule::command('reports:cleanup-old-pdfs')
   ->daily()
   ->at('02:00')
+  ->withoutOverlapping()
+  ->runInBackground();
+
+Schedule::command('pedidos:cleanup-old-files')
+  ->weekly()
+  ->sundays()
+  ->at('03:00')
   ->withoutOverlapping()
   ->runInBackground();
