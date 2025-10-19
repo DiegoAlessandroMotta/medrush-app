@@ -228,6 +228,8 @@ Route::middleware('auth:sanctum')->group(function () {
       ->whereUuid('pedido')
       ->can('delete', 'pedido');
 
+    Route::delete('/antiguos', [PedidoController::class, 'deleteAntiguos']);
+
     Route::prefix('/{pedido}/eventos')->group(function () {
       Route::get('/', [EventoPedidoController::class, 'index'])
         ->can('view', 'pedido');
