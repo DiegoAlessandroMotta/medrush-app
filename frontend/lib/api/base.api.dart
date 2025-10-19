@@ -724,12 +724,7 @@ abstract class BaseApi {
         '${ConsoleColor.yellow}Token de autenticación removido${ConsoleColor.reset}');
   }
 
-  /// Configura headers personalizados
-  static void setCustomHeaders(Map<String, String> headers) {
-    client.options.headers.addAll(headers);
-    logInfo(
-        '📋 Headers personalizados configurados: ${headers.keys.join(', ')}');
-  }
+  // FIX: setCustomHeaders eliminado - usar EndpointManager.buildAuthHeaders() directamente
 
   // ===== MÉTODOS DE ALMACENAMIENTO DE IMÁGENES =====
 
@@ -796,9 +791,9 @@ abstract class BaseApi {
     final String finalEndpoint = endpoint ?? EndpointManager.userFoto(userId);
 
     try {
-      logInfo('📤 Subiendo imagen para usuario: $userId');
-      logInfo('📤 Endpoint: $finalEndpoint');
-      logInfo('📤 Archivo: ${imageFile.name}');
+      logInfo('Subiendo imagen para usuario: $userId');
+      logInfo('Endpoint: $finalEndpoint');
+      logInfo('Archivo: ${imageFile.name}');
 
       // Generar nombre único para el archivo
       final String fileName =
@@ -806,14 +801,14 @@ abstract class BaseApi {
 
       // Determinar el nombre del campo según el endpoint
       final String fieldName = _getFieldNameForEndpoint(finalEndpoint);
-      logInfo('📤 Campo del archivo: $fieldName');
+      logInfo('Campo del archivo: $fieldName');
 
       Response<Map<String, dynamic>> response;
 
       if (kIsWeb) {
         // Para web, leer el archivo como bytes
         final List<int> fileBytes = await imageFile.readAsBytes();
-        logInfo('📤 Tamaño del archivo: ${fileBytes.length} bytes');
+        logInfo('Tamaño del archivo: ${fileBytes.length} bytes');
 
         response = await uploadFileFromBytes<Map<String, dynamic>>(
           finalEndpoint,
@@ -832,8 +827,8 @@ abstract class BaseApi {
         );
       }
 
-      logInfo('📤 Respuesta del servidor: ${response.statusCode}');
-      logInfo('📤 Datos de respuesta: ${response.data}');
+      logInfo('Respuesta del servidor: ${response.statusCode}');
+      logInfo('Datos de respuesta: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         logInfo(
@@ -892,14 +887,14 @@ abstract class BaseApi {
 
       if (imageFile == null) {
         // Eliminar foto - enviar request sin archivo
-        logInfo('🗑️ Eliminando foto de perfil');
+        logInfo('Eliminando foto de perfil');
         response = await post<Map<String, dynamic>>(
           endpoint,
           data: {}, // Sin archivo = eliminar
         );
       } else {
         // Subir nueva foto
-        logInfo('📤 Subiendo nueva foto de perfil');
+        logInfo('Subiendo nueva foto de perfil');
 
         if (kIsWeb) {
           // Para web, leer el archivo como bytes
@@ -933,20 +928,20 @@ abstract class BaseApi {
         final data = response.data;
         if (data != null && data['status'] == 'success') {
           final url = data['data']?['url'] as String?;
-          logInfo('✅ Foto de perfil procesada exitosamente');
+          logInfo('Foto de perfil procesada exitosamente');
           return RepositoryResult.success(url);
         } else {
           final error = data?['message'] ?? 'Error desconocido del servidor';
-          logError('❌ Error del servidor: $error');
+          logError('Error del servidor: $error');
           return RepositoryResult.error(error);
         }
       } else {
         final error = 'Error HTTP ${response.statusCode}';
-        logError('❌ $error');
+        logError('$error');
         return RepositoryResult.error(error);
       }
     } catch (e) {
-      logError('❌ Error al subir foto de perfil', e);
+      logError('Error al subir foto de perfil', e);
       return RepositoryResult.error('Error al procesar la foto: $e');
     }
   }
@@ -1100,7 +1095,7 @@ abstract class BaseApi {
         }
       }
     } catch (e) {
-      logWarning('⚠️ Error al verificar expiración de URL: $e');
+      logWarning('Error al verificar expiración de URL: $e');
     }
 
     return false;
@@ -1122,7 +1117,7 @@ abstract class BaseApi {
       final response = await client.head(url);
       return response.statusCode == 200;
     } catch (e) {
-      logWarning('⚠️ URL no accesible: $url - $e');
+      logWarning('URL no accesible: $url - $e');
       return false;
     }
   }
@@ -1141,7 +1136,7 @@ abstract class BaseApi {
       final hasSignature = uri.queryParameters.containsKey('signature');
 
       if (!hasExpires || !hasSignature) {
-        logWarning('⚠️ URL firmada incompleta - faltan parámetros: $url');
+        logWarning('URL firmada incompleta - faltan parámetros: $url');
         return false;
       }
 
@@ -1157,7 +1152,7 @@ abstract class BaseApi {
       final expires = uri.queryParameters['expires'] ?? '';
       final expiresTimestamp = int.tryParse(expires);
       if (expiresTimestamp == null) {
-        logError('❌ Timestamp de expiración inválido: $expires');
+        logError('Timestamp de expiración inválido: $expires');
         return false;
       }
 
@@ -1166,13 +1161,13 @@ abstract class BaseApi {
           DateTime.fromMillisecondsSinceEpoch(expiresTimestamp * 1000);
       final now = DateTime.now();
       if (expiresTime.isBefore(now)) {
-        logWarning('⚠️ URL firmada expirada: $url');
+        logWarning('URL firmada expirada: $url');
         return false;
       }
 
       return true;
     } catch (e) {
-      logError('❌ Error al validar URL firmada: $e');
+      logError('Error al validar URL firmada: $e');
       return false;
     }
   }

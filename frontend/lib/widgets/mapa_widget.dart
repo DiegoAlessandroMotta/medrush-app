@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/models/geocoding_result.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/services/geocoding_service.dart';
 import 'package:medrush/theme/theme.dart';

@@ -66,7 +66,6 @@ class RepartidoresApi extends BaseApi {
         return ApiHelper.isValidResponse(response.data);
       },
       operationName: 'Actualizando estado del repartidor $id a: $nuevoEstado',
-      successMessage: 'Estado del repartidor actualizado exitosamente',
     );
   }
 
@@ -123,7 +122,6 @@ class RepartidoresApi extends BaseApi {
         return ApiHelper.processSingleResponse(response.data, Usuario.fromJson);
       },
       operationName: 'Creando nuevo repartidor: ${repartidor.nombre}',
-      successMessage: 'Repartidor creado exitosamente',
     );
   }
 
@@ -159,7 +157,6 @@ class RepartidoresApi extends BaseApi {
       },
       operationName:
           'Actualizando repartidor: ${repartidor.nombre} (ID: ${repartidor.id})',
-      successMessage: 'Repartidor actualizado exitosamente',
     );
   }
 
@@ -172,7 +169,6 @@ class RepartidoresApi extends BaseApi {
         return ApiHelper.isValidResponse(response.data);
       },
       operationName: 'Eliminando repartidor con ID: $id',
-      successMessage: 'Repartidor eliminado exitosamente',
     );
   }
 
@@ -187,7 +183,6 @@ class RepartidoresApi extends BaseApi {
         return response;
       },
       operationName: 'Subiendo foto de perfil',
-      successMessage: 'Foto de perfil subida exitosamente',
     );
   }
 
@@ -208,7 +203,6 @@ class RepartidoresApi extends BaseApi {
         return null;
       },
       operationName: 'Subiendo foto de DNI/ID para repartidor: $repartidorId',
-      successMessage: 'Foto de DNI/ID subida exitosamente',
     );
   }
 
@@ -230,7 +224,6 @@ class RepartidoresApi extends BaseApi {
         return null;
       },
       operationName: 'Subiendo foto de licencia para repartidor: $repartidorId',
-      successMessage: 'Foto de licencia subida exitosamente',
     );
   }
 
@@ -253,7 +246,6 @@ class RepartidoresApi extends BaseApi {
       },
       operationName:
           'Subiendo foto de seguro vehicular para repartidor: $repartidorId',
-      successMessage: 'Foto de seguro vehicular subida exitosamente',
     );
   }
 
@@ -276,7 +268,6 @@ class RepartidoresApi extends BaseApi {
         return response.data?['status'] == 'success';
       },
       operationName: 'Cambiando contraseña del repartidor: $repartidorId',
-      successMessage: 'Contraseña del repartidor cambiada exitosamente',
     );
   }
 }

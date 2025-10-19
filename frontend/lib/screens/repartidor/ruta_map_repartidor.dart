@@ -10,6 +10,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/pedidos.api.dart';
 import 'package:medrush/api/rutas.api.dart';
 import 'package:medrush/api/ubicaciones_repartidor.api.dart';
+import 'package:medrush/models/leg_info.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/screens/repartidor/modules/pedidos/pedidos_detalle_repartidor.dart';
@@ -54,19 +55,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
   final Set<String> _pedidosConPolyline = {};
 
   // Cache de polylines movido a PolylineDecodingService
-
-  // Constantes para límites de Google Directions API
-  static const int _maxWaypointsGoogleAPI =
-      25; // Límite de Google Directions API
-
-  // Constantes para fuente de polylines
-  static const String _polylineSourceServer = 'SERVER';
-  static const String _polylineSourceGoogle = 'GOOGLE';
-
-  // Configuración de polyline (puede ser configurada por el usuario)
-  String _polylineSource =
-      _polylineSourceGoogle; // Por defecto: usar Google Directions API
-  // Se usa precisión estándar polyline5 (1e5) de forma fija
 
   bool _isLoading = true;
   String? _error;
@@ -123,6 +111,25 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     return ubicaciones.length;
   }
 
+  /// Cuenta los pedidos pendientes de recogida (asignados)
+  int _contarPedidosPendientesRecogida(List<Pedido> pedidos) {
+    return pedidos
+        .where((pedido) =>
+            pedido.estado == EstadoPedido.asignado ||
+            pedido.estado == EstadoPedido.pendiente)
+        .length;
+  }
+
+  /// Cuenta los pedidos ya recogidos
+  int _contarPedidosRecogidos(List<Pedido> pedidos) {
+    return pedidos
+        .where((pedido) =>
+            pedido.estado == EstadoPedido.recogido ||
+            pedido.estado == EstadoPedido.enRuta ||
+            pedido.estado == EstadoPedido.entregado)
+        .length;
+  }
+
   /// Cuenta las ubicaciones de entrega únicas en una lista de pedidos
   int _contarUbicacionesEntregaUnicas(List<Pedido> pedidos) {
     final ubicaciones = <String>{};
@@ -171,7 +178,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         // No esperamos; mejor UX
         unawaited(() async {
           try {
-            await _obtenerPolylinesConDirectionsAPI();
+            await _obtenerPolylinesDelServidor();
             await _crearMarcadoresYPolylines();
           } catch (e) {
             logError('Error calculando polylines en segundo plano', e);
@@ -601,11 +608,16 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         _contarUbicacionesRecojoUnicas(todosLosPedidos);
     final ubicacionesEntregaUnicas =
         _contarUbicacionesEntregaUnicas(todosLosPedidos);
+    final pedidosPendientesRecogida =
+        _contarPedidosPendientesRecogida(todosLosPedidos);
+    final pedidosRecogidos = _contarPedidosRecogidos(todosLosPedidos);
 
     logInfo(
         '${_rutaOptimizada.length} pedidos en ruta optimizada (TODOS los pedidos se muestran)');
     logInfo(
         'Ubicaciones únicas: $ubicacionesRecojoUnicas recogidas, $ubicacionesEntregaUnicas entregas');
+    logInfo(
+        'Estados: $pedidosPendientesRecogida pendientes de recogida, $pedidosRecogidos ya recogidos');
     logInfo(
         'Polylines limitadas a 25 waypoints, pero marcadores muestran todos los pedidos');
   }
@@ -614,7 +626,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     _markers.clear();
 
     // Debug: verificar estado de polylines
-    logInfo('Creando marcadores - Fuente: $_polylineSource');
+    logInfo('Creando marcadores - Fuente: servidor');
     logInfo(
         'Pedidos con polyline: ${_pedidosConPolyline.length}/${_rutaOptimizada.length}');
     logInfo('IDs con polyline: ${_pedidosConPolyline.toList()}');
@@ -653,19 +665,33 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       final latLngRecojo =
           LatLng(primerPedido.latitudRecojo!, primerPedido.longitudRecojo!);
 
-      // Crear icono con todos los números
-      final numeros = pedidos
+      // Separar pedidos por estado
+      final pedidosPendientes = pedidos
+          .where((p) =>
+              p.estado == EstadoPedido.asignado ||
+              p.estado == EstadoPedido.pendiente)
+          .toList();
+      final pedidosRecogidos = pedidos
+          .where((p) =>
+              p.estado == EstadoPedido.recogido ||
+              p.estado == EstadoPedido.enRuta ||
+              p.estado == EstadoPedido.entregado)
+          .toList();
+
+      // Crear icono con contador de pedidos pendientes
+      final numerosPendientes = pedidosPendientes
           .map((p) => p.ordenOptimizado ?? (_rutaOptimizada.indexOf(p) + 1))
           .toList();
-      final iconRecojo = await _getRecojoIconAgrupado(numeros);
+      final iconRecojo = await _getRecojoIconAgrupado(
+          numerosPendientes, pedidosRecogidos.length);
 
-      // Crear info window con todos los pedidos
-      final titulo = numeros.length == 1
-          ? '${numeros.first}) Recogida - ${primerPedido.pacienteNombre}'
-          : 'Recogida (${numeros.length} pedidos)';
-      final snippet = numeros.length == 1
+      // Crear info window con información de estado
+      final titulo = numerosPendientes.length == 1
+          ? '${numerosPendientes.first}) Recogida - ${primerPedido.pacienteNombre}'
+          : 'Recogida (${numerosPendientes.length} pendientes)';
+      final snippet = numerosPendientes.length == 1
           ? 'Punto de recogida'
-          : 'Pedidos: ${numeros.join(', ')}';
+          : 'Pendientes: ${numerosPendientes.join(', ')}${pedidosRecogidos.length > 0 ? '\nRecogidos: ${pedidosRecogidos.length}' : ''}';
 
       _markers.add(
         Marker(
@@ -690,34 +716,24 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       // Debug: verificar el orden
       if (kDebugMode) {
         debugPrint(
-            '[Map] Pedido ${i + 1}: ${pedido.pacienteNombre} - ordenOptimizado: ${pedido.ordenOptimizado} - usando orden: $orden');
+            '[Map] Pedido ${i + 1}: ${pedido.pacienteNombre} - ordenOptimizado: ${pedido.ordenOptimizado} - usando orden: $orden - estado: ${pedido.estado}');
       }
 
       // Marcador de entrega
       final latLngEntrega =
           LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
 
-      // Determinar el icono basado en si tiene polyline o no
-      BitmapDescriptor iconEntrega;
-      final tienePolyline = _pedidosConPolyline.contains(pedido.id);
-
-      if (_polylineSource == _polylineSourceGoogle && !tienePolyline) {
-        // Pedido en cola (sin polyline) - icono gris
-        iconEntrega = await _getNumberedIconGrey(orden);
-        logInfo(
-            'Marcador GRIS para pedido $orden (${pedido.pacienteNombre}) - sin polyline');
-      } else {
-        // Pedidos con polyline - icono azul (todos iguales)
-        iconEntrega = await _getNumberedIcon(orden);
-        logInfo(
-            'Marcador AZUL para pedido $orden (${pedido.pacienteNombre}) - con polyline');
-      }
+      // Determinar color del icono según el estado
+      final iconEntrega = await _getNumberedIconWithState(orden, pedido.estado);
+      final colorEstado = _getColorForEstado(pedido.estado);
+      logInfo(
+          'Marcador $colorEstado para pedido $orden (${pedido.pacienteNombre}) - estado: ${pedido.estado}');
 
       // Debug: verificar icono de entrega
       if (kDebugMode) {
         final tienePolyline = _pedidosConPolyline.contains(pedido.id);
         debugPrint(
-            '[Map] Creando marcador de entrega $orden para ${pedido.pacienteNombre} - tienePolyline: $tienePolyline - fuente: $_polylineSource');
+            '[Map] Creando marcador de entrega $orden para ${pedido.pacienteNombre} - tienePolyline: $tienePolyline - estado: ${pedido.estado}');
       }
 
       _markers.add(
@@ -750,9 +766,9 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
   }
 
-  /// Obtiene polylines usando Google Directions API (solo para dibujar, no optimizar)
-  Future<void> _obtenerPolylinesConDirectionsAPI() async {
-    if (_rutaOptimizada.isEmpty || _currentPosition == null) {
+  /// Obtiene polylines usando solo el servidor
+  Future<void> _obtenerPolylinesDelServidor() async {
+    if (_rutaOptimizada.isEmpty) {
       return;
     }
 
@@ -761,21 +777,20 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       if (mounted) {
         setState(() {});
       }
-      logInfo('Dibujando polylines con Google Directions API...');
+      logInfo('Dibujando polylines desde el servidor...');
 
       // Limpiar polylines existentes
       _polylines.clear();
 
-      // Siempre usar Google Directions API (limitado a 12 pedidos)
-      await _crearPolylinesDiferenciadas();
+      // Solo usar polyline del servidor
+      await _crearPolylinesDesdeServidor();
 
       if (mounted) {
         _isLoadingPolylines = false;
         setState(() {});
       }
     } catch (e) {
-      logError('Error al dibujar polylines', e);
-      // Sin fallback - solo usar Google Directions API
+      logError('Error al dibujar polylines desde el servidor', e);
       if (mounted) {
         _isLoadingPolylines = false;
         setState(() {});
@@ -821,57 +836,18 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     return icon;
   }
 
-  /// Crea iconos para puntos de recogida agrupados (múltiples números)
-  Future<BitmapDescriptor> _getRecojoIconAgrupado(List<int> numbers) async {
-    final String cacheKey = 'recojo_agrupado_${numbers.join('_')}';
+  /// Crea iconos numerados con color según el estado del pedido
+  Future<BitmapDescriptor> _getNumberedIconWithState(
+      int number, EstadoPedido estado) async {
+    final String cacheKey = '${number}_${estado.name}';
     if (_numberIconCache.containsKey(cacheKey)) {
       return _numberIconCache[cacheKey]!;
     }
 
-    const int size = 60; // Más grande para el texto
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()
-      ..color = const Color(0xFF9C27B0); // morado para recogida
-
-    // Fondo círculo
-    canvas.drawCircle(const Offset(size / 2, size / 2), size / 2.2, paint);
-
-    // Texto "Recoger (X)"
-    final ui.ParagraphBuilder pb = ui.ParagraphBuilder(
-      ui.ParagraphStyle(
-        textAlign: TextAlign.center,
-        fontSize: 11, // Tamaño para que quepa bien
-        fontWeight: FontWeight.w600,
-      ),
-    )
-      ..pushStyle(ui.TextStyle(color: const Color(0xFFFFFFFF)))
-      ..addText('Recoger (${numbers.length})');
-
-    final ui.Paragraph paragraph = pb.build()
-      ..layout(ui.ParagraphConstraints(width: size.toDouble()));
-    canvas.drawParagraph(paragraph, Offset(0, (size - paragraph.height) / 2));
-
-    final ui.Image image = await recorder.endRecording().toImage(size, size);
-    final ByteData? bytes =
-        await image.toByteData(format: ui.ImageByteFormat.png);
-    final Uint8List list = bytes!.buffer.asUint8List();
-    final icon = BitmapDescriptor.bytes(list);
-    _numberIconCache[cacheKey] = icon;
-    return icon;
-  }
-
-  /// Crea iconos numerados grises para pedidos en cola (sin polyline)
-  Future<BitmapDescriptor> _getNumberedIconGrey(int number) async {
-    final String cacheKey = 'grey_$number';
-    if (_numberIconCache.containsKey(cacheKey)) {
-      return _numberIconCache[cacheKey]!;
-    }
     const int size = 36;
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()
-      ..color = const Color(0xFF9E9E9E); // gris para pedidos en cola
+    final Paint paint = Paint()..color = _getColorForEstado(estado);
 
     // Fondo círculo
     canvas.drawCircle(const Offset(size / 2, size / 2), size / 2.2, paint);
@@ -886,6 +862,79 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     )
       ..pushStyle(ui.TextStyle(color: const Color(0xFFFFFFFF)))
       ..addText(number.toString());
+
+    final ui.Paragraph paragraph = pb.build()
+      ..layout(ui.ParagraphConstraints(width: size.toDouble()));
+    canvas.drawParagraph(paragraph, Offset(0, (size - paragraph.height) / 2));
+
+    final ui.Image image = await recorder.endRecording().toImage(size, size);
+    final ByteData? bytes =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List list = bytes!.buffer.asUint8List();
+    final icon = BitmapDescriptor.bytes(list);
+    _numberIconCache[cacheKey] = icon;
+    return icon;
+  }
+
+  /// Obtiene el color para el estado del pedido
+  Color _getColorForEstado(EstadoPedido estado) {
+    switch (estado) {
+      case EstadoPedido.pendiente:
+        return MedRushTheme.statusPending; // #FFA000 - Amarillo
+      case EstadoPedido.asignado:
+        return MedRushTheme.primaryBlue; // #006BBA - Azul principal
+      case EstadoPedido.recogido:
+        return const Color(0xFF9C27B0); // #9C27B0 - Morado
+      case EstadoPedido.enRuta:
+        return MedRushTheme.primaryGreen; // #5F9041 - Verde asparagus
+      case EstadoPedido.entregado:
+        return MedRushTheme.primaryGreenLight; // #7CB459 - Verde claro
+      case EstadoPedido.fallido:
+        return MedRushTheme.statusFailed; // #D32F2F - Rojo
+      case EstadoPedido.cancelado:
+        return MedRushTheme.statusCancelled; // #757575 - Gris
+    }
+  }
+
+  /// Crea iconos para puntos de recogida agrupados (múltiples números)
+  Future<BitmapDescriptor> _getRecojoIconAgrupado(
+      List<int> numbers, int recogidosCount) async {
+    final String cacheKey =
+        'recojo_agrupado_${numbers.join('_')}_recogidos_$recogidosCount';
+    if (_numberIconCache.containsKey(cacheKey)) {
+      return _numberIconCache[cacheKey]!;
+    }
+
+    const int size = 60; // Más grande para el texto
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Color según si hay pedidos pendientes o no
+    final Color color = numbers.isEmpty
+        ? const Color(0xFF5F9041)
+        : const Color(
+            0xFF9C27B0); // Verde si todos recogidos, morado si hay pendientes
+    final Paint paint = Paint()..color = color;
+
+    // Fondo círculo
+    canvas.drawCircle(const Offset(size / 2, size / 2), size / 2.2, paint);
+
+    // Texto con información de estado
+    final ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        textAlign: TextAlign.center,
+        fontSize: 10, // Tamaño para que quepa bien
+        fontWeight: FontWeight.w600,
+      ),
+    )..pushStyle(ui.TextStyle(color: const Color(0xFFFFFFFF)));
+
+    if (numbers.isEmpty) {
+      // Todos recogidos
+      pb.addText('Recogido\n($recogidosCount)');
+    } else {
+      // Hay pendientes
+      pb.addText('Recoger\n(${numbers.length})');
+    }
 
     final ui.Paragraph paragraph = pb.build()
       ..layout(ui.ParagraphConstraints(width: size.toDouble()));
@@ -976,7 +1025,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       final url =
           'https://www.google.com/maps/dir/?api=1&destination=$destination&travelmode=driving';
 
-      logInfo('🌐 Abriendo Google Maps para $action: $url');
+      logInfo('Abriendo Google Maps para $action: $url');
 
       final Uri uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -1047,7 +1096,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         logInfo('${_rutaOptimizada.length} pedidos recargados');
 
         // Recrear polylines primero, luego marcadores
-        await _obtenerPolylinesConDirectionsAPI();
+        await _obtenerPolylinesDelServidor();
         await _crearMarcadoresYPolylines();
       } else {
         logWarning('No hay pedidos en la ruta después de recargar');
@@ -1212,16 +1261,17 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         tiempoAcumulativo += tiempoEstimado;
 
         final legInfo = LegInfo(
-          StatusHelpers.formatearDistanciaKm(distanciaKm), // distanceText
-          '$tiempoEstimado min', // durationText
-          tiempoEstimado * 60, // durationSeconds
-          '$tiempoAcumulativo min', // cumulativeDurationText
-          tiempoAcumulativo * 60, // cumulativeDurationSeconds
+          distanceText: StatusHelpers.formatearDistanciaKm(distanciaKm),
+          durationText: '$tiempoEstimado min',
+          distanceMeters: (distanciaKm * 1000).round(),
+          durationSeconds: tiempoEstimado * 60,
+          cumulativeDistanceMeters: (distanciaKm * 1000).round(),
+          cumulativeDurationSeconds: tiempoAcumulativo * 60,
         );
 
         _legInfoByPedidoId[pedido.id] = legInfo;
         logInfo(
-            'Leg info para pedido ${pedido.id}: ${legInfo.distanceText}, ${legInfo.durationText}, ${legInfo.cumulativeDurationText}');
+            'Leg info para pedido ${pedido.id}: ${legInfo.distanceText}, ${legInfo.durationText}, ${legInfo.cumulativeDurationSeconds}s');
       }
     }
 
@@ -1231,7 +1281,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
   /// Cambia el orden personalizado de un pedido
   Future<void> _cambiarOrdenPedido(Pedido pedido, int nuevoOrden) async {
     try {
-      logInfo('📝 Cambiando orden del pedido ${pedido.id} a $nuevoOrden');
+      logInfo('Cambiando orden del pedido ${pedido.id} a $nuevoOrden');
 
       // Actualizar orden personalizado en el backend
       await RutasOptimizadasApi.actualizarOrdenPersonalizado(
@@ -1331,30 +1381,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     );
   }
 
-  /// Crea polylines usando la fuente seleccionada (servidor o Google Directions API)
-  Future<void> _crearPolylinesDiferenciadas() async {
-    if (_rutaOptimizada.isEmpty) {
-      return;
-    }
-
-    _polylines.clear();
-
-    if (_polylineSource == _polylineSourceServer &&
-        _serverPolylineEncoded != null) {
-      // Usar polyline del servidor
-      await _crearPolylinesDesdeServidor();
-    } else {
-      // Usar Google Directions API
-      await _crearRutaOptimizadaConWaypoints();
-    }
-
-    logInfo(
-        'Ruta optimizada creada: ${_polylines.length} polylines (fuente: $_polylineSource)');
-
-    // Debug detallado de polylines usando el servicio
-    PolylineDecodingService.logMultiplePolylines(_polylines.toList());
-  }
-
   /// Crea polylines usando el polyline_encoded del servidor
   Future<void> _crearPolylinesDesdeServidor() async {
     if (_serverPolylineEncoded == null || _serverPolylineEncoded!.isEmpty) {
@@ -1397,217 +1423,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       logError('Error al decodificar polyline del servidor', e);
     }
   }
-
-  /// Crea una ruta optimizada usando una sola llamada a Google Directions API con waypoints
-  Future<void> _crearRutaOptimizadaConWaypoints() async {
-    if (_currentPosition == null) {
-      return;
-    }
-
-    try {
-      // 1. Preparar waypoints únicos (evitar duplicados)
-      final List<LatLng> waypoints = [];
-      final Set<String> ubicacionesUnicas = {};
-      final Set<String> ubicacionesRecojoUnicas = {};
-
-      // Agregar ubicación de recogida (si es única)
-      final ubicacionRecojo = LatLng(
-        _rutaOptimizada.first.latitudRecojo ?? 0.0,
-        _rutaOptimizada.first.longitudRecojo ?? 0.0,
-      );
-      final keyRecojo = StatusHelpers.formatearCoordenadasAltaPrecision(
-          ubicacionRecojo.latitude, ubicacionRecojo.longitude);
-      if (!ubicacionesUnicas.contains(keyRecojo)) {
-        waypoints.add(ubicacionRecojo);
-        ubicacionesUnicas.add(keyRecojo);
-        ubicacionesRecojoUnicas.add(keyRecojo);
-      }
-
-      // Limpiar pedidos con polyline para recalcular
-      _pedidosConPolyline.clear();
-
-      // Agregar ubicaciones de entrega en orden optimizado (limitado a 25 waypoints)
-      int waypointsAgregados = 0;
-      for (final pedido in _rutaOptimizada) {
-        if (pedido.latitudEntrega != null && pedido.longitudEntrega != null) {
-          final ubicacionEntrega = LatLng(
-            pedido.latitudEntrega!,
-            pedido.longitudEntrega!,
-          );
-          final keyEntrega = StatusHelpers.formatearCoordenadasAltaPrecision(
-              ubicacionEntrega.latitude, ubicacionEntrega.longitude);
-
-          if (!ubicacionesUnicas.contains(keyEntrega)) {
-            waypoints.add(ubicacionEntrega);
-            ubicacionesUnicas.add(keyEntrega);
-            waypointsAgregados++;
-
-            // Marcar este pedido como que tiene polyline (solo los que se incluyen en waypoints)
-            _pedidosConPolyline.add(pedido.id);
-
-            // Limitar a 25 waypoints totales (incluyendo ubicación actual + recogida)
-            if (waypoints.length >= _maxWaypointsGoogleAPI) {
-              logInfo(
-                  'Límite de $_maxWaypointsGoogleAPI waypoints alcanzado. Solo los primeros $waypointsAgregados pedidos tendrán polyline.');
-              break;
-            }
-          }
-        }
-      }
-
-      logInfo(
-          'Creando ruta optimizada con ${waypoints.length} waypoints únicos');
-      logInfo('Ubicaciones únicas totales: ${ubicacionesUnicas.length}');
-      logInfo(
-          'Ubicaciones de recogida únicas: ${ubicacionesRecojoUnicas.length}');
-      logInfo(
-          'Pedidos con polyline: ${_pedidosConPolyline.length}/${_rutaOptimizada.length}');
-
-      // 2. Crear ruta principal con Google Directions API
-      final origen =
-          LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-
-      // Si hay menos de 2 waypoints, no crear polyline
-      if (waypoints.length < 2) {
-        logInfo('Menos de 2 waypoints, no se puede crear polyline');
-        return;
-      }
-
-      final destino = waypoints.last;
-      final waypointsIntermedios = waypoints.length > 2
-          ? waypoints.sublist(1, waypoints.length - 1)
-          : <LatLng>[];
-
-      logInfo('Origen: ${origen.latitude}, ${origen.longitude}');
-      logInfo('Destino: ${destino.latitude}, ${destino.longitude}');
-      logInfo('Waypoints intermedios: ${waypointsIntermedios.length}');
-
-      logInfo('Llamando a _obtenerPolylineConWaypoints...');
-      final polylinePoints = await _obtenerPolylineConWaypoints(
-        origen: origen,
-        destino: destino,
-        waypoints: waypointsIntermedios,
-      );
-      logInfo(
-          '_obtenerPolylineConWaypoints completado. Puntos: ${polylinePoints.length}');
-
-      if (polylinePoints.isNotEmpty) {
-        _polylines.add(
-          PolylineDecodingService.createOptimizedPolyline(
-              'ruta_optimizada', polylinePoints),
-        );
-        logInfo('Ruta optimizada creada con ${polylinePoints.length} puntos');
-
-        // Obtener información inteligente de tiempos según estado de pedidos
-        final legInfoMap = await PolylineDecodingService.getSmartRouteInfo(
-          origen: origen,
-          pedidos: _rutaOptimizada,
-          pedidosConPolyline: _pedidosConPolyline,
-        );
-        _legInfoByPedidoId.addAll(legInfoMap);
-      }
-
-      // 3. Crear polyline de recogida (morado) solo si hay múltiples ubicaciones de recogida
-      logInfo(
-          'Evaluando condición: ubicacionesRecojoUnicas.length (${ubicacionesRecojoUnicas.length}) > 1');
-      if (ubicacionesRecojoUnicas.isNotEmpty) {
-        logInfo(
-            '🟣 Creando polyline de recogida separada (múltiples ubicaciones de recogida)');
-        await _crearPolylineRecogidaConDirections(_rutaOptimizada);
-      }
-    } catch (e) {
-      logError('Error creando ruta optimizada: $e');
-      logError('Stack trace: ${StackTrace.current}');
-      // Sin fallback - solo usar Google Directions API
-    }
-  }
-
-  /// Crea polyline de recogida usando Google Directions API
-  Future<void> _crearPolylineRecogidaConDirections(List<Pedido> pedidos) async {
-    if (_currentPosition == null) {
-      return;
-    }
-
-    final List<LatLng> puntosRecojo = [
-      LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-    ]
-
-        // Agregar ubicación actual como origen
-
-        ;
-
-    // Agregar puntos de recogida únicos (evitar duplicados)
-    for (final pedido in pedidos) {
-      if (pedido.latitudRecojo != null && pedido.longitudRecojo != null) {
-        final punto = LatLng(pedido.latitudRecojo!, pedido.longitudRecojo!);
-        // Solo agregar si no existe ya (tolerancia de 0.0001 grados ≈ 11 metros)
-        if (!puntosRecojo.any((p) =>
-            (p.latitude - punto.latitude).abs() < 0.0001 &&
-            (p.longitude - punto.longitude).abs() < 0.0001)) {
-          puntosRecojo.add(punto);
-        }
-      }
-    }
-
-    // Siempre usar Google Directions API para obtener la ruta real
-    if (puntosRecojo.length > 1) {
-      try {
-        final polylinePoints =
-            await _obtenerPolylineConDirectionsAPI(puntosRecojo);
-        if (polylinePoints.isNotEmpty) {
-          _polylines.add(
-            PolylineDecodingService.createPickupPolyline(
-                'ruta_recojo', polylinePoints),
-          );
-          logInfo(
-              '🟢 Polyline de recogida creada con Google Directions API: ${polylinePoints.length} puntos');
-        }
-      } catch (e) {
-        logError('Error al crear polyline de recogida con Directions API', e);
-        // Sin fallback - solo usar Google Directions API
-      }
-    } else if (puntosRecojo.length == 2) {
-      // Si solo hay 2 puntos, usar Google Directions API también
-      try {
-        final polylinePoints =
-            await _obtenerPolylineConDirectionsAPI(puntosRecojo);
-        if (polylinePoints.isNotEmpty) {
-          _polylines.add(
-            PolylineDecodingService.createSimplePickupPolyline(
-                'ruta_recojo_simple', polylinePoints),
-          );
-          logInfo(
-              '🟢 Polyline de recogida simple creada con Google Directions API');
-        }
-      } catch (e) {
-        logError('Error al crear polyline simple de recogida', e);
-      }
-    }
-  }
-
-  /// Obtiene polyline usando Google Directions API con waypoints optimizados
-  Future<List<LatLng>> _obtenerPolylineConWaypoints({
-    required LatLng origen,
-    required LatLng destino,
-    required List<LatLng> waypoints,
-  }) {
-    return PolylineDecodingService.getPolylineWithWaypoints(
-      origen: origen,
-      destino: destino,
-      waypoints: waypoints,
-    );
-  }
-
-  Future<List<LatLng>> _obtenerPolylineConDirectionsAPI(
-      List<LatLng> waypoints) {
-    return PolylineDecodingService.getPolylineWithDirectionsAPI(waypoints);
-  }
-
-  // Función _extraerInformacionDeRuta movida a PolylineDecodingService
-
-  // Función _formatDuration movida a PolylineDecodingService
-
-  // Web-only JS helpers eliminados: Android/iOS usan REST
 
   Widget _buildLoadingState() {
     return const Center(
@@ -1787,8 +1602,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
             if (_cachedRutaId != null) {
               _reOptimizarRuta();
             }
-          case 'polyline_source':
-            _togglePolylineSource();
         }
       },
       itemBuilder: (context) => [
@@ -1823,38 +1636,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
               ],
             ),
           ),
-        // Configuración de fuente de polyline
-        PopupMenuItem(
-          value: 'polyline_source',
-          child: Row(
-            children: [
-              const Icon(
-                LucideIcons.database,
-                color: MedRushTheme.primaryGreen,
-                size: 18,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Fuente de polylines'),
-                    Text(
-                      _polylineSource == _polylineSourceServer
-                          ? 'Servidor (${_serverPolylineEncoded?.length ?? 0} chars)'
-                          : 'Google Directions API',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: MedRushTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
 
         // Botón de lista de entregas (solo si hay pedidos)
         if (_rutaOptimizada.isNotEmpty)
@@ -2058,6 +1839,10 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     // Construir snippet con información esencial (InfoWindow tiene limitaciones)
     final List<String> parts = [];
 
+    // Estado del pedido
+    final estadoTexto = StatusHelpers.estadoPedidoTexto(pedido.estado);
+    parts.add('Estado: $estadoTexto');
+
     // Dirección de entrega
     if (pedido.direccionEntrega.isNotEmpty) {
       parts.add('Dirección: ${pedido.direccionEntrega}');
@@ -2069,9 +1854,10 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
 
     // Información de ruta (si está disponible)
     if (info != null) {
+      final cumulativeText = _formatDuration(info.cumulativeDurationSeconds);
       parts
         ..add(
-            'Tiempo: ${info.durationText} (siguiente) | ${info.cumulativeDurationText} (total)')
+            'Tiempo: ${info.durationText} (siguiente) | $cumulativeText (total)')
         ..add(
             'Distancia: ${info.distanceText}${desdeMi != null ? ' • $desdeMi desde ti' : ''}');
     } else if (desdeMi != null) {
@@ -2086,6 +1872,18 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     return parts.join('\n');
   }
 
+  /// Formatea duración en segundos a texto legible
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else {
+      return '${minutes}m';
+    }
+  }
+
   Future<void> _focusOnPedido(Pedido pedido) async {
     final LatLng latLng =
         LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
@@ -2098,47 +1896,5 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     // SnackBar removido - estorbaba en el grid
-  }
-
-  /// Configura la fuente de polyline (SERVIDOR o GOOGLE)
-  void _configurarFuentePolyline(String fuente) {
-    if (_polylineSource != fuente) {
-      _polylineSource = fuente;
-      logInfo('📐 Fuente de polyline cambiada a: $fuente');
-
-      // Limpiar cache para forzar regeneración con nueva fuente
-      PolylineDecodingService.clearPolylineCache();
-      logInfo('🧹 Cache de polylines limpiado para nueva fuente');
-
-      // Regenerar polylines con nueva fuente
-      if (_rutaOptimizada.isNotEmpty) {
-        _obtenerPolylinesConDirectionsAPI();
-        _crearMarcadoresYPolylines();
-      }
-    }
-  }
-
-  void _togglePolylineSource() {
-    final String nuevaFuente;
-    if (_polylineSource == _polylineSourceGoogle &&
-        _serverPolylineEncoded != null &&
-        _serverPolylineEncoded!.isNotEmpty) {
-      nuevaFuente = _polylineSourceServer;
-    } else {
-      nuevaFuente = _polylineSourceGoogle;
-    }
-
-    _configurarFuentePolyline(nuevaFuente);
-
-    // Feedback ligero en UI
-    if (mounted) {
-      NotificationService.showInfo(
-        nuevaFuente == _polylineSourceServer
-            ? 'Usando polylines del servidor'
-            : 'Usando Google Directions API',
-        context: context,
-        duration: const Duration(seconds: 2),
-      );
-    }
   }
 }

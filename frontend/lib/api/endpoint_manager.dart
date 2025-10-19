@@ -1,36 +1,15 @@
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class EndpointManager {
   // ===== CONFIGURACIÓN DE RED =====
 
-  // URLs del servidor
-  static const String serverIp = '192.168.1.3';
-  static const String serverUrl = 'http://$serverIp:4000/api'; // Puerto 4000
-  static const String serverWebSocketUrl = 'ws://$serverIp:4000'; // Puerto 4000
+  // URLs del servidor de producción
+  static const String serverDomain = 'medrush.ksdemosapps.com';
+  static const String serverUrl = 'https://$serverDomain/api';
+  static const String serverWebSocketUrl = 'wss://$serverDomain/ws';
 
-  // URLs de Vercel (para deploy web)
-  static const String vercelDomain = 'med-rush-app.vercel.app';
-  static const String vercelApiPath = '/api';
-  static const String vercelWebSocketUrl = 'wss://$vercelDomain/ws';
-
-  // Configuración de URLs según entorno
-  // Debug: usar IP directa del servidor (web y móvil)
-  // Release/Deploy: usar proxy de Vercel para Web, IP directa para móvil
-  static String get baseUrl {
-    if (kDebugMode) {
-      // En modo debug, siempre usar IP directa (web y móvil)
-      return serverUrl;
-    } else {
-      // En modo release/deploy
-      if (kIsWeb) {
-        // Web en deploy: usar proxy de Vercel
-        return vercelApiPath;
-      } else {
-        // Móvil en deploy: usar IP directa
-        return serverUrl;
-      }
-    }
-  }
+  // Configuración de URLs - siempre usar el servidor de producción
+  static String get baseUrl => serverUrl;
 
   static const int connectTimeout = 30000; // 30 segundos
   static const int receiveTimeout = 60000; // 60 segundos
@@ -52,24 +31,8 @@ class EndpointManager {
   static const String userKey = 'user_data';
   static const String sessionKey = 'laravel_session';
 
-  // Configuración de WebSocket
-  // Debug: usar IP directa del servidor (web y móvil)
-  // Release/Deploy: usar proxy de Vercel para Web, IP directa para móvil
-  static String get websocketUrl {
-    if (kDebugMode) {
-      // En modo debug, siempre usar IP directa (web y móvil)
-      return serverWebSocketUrl;
-    } else {
-      // En modo release/deploy
-      if (kIsWeb) {
-        // Web en deploy: usar proxy de Vercel (WSS)
-        return vercelWebSocketUrl;
-      } else {
-        // Móvil en deploy: usar IP directa
-        return serverWebSocketUrl;
-      }
-    }
-  }
+  // Configuración de WebSocket - siempre usar el servidor de producción
+  static String get websocketUrl => serverWebSocketUrl;
 
   // API Key de Google Maps
   static const String googleMapsApiKey =
@@ -169,6 +132,15 @@ class EndpointManager {
   // Endpoints de ubicaciones repartidor
   static const String ubicacionesRepartidor = '/ubicaciones-repartidor';
 
+  // Endpoints de geocoding
+  static const String geocoding = '/geocoding';
+  static const String geocodingReverse = '$geocoding/reverse';
+
+  // Endpoints de directions
+  static const String directions = '/directions';
+  static const String directionsWithWaypoints = '$directions/with-waypoints';
+  static const String directionsRouteInfo = '$directions/route-info';
+
   // Endpoints de descargas
   static String downloadTemplateSignedUrl(String lang, String templateKey) =>
       '/downloads/templates/csv/$lang/$templateKey/signed-url';
@@ -233,6 +205,15 @@ class EndpointManager {
     return headers;
   }
 
+  /// Obtiene configuración de timeouts centralizada
+  static Map<String, int> getTimeoutConfig() {
+    return {
+      'connectTimeout': connectTimeout,
+      'receiveTimeout': receiveTimeout,
+      'sendTimeout': sendTimeout,
+    };
+  }
+
   /// Construye parámetros de paginación
   static Map<String, dynamic> buildPaginationParams({
     int page = 1,
@@ -254,19 +235,17 @@ class EndpointManager {
   }
 
   /// URL base fija para la aplicación
-  static String get currentHost {
-    if (kDebugMode) {
-      // En modo debug, siempre usar IP directa
-      return serverIp;
-    } else {
-      // En modo release/deploy
-      if (kIsWeb) {
-        // Web en deploy: usar dominio de Vercel
-        return vercelDomain;
-      } else {
-        // Móvil en deploy: usar IP directa
-        return serverIp;
-      }
-    }
+  static String get currentHost => serverDomain;
+
+  /// Información de debug para la configuración de red
+  static Map<String, dynamic> get debugInfo {
+    return {
+      'isWeb': kIsWeb,
+      'platform': kIsWeb ? 'web' : 'mobile',
+      'baseUrl': baseUrl,
+      'websocketUrl': websocketUrl,
+      'currentHost': currentHost,
+      'serverDomain': serverDomain,
+    };
   }
 }

@@ -34,7 +34,6 @@ class RutasOptimizadasApi {
         return <RutaOptimizada>[];
       },
       operationName: 'Obteniendo rutas optimizadas: página $page',
-      successMessage: 'Rutas optimizadas obtenidas exitosamente',
     );
   }
 
@@ -56,7 +55,6 @@ class RutasOptimizadasApi {
         return null;
       },
       operationName: 'Obteniendo ruta optimizada: $id',
-      successMessage: 'Ruta optimizada obtenida exitosamente',
     );
   }
 
@@ -87,7 +85,6 @@ class RutasOptimizadasApi {
         return <Map<String, dynamic>>[];
       },
       operationName: 'Obteniendo pedidos de la ruta: $rutaId',
-      successMessage: 'Pedidos de la ruta obtenidos exitosamente',
     );
   }
 
@@ -144,7 +141,6 @@ class RutasOptimizadasApi {
       },
       operationName:
           'Creando nueva ruta optimizada para repartidor: $repartidorId',
-      successMessage: 'Ruta optimizada creada exitosamente',
     );
   }
 
@@ -199,7 +195,6 @@ class RutasOptimizadasApi {
         return null;
       },
       operationName: 'Actualizando ruta optimizada: $id',
-      successMessage: 'Ruta optimizada actualizada exitosamente',
     );
   }
 
@@ -211,7 +206,6 @@ class RutasOptimizadasApi {
         return true;
       },
       operationName: 'Eliminando ruta optimizada: $id',
-      successMessage: 'Ruta optimizada eliminada exitosamente',
     );
   }
 
@@ -237,7 +231,6 @@ class RutasOptimizadasApi {
         return response.data ?? <String, dynamic>{};
       },
       operationName: 'Optimizando rutas con Google API',
-      successMessage: 'Rutas optimizadas exitosamente',
     );
   }
 
@@ -277,7 +270,6 @@ class RutasOptimizadasApi {
         return <Map<String, dynamic>>[];
       },
       operationName: 'Obteniendo pedidos de ruta optimizada: $rutaId',
-      successMessage: 'Pedidos de ruta optimizada obtenidos exitosamente',
     );
   }
 
@@ -305,7 +297,6 @@ class RutasOptimizadasApi {
       },
       operationName:
           'Obteniendo rutas optimizadas del repartidor: $repartidorId',
-      successMessage: 'Rutas del repartidor obtenidas exitosamente',
     );
   }
 
@@ -337,7 +328,6 @@ class RutasOptimizadasApi {
         return <RutaOptimizada>[];
       },
       operationName: 'Obteniendo rutas optimizadas activas',
-      successMessage: 'Rutas activas obtenidas exitosamente',
     );
   }
 
@@ -360,7 +350,6 @@ class RutasOptimizadasApi {
         return response.data ?? <String, dynamic>{};
       },
       operationName: 'Re-optimizando ruta: $rutaId',
-      successMessage: 'Ruta re-optimizada exitosamente',
     );
   }
 
@@ -380,7 +369,6 @@ class RutasOptimizadasApi {
         return true;
       },
       operationName: 'Actualizando orden personalizado del pedido: $pedidoId',
-      successMessage: 'Orden personalizado actualizado exitosamente',
     );
   }
 
@@ -397,7 +385,6 @@ class RutasOptimizadasApi {
         return response.data ?? <String, dynamic>{};
       },
       operationName: 'Obteniendo estado de optimización: $rutaId',
-      successMessage: 'Estado de optimización obtenido exitosamente',
     );
   }
 
@@ -434,7 +421,6 @@ class RutasOptimizadasApi {
         return null;
       },
       operationName: 'Obteniendo ruta actual del repartidor autenticado',
-      successMessage: 'Ruta actual obtenida exitosamente',
     );
   }
 
@@ -460,7 +446,6 @@ class RutasOptimizadasApi {
         };
       },
       operationName: 'Obteniendo estadísticas de rutas optimizadas',
-      successMessage: 'Estadísticas de rutas obtenidas exitosamente',
     );
   }
 }

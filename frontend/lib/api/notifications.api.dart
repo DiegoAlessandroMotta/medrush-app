@@ -25,7 +25,6 @@ class NotificationsApi {
         return <Notificacion>[];
       },
       operationName: 'Obteniendo notificaciones del usuario',
-      successMessage: 'Notificaciones obtenidas exitosamente',
     );
   }
 
@@ -39,7 +38,6 @@ class NotificationsApi {
             .toList();
       },
       operationName: 'Obteniendo notificaciones no leídas',
-      successMessage: 'Notificaciones no leídas obtenidas exitosamente',
     );
   }
 
@@ -51,7 +49,6 @@ class NotificationsApi {
         return allNotifications.take(limit).toList();
       },
       operationName: 'Obteniendo $limit notificaciones recientes',
-      successMessage: 'Notificaciones recientes obtenidas exitosamente',
     );
   }
 
@@ -78,7 +75,6 @@ class NotificationsApi {
         };
       },
       operationName: 'Obteniendo estadísticas de notificaciones',
-      successMessage: 'Estadísticas obtenidas exitosamente',
     );
   }
 }

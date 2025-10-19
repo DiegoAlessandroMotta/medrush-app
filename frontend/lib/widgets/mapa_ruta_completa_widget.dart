@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/models/ruta_optimizada.model.dart';
+import 'package:medrush/services/polyline_decoding.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
 
 class MapaRutaCompletaWidget extends StatefulWidget {
@@ -44,7 +46,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
   Future<void> _crearMarcadores() async {
     _markers.clear();
 
-    print('🗺️ Creando marcadores para ${widget.pedidos.length} pedidos');
+    logInfo('🗺️ Creando marcadores para ${widget.pedidos.length} pedidos');
 
     // Marcador del punto de inicio
     if (widget.ruta.puntoInicio != null) {
@@ -119,7 +121,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
         final iconoNumerado =
             await _getNumberedIcon(orden, MedRushTheme.primaryBlue);
 
-        print(
+        logInfo(
             '📍 Agregando marcador para pedido ${pedido['id']} en ($lat, $lng) - Orden: $orden');
 
         _markers.add(
@@ -134,56 +136,96 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
           ),
         );
       } else {
-        print('⚠️ Pedido ${pedido['id']} no tiene coordenadas válidas');
+        logWarning('⚠️ Pedido ${pedido['id']} no tiene coordenadas válidas');
       }
     }
 
-    print('✅ Total de marcadores creados: ${_markers.length}');
+    logInfo('✅ Total de marcadores creados: ${_markers.length}');
     setState(() {});
   }
 
   void _crearPolylineRuta() {
     if (widget.ruta.polylineEncoded != null &&
         widget.ruta.polylineEncoded!.isNotEmpty) {
-      // TODO: Decodificar polyline si es necesario
-      // Por ahora, creamos una línea simple entre puntos principales
-      final puntos = <LatLng>[];
+      logInfo('🗺️ Decodificando polyline de la ruta desde el backend');
 
-      // Agregar punto de inicio
-      if (widget.ruta.puntoInicio != null) {
-        final lat = widget.ruta.puntoInicio!['latitude'] as num?;
-        final lng = widget.ruta.puntoInicio!['longitude'] as num?;
-        if (lat != null && lng != null) {
-          puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
-        }
-      }
-
-      // Agregar punto final
-      if (widget.ruta.puntoFinal != null) {
-        final lat = widget.ruta.puntoFinal!['latitude'] as num?;
-        final lng = widget.ruta.puntoFinal!['longitude'] as num?;
-        if (lat != null && lng != null) {
-          puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
-        }
-      }
-
-      if (puntos.length >= 2) {
-        _polylines.add(
-          Polyline(
-            polylineId: const PolylineId('ruta'),
-            points: puntos,
-            color: MedRushTheme.primaryGreen,
-            width: 4,
-            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-          ),
+      try {
+        // Usar PolylineDecodingService para decodificar el polyline del backend
+        final puntosDecodificados =
+            PolylineDecodingService.decodePolylineManual(
+          widget.ruta.polylineEncoded!,
         );
+
+        if (puntosDecodificados.isNotEmpty) {
+          logInfo(
+              '✅ Polyline decodificado exitosamente: ${puntosDecodificados.length} puntos');
+
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('ruta_optimizada'),
+              points: puntosDecodificados,
+              color: MedRushTheme.primaryGreen,
+              width: 4,
+              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+            ),
+          );
+
+          setState(() {});
+        } else {
+          logWarning('⚠️ Polyline decodificado está vacío, usando fallback');
+          _crearPolylineFallback();
+        }
+      } catch (e) {
+        logError('❌ Error decodificando polyline de la ruta', e);
+        logInfo('🔄 Usando fallback de polyline simple');
+        _crearPolylineFallback();
       }
+    } else {
+      logWarning('⚠️ No hay polyline encoded en la ruta, usando fallback');
+      _crearPolylineFallback();
+    }
+  }
+
+  /// Crea un polyline fallback simple entre punto inicio y final
+  void _crearPolylineFallback() {
+    final puntos = <LatLng>[];
+
+    // Agregar punto de inicio
+    if (widget.ruta.puntoInicio != null) {
+      final lat = widget.ruta.puntoInicio!['latitude'] as num?;
+      final lng = widget.ruta.puntoInicio!['longitude'] as num?;
+      if (lat != null && lng != null) {
+        puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
+      }
+    }
+
+    // Agregar punto final
+    if (widget.ruta.puntoFinal != null) {
+      final lat = widget.ruta.puntoFinal!['latitude'] as num?;
+      final lng = widget.ruta.puntoFinal!['longitude'] as num?;
+      if (lat != null && lng != null) {
+        puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
+      }
+    }
+
+    if (puntos.length >= 2) {
+      logInfo('📍 Creando polyline fallback con ${puntos.length} puntos');
+      _polylines.add(
+        Polyline(
+          polylineId: const PolylineId('ruta_fallback'),
+          points: puntos,
+          color: MedRushTheme.primaryGreen.withValues(alpha: 0.7),
+          width: 3,
+          patterns: [PatternItem.dash(15), PatternItem.gap(8)],
+        ),
+      );
+      setState(() {});
     }
   }
 
   /// Crea iconos numerados para los pedidos
   Future<BitmapDescriptor> _getNumberedIcon(int number, Color color) async {
-    final String cacheKey = '${color.value}_$number';
+    final String cacheKey = '${color.toARGB32()}_$number';
     if (_numberIconCache.containsKey(cacheKey)) {
       return _numberIconCache[cacheKey]!;
     }
@@ -437,7 +479,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
     );
   }
 
-  Widget _buildLeyendaItem(String label, dynamic color) {
+  Widget _buildLeyendaItem(String label, color) {
     Color displayColor;
     if (color is double) {
       // Es un hue de BitmapDescriptor
@@ -460,7 +502,6 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
             shape: BoxShape.circle,
             border: Border.all(
               color: Colors.white,
-              width: 1,
             ),
           ),
         ),

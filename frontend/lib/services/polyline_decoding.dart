@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:medrush/api/endpoint_manager.dart';
+import 'package:medrush/api/directions.api.dart';
+import 'package:medrush/models/leg_info.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -183,16 +183,16 @@ class PolylineDecodingService {
   /// Logs de debug para polylines
   static void logPolylineInfo(
       String polylineId, List<LatLng> points, String type) {
-    logInfo('🔍 Polyline $polylineId: $type - ${points.length} puntos');
+    logInfo('Polyline $polylineId: $type - ${points.length} puntos');
   }
 
   /// Logs de debug para múltiples polylines
   static void logMultiplePolylines(List<Polyline> polylines) {
-    logInfo('✅ ${polylines.length} polylines creadas');
+    logInfo('${polylines.length} polylines creadas');
     for (int i = 0; i < polylines.length; i++) {
       final polyline = polylines.elementAt(i);
       logInfo(
-          '🔍 Polyline $i: ${polyline.polylineId.value} - ${polyline.points.length} puntos - color: ${polyline.color} - width: ${polyline.width.toInt()}');
+          'Polyline $i: ${polyline.polylineId.value} - ${polyline.points.length} puntos - color: ${polyline.color} - width: ${polyline.width.toInt()}');
     }
   }
 
@@ -224,7 +224,7 @@ class PolylineDecodingService {
   /// Obtiene polyline del cache si es válido
   static List<LatLng>? getCachedPolyline(String cacheKey) {
     if (isPolylineCacheValid(cacheKey)) {
-      logInfo('🎯 Usando polyline del cache: $cacheKey');
+      logInfo('Usando polyline del cache: $cacheKey');
       return _polylineCache[cacheKey];
     }
     return null;
@@ -293,7 +293,7 @@ class PolylineDecodingService {
 
   // ===== GOOGLE DIRECTIONS API =====
 
-  /// Obtiene polyline usando Google Directions API con waypoints optimizados
+  /// Obtiene polyline usando el endpoint del backend con waypoints optimizados
   static Future<List<LatLng>> getPolylineWithWaypoints({
     required LatLng origen,
     required LatLng destino,
@@ -306,69 +306,43 @@ class PolylineDecodingService {
     // Verificar cache primero
     final cachedPolyline = getCachedPolyline(cacheKey);
     if (cachedPolyline != null) {
-      logInfo('💾 Usando polyline desde caché');
+      logInfo('Usando polyline desde caché');
       return cachedPolyline;
     }
 
     try {
       logInfo(
-          '🌐 Llamando a Google Directions API con ${waypoints.length} waypoints...');
+          '🌐 Llamando a Directions API vía backend con ${waypoints.length} waypoints...');
 
-      final dio = Dio();
-      final origin = '${origen.latitude},${origen.longitude}';
-      final destination = '${destino.latitude},${destino.longitude}';
+      final directionsResponse = await DirectionsApi.getDirectionsWithWaypoints(
+        origin: origen,
+        destination: destino,
+        waypoints: waypoints,
+        optimizeWaypoints: true,
+      );
 
-      // Construir waypoints intermedios
-      final waypointsParam =
-          waypoints.map((wp) => '${wp.latitude},${wp.longitude}').join('|');
-
-      final url = 'https://maps.googleapis.com/maps/api/directions/json';
-      final query = {
-        'origin': origin,
-        'destination': destination,
-        'mode': 'driving',
-        'units': 'metric',
-        'departure_time': 'now',
-        'key': EndpointManager.googleMapsApiKey,
-      };
-
-      // Agregar waypoints solo si hay puntos intermedios
-      if (waypointsParam.isNotEmpty) {
-        query['waypoints'] =
-            'optimize:true|$waypointsParam'; // Optimizar waypoints automáticamente
-      }
-
-      logInfo('🌐 URL completa: $url');
-      logInfo('🌐 Query parameters: $query');
-
-      final resp = await dio.get(url, queryParameters: query);
-
-      logInfo('🌐 Respuesta recibida: status=${resp.statusCode}');
-      logInfo('🌐 Status de API: ${resp.data['status']}');
-
-      if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
-        final route = resp.data['routes'][0];
-        logInfo('🌐 Estructura de route recibida: ${route.keys.toList()}');
-
-        final polylinePoints = decodePolylineFromResponse(route);
+      if (directionsResponse != null &&
+          directionsResponse.encodedPolyline.isNotEmpty) {
+        final polylinePoints =
+            decodePolylineManual(directionsResponse.encodedPolyline);
 
         // Guardar en caché
         savePolylineToCache(cacheKey, polylinePoints);
 
-        logInfo('✅ Polyline obtenida con ${polylinePoints.length} puntos');
+        logInfo(
+            '✅ Polyline obtenida vía backend con ${polylinePoints.length} puntos');
         return polylinePoints;
       } else {
-        logError('❌ Error en Google Directions API: ${resp.data['status']}');
-        logError('❌ Respuesta completa: ${resp.data}');
+        logError('❌ Error obteniendo polyline vía backend');
         return [];
       }
     } catch (e) {
-      logError('❌ Error llamando a Google Directions API: $e');
+      logError('❌ Error llamando a Directions API vía backend: $e');
       return [];
     }
   }
 
-  /// Obtiene polyline usando Google Directions API para lista de waypoints
+  /// Obtiene polyline usando el endpoint del backend para lista de waypoints
   static Future<List<LatLng>> getPolylineWithDirectionsAPI(
       List<LatLng> waypoints) async {
     if (waypoints.length < 2) {
@@ -386,49 +360,24 @@ class PolylineDecodingService {
 
     try {
       logInfo(
-          '🌐 Llamando a Google Directions API para ${waypoints.length} waypoints...');
+          '🌐 Llamando a Directions API vía backend para ${waypoints.length} waypoints...');
 
-      final dio = Dio();
-      final origin = '${waypoints.first.latitude},${waypoints.first.longitude}';
-      final destination =
-          '${waypoints.last.latitude},${waypoints.last.longitude}';
-
-      // Construir waypoints intermedios (excluyendo origen y destino)
+      final origin = waypoints.first;
+      final destination = waypoints.last;
       final intermediateWaypoints =
-          waypoints.skip(1).take(waypoints.length - 2);
-      final waypointsParam = intermediateWaypoints
-          .map((wp) => '${wp.latitude},${wp.longitude}')
-          .join('|');
+          waypoints.skip(1).take(waypoints.length - 2).toList();
 
-      final url = 'https://maps.googleapis.com/maps/api/directions/json';
-      final query = {
-        'origin': origin,
-        'destination': destination,
-        'mode': 'driving',
-        'units': 'metric',
-        'departure_time': 'now',
-        'key': EndpointManager.googleMapsApiKey,
-      };
+      final directionsResponse = await DirectionsApi.getDirectionsWithWaypoints(
+        origin: origin,
+        destination: destination,
+        waypoints: intermediateWaypoints,
+        // No optimizar para mantener orden
+      );
 
-      // Agregar waypoints solo si hay puntos intermedios
-      if (waypointsParam.isNotEmpty) {
-        query['waypoints'] = waypointsParam;
-      }
-
-      logInfo('🌐 URL completa: $url');
-      logInfo('🌐 Query parameters: $query');
-
-      final resp = await dio.get(url, queryParameters: query);
-
-      logInfo('🌐 Respuesta recibida: status=${resp.statusCode}');
-      logInfo('🌐 Status de API: ${resp.data['status']}');
-
-      if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
-        final route = resp.data['routes'][0];
-        logInfo('🌐 Estructura de route recibida: ${route.keys.toList()}');
-
-        // Decodificar polyline usando función unificada
-        final decodedPoints = decodePolylineFromResponse(route);
+      if (directionsResponse != null &&
+          directionsResponse.encodedPolyline.isNotEmpty) {
+        final decodedPoints =
+            decodePolylineManual(directionsResponse.encodedPolyline);
 
         // Guardar en cache
         savePolylineToCache(cacheKey, decodedPoints);
@@ -436,14 +385,15 @@ class PolylineDecodingService {
         // Limpiar cache expirado
         cleanExpiredPolylineCache();
 
+        logInfo(
+            '✅ Polyline obtenida vía backend con ${decodedPoints.length} puntos');
         return decodedPoints;
       } else {
-        logWarning('⚠️ Google Directions API error: ${resp.data['status']}');
-        logWarning('⚠️ Respuesta completa: ${resp.data}');
+        logWarning('⚠️ Error obteniendo polyline vía backend');
         return [];
       }
     } catch (e) {
-      logError('❌ Error en Google Directions API', e);
+      logError('❌ Error en Directions API vía backend', e);
       return [];
     }
   }
@@ -512,7 +462,7 @@ class PolylineDecodingService {
     }
   }
 
-  /// Obtiene información real de tiempo y distancia de Google Directions API
+  /// Obtiene información real de tiempo y distancia usando el endpoint del backend
   static Future<Map<String, LegInfo>> getRealRouteInfo({
     required LatLng origen,
     required LatLng destino,
@@ -523,106 +473,75 @@ class PolylineDecodingService {
     final Map<String, LegInfo> legInfoByPedidoId = {};
 
     try {
-      logInfo('🌐 Obteniendo información real de Google Directions API...');
+      logInfo('Obteniendo información real vía backend...');
 
-      final dio = Dio();
-      final origin = '${origen.latitude},${origen.longitude}';
-      final destination = '${destino.latitude},${destino.longitude}';
+      final directionsResponse = await DirectionsApi.getDirectionsWithWaypoints(
+        origin: origen,
+        destination: destino,
+        waypoints: waypoints,
+        optimizeWaypoints: true,
+      );
 
-      // Construir waypoints intermedios
-      final waypointsParam =
-          waypoints.map((wp) => '${wp.latitude},${wp.longitude}').join('|');
+      if (directionsResponse != null && directionsResponse.legs.isNotEmpty) {
+        // Crear waypoints completos (origen + waypoints + destino)
+        final allWaypoints = [origen, ...waypoints, destino];
 
-      final url = 'https://maps.googleapis.com/maps/api/directions/json';
-      final query = {
-        'origin': origin,
-        'destination': destination,
-        'mode': 'driving',
-        'units': 'metric',
-        'departure_time': 'now',
-        'key': EndpointManager.googleMapsApiKey,
-      };
+        for (int i = 0;
+            i < directionsResponse.legs.length && i < allWaypoints.length - 1;
+            i++) {
+          final leg = directionsResponse.legs[i];
 
-      // Agregar waypoints solo si hay puntos intermedios
-      if (waypointsParam.isNotEmpty) {
-        query['waypoints'] = 'optimize:true|$waypointsParam';
-      }
+          // Crear LegInfo para este segmento
+          final legInfo = LegInfo(
+            distanceText: leg.distanceText,
+            durationText: leg.durationText,
+            distanceMeters: leg.distanceMeters,
+            durationSeconds: leg.durationSeconds,
+            cumulativeDistanceMeters: leg.cumulativeDistanceMeters,
+            cumulativeDurationSeconds: leg.cumulativeDurationSeconds,
+          );
 
-      final resp = await dio.get(url, queryParameters: query);
+          // Asociar con el pedido correspondiente (i+1, ya que el primero es la ubicación actual)
+          if (i + 1 < allWaypoints.length) {
+            final waypoint = allWaypoints[i + 1];
 
-      if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
-        final route = resp.data['routes'][0];
-        final legs = route['legs'] as List<dynamic>?;
+            // Buscar el pedido que corresponde a este waypoint
+            for (final pedido in pedidos) {
+              if (pedidosConPolyline.contains(pedido.id) &&
+                  pedido.latitudEntrega != null &&
+                  pedido.longitudEntrega != null) {
+                final distancia = Geolocator.distanceBetween(
+                  waypoint.latitude,
+                  waypoint.longitude,
+                  pedido.latitudEntrega!,
+                  pedido.longitudEntrega!,
+                );
 
-        if (legs != null && legs.isNotEmpty) {
-          int tiempoAcumulativo = 0;
-
-          // Crear waypoints completos (origen + waypoints + destino)
-          final allWaypoints = [origen, ...waypoints, destino];
-
-          for (int i = 0; i < legs.length && i < allWaypoints.length - 1; i++) {
-            final leg = legs[i];
-            final distance = leg['distance']['text'] as String;
-            final duration = leg['duration']['text'] as String;
-            final durationSeconds = leg['duration']['value'] as int;
-
-            tiempoAcumulativo += durationSeconds;
-
-            // Formatear tiempo acumulativo
-            final cumulativeDurationText = _formatDuration(tiempoAcumulativo);
-
-            // Crear LegInfo para este segmento
-            final legInfo = LegInfo(
-              distance, // distanceText
-              duration, // durationText
-              durationSeconds, // durationSeconds
-              cumulativeDurationText, // cumulativeDurationText
-              tiempoAcumulativo, // cumulativeDurationSeconds
-            );
-
-            // Asociar con el pedido correspondiente (i+1, ya que el primero es la ubicación actual)
-            if (i + 1 < allWaypoints.length) {
-              final waypoint = allWaypoints[i + 1];
-
-              // Buscar el pedido que corresponde a este waypoint
-              for (final pedido in pedidos) {
-                if (pedidosConPolyline.contains(pedido.id) &&
-                    pedido.latitudEntrega != null &&
-                    pedido.longitudEntrega != null) {
-                  final distancia = Geolocator.distanceBetween(
-                    waypoint.latitude,
-                    waypoint.longitude,
-                    pedido.latitudEntrega!,
-                    pedido.longitudEntrega!,
-                  );
-
-                  // Si la distancia es menor a 50 metros, es el mismo punto
-                  if (distancia < 50) {
-                    legInfoByPedidoId[pedido.id] = legInfo;
-                    logInfo(
-                        '📊 Leg info real para pedido ${pedido.id}: ${legInfo.distanceText}, ${legInfo.durationText}, ${legInfo.cumulativeDurationText}');
-                    break;
-                  }
+                // Si la distancia es menor a 50 metros, es el mismo punto
+                if (distancia < 50) {
+                  legInfoByPedidoId[pedido.id] = legInfo;
+                  logInfo(
+                      '📊 Leg info real para pedido ${pedido.id}: ${legInfo.distanceText}, ${legInfo.durationText}, ${legInfo.cumulativeDurationSeconds}s');
+                  break;
                 }
               }
             }
           }
-
-          logInfo(
-              '✅ Información real de Google Directions API obtenida para ${legInfoByPedidoId.length} pedidos');
         }
+
+        logInfo(
+            '✅ Información real vía backend obtenida para ${legInfoByPedidoId.length} pedidos');
       } else {
-        logWarning('⚠️ Error en Google Directions API: ${resp.data['status']}');
+        logWarning('⚠️ Error obteniendo información vía backend');
       }
     } catch (e) {
-      logError(
-          '❌ Error obteniendo información real de Google Directions API', e);
+      logError('❌ Error obteniendo información real vía backend', e);
     }
 
     return legInfoByPedidoId;
   }
 
-  /// Obtiene información de tiempo inteligente según el estado del pedido
+  /// Obtiene información de tiempo inteligente según el estado del pedido usando el backend
   static Future<Map<String, LegInfo>> getSmartRouteInfo({
     required LatLng origen,
     required List<Pedido> pedidos,
@@ -631,7 +550,8 @@ class PolylineDecodingService {
     final Map<String, LegInfo> legInfoByPedidoId = {};
 
     try {
-      logInfo('🧠 Calculando tiempos inteligentes según estado de pedidos...');
+      logInfo(
+          '🧠 Calculando tiempos inteligentes vía backend según estado de pedidos...');
 
       for (final pedido in pedidos) {
         if (!pedidosConPolyline.contains(pedido.id)) {
@@ -673,9 +593,9 @@ class PolylineDecodingService {
           continue;
         }
 
-        // Calcular tiempo desde origen hasta el destino específico
-        final legInfo =
-            await _calculateTimeToDestination(origen, destino, tipoDestino);
+        // Calcular tiempo desde origen hasta el destino específico usando el backend
+        final legInfo = await _calculateTimeToDestinationViaBackend(
+            origen, destino, tipoDestino);
         if (legInfo != null) {
           legInfoByPedidoId[pedido.id] = legInfo;
           logInfo(
@@ -684,77 +604,40 @@ class PolylineDecodingService {
       }
 
       logInfo(
-          '✅ Tiempos inteligentes calculados para ${legInfoByPedidoId.length} pedidos');
+          '✅ Tiempos inteligentes calculados vía backend para ${legInfoByPedidoId.length} pedidos');
     } catch (e) {
-      logError('❌ Error calculando tiempos inteligentes', e);
+      logError('❌ Error calculando tiempos inteligentes vía backend', e);
     }
 
     return legInfoByPedidoId;
   }
 
-  /// Calcula el tiempo desde origen hasta un destino específico
-  static Future<LegInfo?> _calculateTimeToDestination(
+  /// Calcula el tiempo desde origen hasta un destino específico usando el backend
+  static Future<LegInfo?> _calculateTimeToDestinationViaBackend(
       LatLng origen, LatLng destino, String tipoDestino) async {
     try {
-      final dio = Dio();
-      final origin = '${origen.latitude},${origen.longitude}';
-      final destination = '${destino.latitude},${destino.longitude}';
+      final routeInfo = await DirectionsApi.getRouteInfo(
+        origin: origen,
+        destination: destino,
+        waypoints: [], // Sin waypoints para cálculo directo
+      );
 
-      final url = 'https://maps.googleapis.com/maps/api/directions/json';
-      final query = {
-        'origin': origin,
-        'destination': destination,
-        'mode': 'driving',
-        'units': 'metric',
-        'departure_time': 'now',
-        'key': EndpointManager.googleMapsApiKey,
-      };
+      if (routeInfo != null && routeInfo.legs.isNotEmpty) {
+        final leg = routeInfo.legs.first;
 
-      final resp = await dio.get(url, queryParameters: query);
-
-      if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
-        final route = resp.data['routes'][0];
-        final legs = route['legs'] as List<dynamic>?;
-
-        if (legs != null && legs.isNotEmpty) {
-          final leg = legs[0];
-          final distance = leg['distance']['text'] as String;
-          final duration = leg['duration']['text'] as String;
-          final durationSeconds = leg['duration']['value'] as int;
-
-          // Para tiempos inteligentes, el tiempo acumulativo es igual al tiempo del segmento
-          final cumulativeDurationText = _formatDuration(durationSeconds);
-
-          return LegInfo(
-            distance,
-            duration,
-            durationSeconds,
-            cumulativeDurationText,
-            durationSeconds, // Tiempo acumulativo = tiempo del segmento
-          );
-        }
+        return LegInfo(
+          distanceText: leg.distanceText,
+          durationText: leg.durationText,
+          distanceMeters: leg.distanceMeters,
+          durationSeconds: leg.durationSeconds,
+          cumulativeDistanceMeters: leg.cumulativeDistanceMeters,
+          cumulativeDurationSeconds: leg.cumulativeDurationSeconds,
+        );
       }
     } catch (e) {
-      logError('❌ Error calculando tiempo a $tipoDestino', e);
+      logError('❌ Error calculando tiempo a $tipoDestino vía backend', e);
     }
 
     return null;
   }
-}
-
-/// Información de un segmento de ruta
-class LegInfo {
-  final String distanceText;
-  final String durationText;
-  final int durationSeconds;
-  final String cumulativeDurationText; // Tiempo acumulativo
-  final int cumulativeDurationSeconds; // Segundos acumulativos
-
-  const LegInfo(
-    this.distanceText,
-    this.durationText,
-    this.durationSeconds,
-    this.cumulativeDurationText,
-    this.cumulativeDurationSeconds,
-  );
 }

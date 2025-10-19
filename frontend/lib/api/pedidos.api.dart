@@ -58,7 +58,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Creando nuevo pedido',
-      successMessage: 'Pedido creado exitosamente',
     );
   }
 
@@ -74,7 +73,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Actualizando pedido $id',
-      successMessage: 'Pedido actualizado exitosamente',
     );
   }
 
@@ -103,7 +101,6 @@ class PedidosApi {
             response.statusCode! < 300;
       },
       operationName: 'Eliminando pedido $id',
-      successMessage: 'Pedido eliminado exitosamente',
     );
   }
 
@@ -120,7 +117,6 @@ class PedidosApi {
         return ApiHelper.isValidResponse(response.data);
       },
       operationName: 'Subiendo archivo CSV de pedidos',
-      successMessage: 'Archivo CSV subido exitosamente',
     );
   }
 
@@ -135,7 +131,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Asignando pedido $pedidoId a repartidor $repartidorId',
-      successMessage: 'Pedido asignado exitosamente',
     );
   }
 
@@ -149,7 +144,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Marcando pedido $pedidoId como recogido',
-      successMessage: 'Pedido marcado como recogido exitosamente',
     );
   }
 
@@ -163,7 +157,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Marcando pedido $pedidoId como en ruta',
-      successMessage: 'Pedido marcado como en ruta exitosamente',
     );
   }
 
@@ -206,7 +199,7 @@ class PedidosApi {
         files: files,
       );
 
-      logInfo('📤 Respuesta del servidor: ${response.data['status']}');
+      logInfo('Respuesta del servidor: ${response.data['status']}');
 
       if (response.data['status'] == 'success') {
         final pedido = Pedido.fromJson(response.data['data']);
@@ -267,7 +260,6 @@ class PedidosApi {
         return ApiHelper.processSingleResponse(response.data, Pedido.fromJson);
       },
       operationName: 'Marcando pedido $pedidoId como devuelto',
-      successMessage: 'Pedido marcado como devuelto exitosamente',
     );
   }
 

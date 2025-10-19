@@ -25,7 +25,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Obteniendo ubicaciones del repartidor para pedido: $pedidoId',
-      successMessage: 'Ubicaciones obtenidas exitosamente',
     );
   }
 
@@ -75,7 +74,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Registrando ubicación del repartidor para pedido: $pedidoId',
-      successMessage: 'Ubicación registrada exitosamente',
     );
   }
 
@@ -105,7 +103,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Obteniendo última ubicación del repartidor para pedido: $pedidoId',
-      successMessage: 'Última ubicación obtenida exitosamente',
     );
   }
 
@@ -162,7 +159,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Obteniendo historial de ubicaciones para pedido: $pedidoId',
-      successMessage: 'Historial de ubicaciones obtenido exitosamente',
     );
   }
 
@@ -209,7 +205,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Calculando distancia total recorrida para pedido: $pedidoId',
-      successMessage: 'Distancia total calculada exitosamente',
     );
   }
 
@@ -252,7 +247,6 @@ class UbicacionesRepartidorApi {
         return velocidadTotal / medicionesValidas;
       },
       operationName: 'Calculando velocidad promedio para pedido: $pedidoId',
-      successMessage: 'Velocidad promedio calculada exitosamente',
     );
   }
 
@@ -286,7 +280,6 @@ class UbicacionesRepartidorApi {
       },
       operationName:
           'Obteniendo estadísticas de ubicaciones para pedido: $pedidoId',
-      successMessage: 'Estadísticas de ubicaciones obtenidas exitosamente',
     );
   }
 

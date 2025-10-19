@@ -139,10 +139,10 @@ class FarmaciasApi {
     String? estado,
   }) async {
     try {
-      logInfo('🔍 Obteniendo farmacias paginadas: página $page');
+      logInfo('Obteniendo farmacias paginadas: página $page');
 
       // Si no está en caché, consulta la API
-      logInfo('📡 Consultando farmacias paginadas desde API...');
+      logInfo('Consultando farmacias paginadas desde API...');
 
       final result = await BaseApi.execute(() async {
         final filters = <String, dynamic>{};
@@ -181,7 +181,7 @@ class FarmaciasApi {
 
       return result;
     } catch (e) {
-      logError('❌ Error al obtener farmacias paginadas', e);
+      logError('Error al obtener farmacias paginadas', e);
       rethrow;
     }
   }

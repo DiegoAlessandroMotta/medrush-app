@@ -20,24 +20,24 @@ class FcmService {
   /// Inicializa el servicio FCM
   Future<void> initialize() async {
     if (_isInitialized) {
-      logInfo('🔄 FCM ya está inicializado');
+      logInfo('FCM ya está inicializado');
       return;
     }
 
     try {
-      logInfo('🚀 Inicializando Firebase Cloud Messaging...');
+      logInfo('Inicializando Firebase Cloud Messaging...');
 
       // En web, FCM puede no estar disponible
       if (kIsWeb) {
-        logInfo('🌐 Detectado entorno web, FCM puede tener limitaciones');
+        logInfo('Detectado entorno web, FCM puede tener limitaciones');
       }
 
       // Verificar si Firebase ya está inicializado
       try {
         Firebase.app(); // Esto lanza una excepción si no está inicializado
-        logInfo('✅ Firebase ya está inicializado');
+        logInfo('Firebase ya está inicializado');
       } catch (e) {
-        logInfo('🔄 Firebase no está inicializado, inicializando...');
+        logInfo('Firebase no está inicializado, inicializando...');
         await Firebase.initializeApp();
       }
 
@@ -53,12 +53,11 @@ class FcmService {
       await _getToken();
 
       _isInitialized = true;
-      logInfo('✅ FCM inicializado exitosamente');
+      logInfo('FCM inicializado exitosamente');
     } catch (e) {
-      logError('❌ Error al inicializar FCM', e);
+      logError('Error al inicializar FCM', e);
       if (kIsWeb) {
-        logWarning(
-            '⚠️ FCM no disponible en web, continuando sin notificaciones');
+        logWarning('FCM no disponible en web, continuando sin notificaciones');
         // En web, no re-lanzar el error para no bloquear el login
         return;
       }
@@ -74,13 +73,13 @@ class FcmService {
 
     // Mensaje cuando la app está en primer plano
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      logInfo('📱 Mensaje recibido en primer plano: ${message.messageId}');
+      logInfo('Mensaje recibido en primer plano: ${message.messageId}');
       _handleForegroundMessage(message);
     });
 
     // Mensaje cuando la app está en segundo plano y se abre desde la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      logInfo('📱 App abierta desde notificación: ${message.messageId}');
+      logInfo('App abierta desde notificación: ${message.messageId}');
       _handleNotificationTap(message);
     });
 
@@ -104,15 +103,15 @@ class FcmService {
       final settings = await _messaging!.requestPermission();
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        logInfo('✅ Permisos de notificación concedidos');
+        logInfo('Permisos de notificación concedidos');
       } else if (settings.authorizationStatus ==
           AuthorizationStatus.provisional) {
-        logInfo('⚠️ Permisos provisionales de notificación concedidos');
+        logInfo('Permisos provisionales de notificación concedidos');
       } else {
-        logWarning('❌ Permisos de notificación denegados');
+        logWarning('Permisos de notificación denegados');
       }
     } catch (e) {
-      logError('❌ Error al solicitar permisos de notificación', e);
+      logError('Error al solicitar permisos de notificación', e);
     }
   }
 
@@ -142,7 +141,7 @@ class FcmService {
     }
 
     try {
-      logInfo('📤 Registrando token FCM en el backend...');
+      logInfo('Registrando token FCM en el backend...');
 
       final deviceInfo = await _getDeviceInfo();
       final platform = _getPlatform();
@@ -155,14 +154,14 @@ class FcmService {
       );
 
       if (success) {
-        logInfo('✅ Token FCM registrado exitosamente en el backend');
+        logInfo('Token FCM registrado exitosamente en el backend');
       } else {
-        logError('❌ Error al registrar token FCM en el backend');
+        logError('Error al registrar token FCM en el backend');
       }
 
       return success;
     } catch (e) {
-      logError('❌ Error al registrar token FCM', e);
+      logError('Error al registrar token FCM', e);
       return false;
     }
   }
@@ -222,7 +221,7 @@ class FcmService {
 
   /// Maneja mensajes en primer plano
   void _handleForegroundMessage(RemoteMessage message) {
-    logInfo('📱 Procesando mensaje en primer plano:');
+    logInfo('Procesando mensaje en primer plano:');
     logInfo('   Título: ${message.notification?.title}');
     logInfo('   Cuerpo: ${message.notification?.body}');
     logInfo('   Datos: ${message.data}');
@@ -314,7 +313,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   } catch (e) {
     await Firebase.initializeApp(); // Solo inicializar si no está inicializado
   }
-  logInfo('📱 Mensaje en segundo plano: ${message.messageId}');
+  logInfo('Mensaje en segundo plano: ${message.messageId}');
   logInfo('   Título: ${message.notification?.title}');
   logInfo('   Cuerpo: ${message.notification?.body}');
   logInfo('   Datos: ${message.data}');

@@ -1,27 +1,9 @@
 import 'package:medrush/api/base.api.dart';
-import 'package:medrush/api/endpoint_manager.dart';
 import 'package:medrush/utils/loggers.dart';
 
 /// Helper centralizado para operaciones comunes de API
 class ApiHelper {
-  /// Configura headers de autorización de forma centralizada
-  static void setAuthHeaders(String token) {
-    BaseApi.setCustomHeaders({'Authorization': 'Bearer $token'});
-  }
-
-  /// Obtiene headers por defecto con token opcional
-  static Map<String, String> getHeaders({String? token}) {
-    return EndpointManager.buildAuthHeaders(token);
-  }
-
-  /// Obtiene configuración de timeouts
-  static Map<String, int> getTimeoutConfig() {
-    return {
-      'connectTimeout': EndpointManager.connectTimeout,
-      'receiveTimeout': EndpointManager.receiveTimeout,
-      'sendTimeout': EndpointManager.sendTimeout,
-    };
-  }
+  // FIX: Funciones de configuración duplicadas eliminadas
 
   /// Procesa respuestas estándar del backend Laravel
   static List<T> processListResponse<T>(
@@ -41,20 +23,28 @@ class ApiHelper {
     return data != null ? fromJson(data) : null;
   }
 
-  /// Ejecuta operación con logging estándar
+  /// Ejecuta operación con logging optimizado
   static Future<T> executeWithLogging<T>(
     Future<T> Function() operation, {
-    required String operationName,
-    required String successMessage,
-    String? errorMessage,
+    String? operationName,
+    bool enableLogging = true,
   }) async {
     try {
-      logInfo('🔄 $operationName');
+      if (enableLogging && operationName != null) {
+        logInfo('Iniciando: $operationName');
+      }
+
       final result = await operation();
-      logInfo('✅ $successMessage');
+
+      if (enableLogging && operationName != null) {
+        logInfo('Completado: $operationName');
+      }
+
       return result;
     } catch (e) {
-      logError('❌ ${errorMessage ?? 'Error en $operationName'}', e);
+      if (enableLogging && operationName != null) {
+        logError('Error en: $operationName', e);
+      }
       rethrow;
     }
   }
@@ -74,8 +64,7 @@ class ApiHelper {
         );
         return processListResponse(response.data, fromJson);
       },
-      operationName: operationName ?? 'Obteniendo datos',
-      successMessage: 'Datos obtenidos exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -94,8 +83,7 @@ class ApiHelper {
         );
         return processSingleResponse(response.data, fromJson);
       },
-      operationName: operationName ?? 'Obteniendo item',
-      successMessage: 'Item obtenido exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -114,8 +102,7 @@ class ApiHelper {
         );
         return processSingleResponse(response.data, fromJson)!;
       },
-      operationName: operationName ?? 'Creando item',
-      successMessage: 'Item creado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -134,8 +121,7 @@ class ApiHelper {
         );
         return processSingleResponse(response.data, fromJson)!;
       },
-      operationName: operationName ?? 'Actualizando item',
-      successMessage: 'Item actualizado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -149,8 +135,7 @@ class ApiHelper {
         await BaseApi.delete(endpoint);
         return true;
       },
-      operationName: operationName ?? 'Eliminando item',
-      successMessage: 'Item eliminado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -226,8 +211,7 @@ class ApiHelper {
           dataKey: dataKey,
         );
       },
-      operationName: operationName ?? 'Obteniendo lista de datos',
-      successMessage: 'Lista de datos obtenida exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -256,8 +240,7 @@ class ApiHelper {
 
         return data != null ? fromJson(data) : null;
       },
-      operationName: operationName ?? 'Obteniendo item',
-      successMessage: 'Item obtenido exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -286,8 +269,7 @@ class ApiHelper {
 
         return responseData != null ? fromJson(responseData) : null;
       },
-      operationName: operationName ?? 'Creando item',
-      successMessage: 'Item creado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -316,8 +298,7 @@ class ApiHelper {
 
         return responseData != null ? fromJson(responseData) : null;
       },
-      operationName: operationName ?? 'Actualizando item',
-      successMessage: 'Item actualizado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -346,8 +327,7 @@ class ApiHelper {
 
         return responseData != null ? fromJson(responseData) : null;
       },
-      operationName: operationName ?? 'Actualizando item',
-      successMessage: 'Item actualizado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -368,8 +348,7 @@ class ApiHelper {
 
         throw Exception(getErrorMessage(response.data));
       },
-      operationName: operationName ?? 'Eliminando item',
-      successMessage: 'Item eliminado exitosamente',
+      operationName: operationName,
     );
   }
 
@@ -387,8 +366,7 @@ class ApiHelper {
         );
         return response.data ?? <String, dynamic>{};
       },
-      operationName: operationName ?? 'Obteniendo datos',
-      successMessage: 'Datos obtenidos exitosamente',
+      operationName: operationName,
     );
   }
 }

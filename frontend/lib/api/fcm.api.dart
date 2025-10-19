@@ -29,7 +29,6 @@ class FcmApi {
         return ApiHelper.isValidResponse(response.data);
       },
       operationName: 'Registrando token FCM del dispositivo: $deviceType',
-      successMessage: 'Token FCM registrado exitosamente',
     );
   }
 
@@ -82,7 +81,7 @@ class FcmApi {
     String? appVersion,
   }) async {
     try {
-      logInfo('🔍 Detectando plataforma para registro automático de token FCM');
+      logInfo('Detectando plataforma para registro automático de token FCM');
 
       // Importar dart:io para detectar la plataforma
       // Nota: Esto debe hacerse en tiempo de compilación
@@ -98,7 +97,7 @@ class FcmApi {
         appVersion: appVersion,
       );
     } catch (e) {
-      logError('❌ Error en registro automático de token FCM', e);
+      logError('Error en registro automático de token FCM', e);
       rethrow;
     }
   }
@@ -151,7 +150,7 @@ class FcmApi {
         'packageName': packageInfo.packageName,
       };
     } catch (e) {
-      logError('❌ Error al obtener información del dispositivo', e);
+      logError('Error al obtener información del dispositivo', e);
       return {
         'platform': 'unknown',
         'deviceName': 'Dispositivo Desconocido',
@@ -173,7 +172,6 @@ class FcmApi {
         return response.statusCode == 200 || response.statusCode == 204;
       },
       operationName: 'Eliminando token FCM de sesión actual',
-      successMessage: 'Token FCM eliminado exitosamente',
     );
   }
 }

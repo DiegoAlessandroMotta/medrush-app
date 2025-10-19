@@ -31,7 +31,6 @@ class AuthApi {
         return response.data as Map<String, dynamic>;
       },
       operationName: 'Iniciando sesión para: $email',
-      successMessage: 'Login exitoso para: $email',
     );
   }
 
@@ -43,14 +42,13 @@ class AuthApi {
   static Future<Map<String, dynamic>> getMe(String token) {
     return ApiHelper.executeWithLogging(
       () async {
-        ApiHelper.setAuthHeaders(token);
+        // Headers configurados automáticamente por BaseApi.client
         final response = await BaseApi.get<Map<String, dynamic>>(
           EndpointManager.me,
         );
         return response.data as Map<String, dynamic>;
       },
       operationName: 'Obteniendo información del usuario autenticado',
-      successMessage: 'Información del usuario obtenida exitosamente',
     );
   }
 
@@ -60,12 +58,11 @@ class AuthApi {
   static Future<bool> logout(String token) {
     return ApiHelper.executeWithLogging(
       () async {
-        ApiHelper.setAuthHeaders(token);
+        // Headers configurados automáticamente por BaseApi.client
         await BaseApi.post(EndpointManager.logout);
         return true;
       },
       operationName: 'Cerrando sesión del usuario',
-      successMessage: 'Sesión cerrada exitosamente',
     );
   }
 
@@ -75,12 +72,11 @@ class AuthApi {
   static Future<bool> logoutAll(String token) {
     return ApiHelper.executeWithLogging(
       () async {
-        ApiHelper.setAuthHeaders(token);
+        // Headers configurados automáticamente por BaseApi.client
         await BaseApi.post(EndpointManager.logoutAll);
         return true;
       },
       operationName: 'Cerrando todas las sesiones del usuario',
-      successMessage: 'Todas las sesiones cerradas exitosamente',
     );
   }
 
@@ -89,10 +85,9 @@ class AuthApi {
   /// [token] - Token de acceso Bearer
   static Future<List<Map<String, dynamic>>> listTokens(String token) async {
     try {
-      logInfo('📱 Obteniendo lista de sesiones activas');
+      logInfo('Obteniendo lista de sesiones activas');
 
-      // Configurar headers de autorización
-      BaseApi.setCustomHeaders({'Authorization': 'Bearer $token'});
+      // Headers configurados automáticamente por BaseApi.client
 
       // El backend responde envuelto en { status, message, data: [] }
       final response = await BaseApi.get<Map<String, dynamic>>(
@@ -108,10 +103,10 @@ class AuthApi {
           .cast<Map<String, dynamic>>()
           .toList();
 
-      logInfo('✅ Lista de sesiones obtenida: ${tokens.length} sesiones');
+      logInfo('Lista de sesiones obtenida: ${tokens.length} sesiones');
       return tokens;
     } catch (e) {
-      logError('❌ Error al obtener lista de sesiones', e);
+      logError('Error al obtener lista de sesiones', e);
       rethrow;
     }
   }
@@ -122,19 +117,18 @@ class AuthApi {
   /// [tokenId] - ID del token a revocar
   static Future<bool> revokeToken(String token, String tokenId) async {
     try {
-      logInfo('🗑️ Revocando token: $tokenId');
+      logInfo('Revocando token: $tokenId');
 
-      // Configurar headers de autorización
-      BaseApi.setCustomHeaders({'Authorization': 'Bearer $token'});
+      // Headers configurados automáticamente por BaseApi.client
 
       await BaseApi.delete(
         EndpointManager.revokeToken(tokenId),
       );
 
-      logInfo('✅ Token revocado exitosamente: $tokenId');
+      logInfo('Token revocado exitosamente: $tokenId');
       return true;
     } catch (e) {
-      logError('❌ Error al revocar token: $tokenId', e);
+      logError('Error al revocar token: $tokenId', e);
       rethrow;
     }
   }
@@ -164,12 +158,12 @@ class AuthApi {
 
       final responseData = response.data as Map<String, dynamic>;
 
-      logInfo('✅ Usuario repartidor registrado exitosamente');
-      logDebug('📦 Response data: $responseData');
+      logInfo('Usuario repartidor registrado exitosamente');
+      logDebug('Response data: $responseData');
 
       return responseData;
     } catch (e) {
-      logError('❌ Error al registrar usuario repartidor', e);
+      logError('Error al registrar usuario repartidor', e);
       rethrow;
     }
   }
@@ -199,12 +193,12 @@ class AuthApi {
 
       final responseData = response.data as Map<String, dynamic>;
 
-      logInfo('✅ Usuario farmacia registrado exitosamente');
-      logDebug('📦 Response data: $responseData');
+      logInfo('Usuario farmacia registrado exitosamente');
+      logDebug('Response data: $responseData');
 
       return responseData;
     } catch (e) {
-      logError('❌ Error al registrar usuario farmacia', e);
+      logError('Error al registrar usuario farmacia', e);
       rethrow;
     }
   }
@@ -234,12 +228,12 @@ class AuthApi {
 
       final responseData = response.data as Map<String, dynamic>;
 
-      logInfo('✅ Usuario administrador registrado exitosamente');
-      logDebug('📦 Response data: $responseData');
+      logInfo('Usuario administrador registrado exitosamente');
+      logDebug('Response data: $responseData');
 
       return responseData;
     } catch (e) {
-      logError('❌ Error al registrar usuario administrador', e);
+      logError('Error al registrar usuario administrador', e);
       rethrow;
     }
   }

@@ -5,7 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/farmacias.api.dart';
 import 'package:medrush/models/farmacia.model.dart';
-import 'package:medrush/services/geocoding_service.dart'; // Para GeocodingResult
+import 'package:medrush/models/geocoding_result.model.dart';
+import 'package:medrush/services/geocoding_service.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
@@ -186,7 +187,8 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         builder: (context) => MapaPantallaCompleta(
           puntoInicial: puntoInicial,
           titulo: 'Seleccionar Ubicación de la Farmacia',
-          onUbicacionSeleccionada: (coordenadas, geocodingResult) {
+          onUbicacionSeleccionada:
+              (coordenadas, GeocodingResult? geocodingResult) {
             setState(() {
               _latitudController.text = StatusHelpers.formatearNumero(
                   coordenadas.latitude,

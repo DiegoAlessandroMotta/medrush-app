@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/models/leg_info.model.dart';
 import 'package:medrush/models/pedido.model.dart';
-import 'package:medrush/services/polyline_decoding.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
 
@@ -24,6 +24,18 @@ String _toSpanishDuration(String durationText) {
   t = t.replaceAll('m', 'min');
   t = t.replaceAll('  ', ' ');
   return t.trim();
+}
+
+// Formatea duración desde segundos a formato legible
+String _formatDuration(int seconds) {
+  final hours = seconds ~/ 3600;
+  final minutes = (seconds % 3600) ~/ 60;
+
+  if (hours > 0) {
+    return '${hours}h ${minutes}m';
+  } else {
+    return '${minutes}m';
+  }
 }
 
 class RutaMapList extends StatelessWidget {
@@ -56,6 +68,13 @@ class RutaMapList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Filtrar pedidos por estado para mostrar solo los relevantes
+    final pedidosPendientesRecogida = rutaOptimizada
+        .where((pedido) =>
+            pedido.estado == EstadoPedido.asignado ||
+            pedido.estado == EstadoPedido.pendiente)
+        .toList();
+
     return Material(
       color: MedRushTheme.surface,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -122,7 +141,7 @@ class RutaMapList extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        '${rutaOptimizada.length}',
+                        '${pedidosPendientesRecogida.length}',
                         style: const TextStyle(
                           color: MedRushTheme.textInverse,
                           fontSize: MedRushTheme.fontSizeBodySmall,
@@ -139,9 +158,9 @@ class RutaMapList extends StatelessWidget {
             const SizedBox(height: MedRushTheme.spacingSm),
             Expanded(
               child: ListView.builder(
-                itemCount: rutaOptimizada.length,
+                itemCount: pedidosPendientesRecogida.length,
                 itemBuilder: (context, index) {
-                  final pedido = rutaOptimizada[index];
+                  final pedido = pedidosPendientesRecogida[index];
                   final tienePolyline = pedidosConPolyline.contains(pedido.id);
                   return _buildEntregaItem(pedido, index + 1,
                       isActive: tienePolyline);
@@ -369,7 +388,7 @@ class RutaMapList extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${_toSpanishDuration(info.cumulativeDurationText)} (total)',
+                                '${_formatDuration(info.cumulativeDurationSeconds)} (total)',
                                 style: const TextStyle(
                                   fontSize: MedRushTheme.fontSizeBodyMedium,
                                   fontWeight: FontWeight.bold,
