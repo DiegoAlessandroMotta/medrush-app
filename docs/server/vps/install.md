@@ -155,7 +155,7 @@ Laravel requiere PHP. Instalaremos PHP 8.2 (la versión actual recomendada al mo
 2. **Instalar PHP 8.2 y extensiones:**
 
     ```bash
-    sudo apt install php8.2-fpm php8.2-common php8.2-cli php8.2-curl php8.2-mbstring php8.2-xml php8.2-zip php8.2-gd php8.2-pgsql php8.2-bcmath php8.2-soap php8.2-intl php8.2-readline -y
+    sudo apt install php8.2-fpm php8.2-common php8.2-cli php8.2-curl php8.2-mbstring php8.2-xml php8.2-zip php8.2-gd php8.2-pgsql php8.2-bcmath php8.2-soap php8.2-intl php8.2-readline imagemagick libmagickwand-dev php8.2-imagick -y
     ```
 
 3. **Verificar la versión de PHP:**
