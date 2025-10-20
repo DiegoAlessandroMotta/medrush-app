@@ -817,4 +817,32 @@ class PedidosApi {
       rethrow;
     }
   }
+
+  /// Elimina archivos multimedia de pedidos antiguos
+  static Future<bool> eliminarPedidosAntiguos(int semanas) async {
+    try {
+      logInfo(
+          'Iniciando limpieza de archivos multimedia de pedidos antiguos: $semanas semanas');
+
+      final response = await BaseApi.delete(
+        '/pedidos/antiguos',
+        queryParameters: {'semanas': semanas},
+      );
+
+      // El backend devuelve 202 (Accepted) para operaciones asíncronas
+      if (response.statusCode == 202) {
+        logInfo(
+            'Limpieza de archivos multimedia de pedidos antiguos iniciada exitosamente');
+        return true;
+      }
+
+      logWarning('Respuesta inesperada del servidor: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      logError(
+          'Error al iniciar la limpieza de archivos multimedia de pedidos antiguos',
+          e);
+      rethrow;
+    }
+  }
 }

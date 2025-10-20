@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:medrush/api/base.api.dart';
 import 'package:medrush/providers/auth.provider.dart';
+import 'package:medrush/screens/admin/modules/configuracion/google_api_metrics_widget.dart';
+import 'package:medrush/screens/admin/modules/configuracion/limpieza_pedidos_widget.dart';
 import 'package:medrush/theme/theme.dart';
-import 'package:medrush/widgets/google_api_metrics_widget.dart';
 import 'package:provider/provider.dart';
 
 class ConfiguracionAdminScreen extends StatelessWidget {
@@ -27,8 +27,16 @@ class ConfiguracionAdminScreen extends StatelessWidget {
 }
 
 // Widget de contenido sin Scaffold para usar en AdminMainScreen
-class ConfiguracionAdminContent extends StatelessWidget {
+class ConfiguracionAdminContent extends StatefulWidget {
   const ConfiguracionAdminContent({super.key});
+
+  @override
+  State<ConfiguracionAdminContent> createState() =>
+      _ConfiguracionAdminContentState();
+}
+
+class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
+  bool _isProfileExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,267 +45,365 @@ class ConfiguracionAdminContent extends StatelessWidget {
 
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            MedRushTheme.spacingLg,
-            MedRushTheme.spacingLg,
-            MedRushTheme.spacingLg,
-            isDesktop
-                ? MedRushTheme.spacingLg
-                : MedRushTheme.spacingXl +
-                    80, // Extra space for bottom nav in mobile
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-                decoration: BoxDecoration(
-                  color: MedRushTheme.surface,
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusLg),
-                  border: Border.all(color: MedRushTheme.borderLight),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(
-                      LucideIcons.settings,
-                      color: MedRushTheme.primaryGreen,
-                      size: 32,
-                    ),
-                    SizedBox(width: MedRushTheme.spacingMd),
-                    Text(
-                      'Configuración',
-                      style: TextStyle(
-                        fontSize: MedRushTheme.fontSizeTitleLarge,
-                        fontWeight: MedRushTheme.fontWeightBold,
-                        color: MedRushTheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: MedRushTheme.spacingXl),
-
-              // Sección de perfil del administrador
-              Container(
-                padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-                decoration: BoxDecoration(
-                  color: MedRushTheme.surface,
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusLg),
-                  border: Border.all(color: MedRushTheme.borderLight),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          LucideIcons.user,
-                          color: MedRushTheme.primaryGreen,
-                          size: 24,
-                        ),
-                        SizedBox(width: MedRushTheme.spacingSm),
-                        Text(
-                          'Perfil del Administrador',
-                          style: TextStyle(
-                            fontSize: MedRushTheme.fontSizeBodyLarge,
-                            fontWeight: MedRushTheme.fontWeightMedium,
-                            color: MedRushTheme.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: MedRushTheme.spacingLg),
-
-                    // Información del administrador
-                    if (authProvider.usuario != null) ...[
-                      Row(
-                        children: [
-                          // Avatar del administrador
-                          _buildAdminAvatar(authProvider),
-                          const SizedBox(width: MedRushTheme.spacingLg),
-                          // Información del usuario
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  authProvider.usuario!.nombre,
-                                  style: const TextStyle(
-                                    fontSize: MedRushTheme.fontSizeBodyLarge,
-                                    fontWeight: MedRushTheme.fontWeightSemiBold,
-                                    color: MedRushTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: MedRushTheme.spacingXs),
-                                Text(
-                                  authProvider.usuario!.email,
-                                  style: const TextStyle(
-                                    fontSize: MedRushTheme.fontSizeBodyMedium,
-                                    color: MedRushTheme.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: MedRushTheme.spacingXs),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: MedRushTheme.spacingSm,
-                                    vertical: MedRushTheme.spacingXs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: MedRushTheme.primaryGreen
-                                        .withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(
-                                        MedRushTheme.borderRadiusSm),
-                                    border: Border.all(
-                                      color: MedRushTheme.primaryGreen
-                                          .withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        LucideIcons.shield,
-                                        size: 14,
-                                        color: MedRushTheme.primaryGreen,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Administrador',
-                                        style: TextStyle(
-                                          fontSize:
-                                              MedRushTheme.fontSizeBodySmall,
-                                          fontWeight:
-                                              MedRushTheme.fontWeightMedium,
-                                          color: MedRushTheme.primaryGreen,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ] else ...[
-                      const Center(
-                        child: Text(
-                          'No se pudo cargar la información del usuario',
-                          style: TextStyle(
-                            color: MedRushTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: MedRushTheme.spacingXl),
-
-              // Sección de métricas de Google API
-              const GoogleApiMetricsWidget(),
-              const SizedBox(height: MedRushTheme.spacingXl),
-
-              // Sección de cuenta (solo en móvil)
-              if (!isDesktop) ...[
-                Container(
-                  padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-                  decoration: BoxDecoration(
-                    color: MedRushTheme.surface,
-                    borderRadius:
-                        BorderRadius.circular(MedRushTheme.borderRadiusLg),
-                    border: Border.all(color: MedRushTheme.borderLight),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(
-                            LucideIcons.logOut,
-                            color: MedRushTheme.error,
-                            size: 24,
-                          ),
-                          SizedBox(width: MedRushTheme.spacingSm),
-                          Text(
-                            'Sesión',
-                            style: TextStyle(
-                              fontSize: MedRushTheme.fontSizeBodyLarge,
-                              fontWeight: MedRushTheme.fontWeightMedium,
-                              color: MedRushTheme.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: MedRushTheme.spacingLg),
-                      ElevatedButton.icon(
-                        icon:
-                            const Icon(LucideIcons.logOut, color: Colors.white),
-                        label: const Text('Cerrar sesión'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: MedRushTheme.error,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          minimumSize: const Size(double.infinity, 0),
-                        ),
-                        onPressed: () => _mostrarDialogoLogout(context),
-                      ),
-                    ],
-                  ),
-                ),
+        return ColoredBox(
+          color: MedRushTheme.backgroundSecondary,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              24,
+              24,
+              isDesktop ? 24 : 104, // Extra space for bottom nav in mobile
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Layout de una columna (tanto desktop como móvil)
+                _buildCollapsibleProfileCard(authProvider),
+                const SizedBox(height: 24),
+                const GoogleApiMetricsWidget(),
+                const SizedBox(height: 24),
+                const LimpiezaPedidosWidget(),
+                const SizedBox(height: 24),
+                _buildLogoutCard(context),
               ],
-            ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildAdminAvatar(AuthProvider authProvider) {
-    final foto = authProvider.usuario?.foto;
-    final imageUrl = BaseApi.getImageUrl(foto);
-
-    return Container(
-      width: 80,
-      height: 80,
+  Widget _buildCollapsibleProfileCard(AuthProvider authProvider) {
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: MedRushTheme.primaryGreen,
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: MedRushTheme.borderLight, width: 3),
+        color: MedRushTheme.surface,
+        borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
         boxShadow: const [
           BoxShadow(
             color: MedRushTheme.shadowLight,
-            blurRadius: 8,
+            blurRadius: 10,
             offset: Offset(0, 4),
           ),
         ],
       ),
-      child: imageUrl.isNotEmpty
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(37),
-              child: Image.network(
-                imageUrl,
-                width: 74,
-                height: 74,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    LucideIcons.user,
-                    color: Colors.white,
-                    size: 32,
-                  );
-                },
+      child: Column(
+        children: [
+          // Header clickeable
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isProfileExpanded = !_isProfileExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: MedRushTheme.primaryBlue.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(MedRushTheme.borderRadiusSm),
+                    ),
+                    child: const Icon(
+                      LucideIcons.user,
+                      color: MedRushTheme.primaryBlue,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Perfil del Administrador',
+                      style: TextStyle(
+                        fontSize: MedRushTheme.fontSizeBodyLarge,
+                        fontWeight: MedRushTheme.fontWeightSemiBold,
+                        color: MedRushTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isProfileExpanded
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
+                    color: MedRushTheme.textSecondary,
+                    size: 20,
+                  ),
+                ],
               ),
-            )
-          : const Icon(
-              LucideIcons.user,
-              color: Colors.white,
-              size: 32,
             ),
+          ),
+          // Contenido desplegable
+          if (_isProfileExpanded) ...[
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: _buildProfileContent(authProvider),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileContent(AuthProvider authProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Campos del formulario
+        if (authProvider.usuario != null) ...[
+          _buildFormField(
+              'Nombre', authProvider.usuario!.nombre, 'Nombre del Admin'),
+          const SizedBox(height: 16),
+          _buildFormField('Dirección de Email', authProvider.usuario!.email,
+              'admin@healthcare.com'),
+          const SizedBox(height: 16),
+          _buildPasswordChangeForm(),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MedRushTheme.textPrimary,
+                foregroundColor: MedRushTheme.textInverse,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(MedRushTheme.borderRadiusSm),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Actualizar Perfil',
+                style: TextStyle(
+                  fontWeight: MedRushTheme.fontWeightSemiBold,
+                ),
+              ),
+            ),
+          ),
+        ] else ...[
+          const Center(
+            child: Text(
+              'No se pudo cargar la información del usuario',
+              style: TextStyle(
+                color: MedRushTheme.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPasswordChangeForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Cambiar Contraseña',
+          style: TextStyle(
+            fontSize: MedRushTheme.fontSizeBodySmall,
+            fontWeight: MedRushTheme.fontWeightMedium,
+            color: MedRushTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: MedRushTheme.backgroundSecondary,
+            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
+            border: Border.all(color: MedRushTheme.borderLight),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Contraseña actual',
+                  style: TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: MedRushTheme.textTertiary,
+                  ),
+                ),
+              ),
+              Icon(
+                LucideIcons.lock,
+                size: 16,
+                color: MedRushTheme.textSecondary,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: MedRushTheme.backgroundSecondary,
+            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
+            border: Border.all(color: MedRushTheme.borderLight),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Nueva contraseña',
+                  style: TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: MedRushTheme.textTertiary,
+                  ),
+                ),
+              ),
+              Icon(
+                LucideIcons.key,
+                size: 16,
+                color: MedRushTheme.textSecondary,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: MedRushTheme.backgroundSecondary,
+            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
+            border: Border.all(color: MedRushTheme.borderLight),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Confirmar nueva contraseña',
+                  style: TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: MedRushTheme.textTertiary,
+                  ),
+                ),
+              ),
+              Icon(
+                LucideIcons.check,
+                size: 16,
+                color: MedRushTheme.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormField(String label, String value, String placeholder) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: MedRushTheme.fontSizeBodySmall,
+            fontWeight: MedRushTheme.fontWeightMedium,
+            color: MedRushTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: MedRushTheme.backgroundSecondary,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: MedRushTheme.borderLight),
+          ),
+          child: Text(
+            value.isNotEmpty ? value : placeholder,
+            style: TextStyle(
+              fontSize: 14,
+              color: value.isNotEmpty
+                  ? const Color(0xFF1F2937)
+                  : const Color(0xFF9CA3AF),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogoutCard(BuildContext context) {
+    // Solo mostrar en móviles
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 768;
+
+        if (!isMobile) {
+          return const SizedBox.shrink(); // No mostrar en desktop
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: MedRushTheme.surface,
+            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
+            boxShadow: const [
+              BoxShadow(
+                color: MedRushTheme.shadowLight,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: MedRushTheme.error.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(MedRushTheme.borderRadiusSm),
+                    ),
+                    child: const Icon(
+                      LucideIcons.logOut,
+                      color: MedRushTheme.error,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Sesión',
+                    style: TextStyle(
+                      fontSize: MedRushTheme.fontSizeBodyLarge,
+                      fontWeight: MedRushTheme.fontWeightSemiBold,
+                      color: MedRushTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(LucideIcons.logOut,
+                      color: MedRushTheme.textInverse, size: 16),
+                  label: const Text('Cerrar sesión'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: MedRushTheme.error,
+                    foregroundColor: MedRushTheme.textInverse,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(MedRushTheme.borderRadiusSm),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => _mostrarDialogoLogout(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -307,7 +413,7 @@ class ConfiguracionAdminContent extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(LucideIcons.logOut, color: Colors.red),
+            Icon(LucideIcons.logOut, color: MedRushTheme.error),
             SizedBox(width: 8),
             Text('Cerrar Sesión'),
           ],
@@ -327,8 +433,8 @@ class ConfiguracionAdminContent extends StatelessWidget {
               await _logout(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: MedRushTheme.error,
+              foregroundColor: MedRushTheme.textInverse,
             ),
             child: const Text('Cerrar Sesión'),
           ),

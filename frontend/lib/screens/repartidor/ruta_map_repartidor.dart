@@ -691,7 +691,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
           : 'Recogida (${numerosPendientes.length} pendientes)';
       final snippet = numerosPendientes.length == 1
           ? 'Punto de recogida'
-          : 'Pendientes: ${numerosPendientes.join(', ')}${pedidosRecogidos.length > 0 ? '\nRecogidos: ${pedidosRecogidos.length}' : ''}';
+          : 'Pendientes: ${numerosPendientes.join(', ')}${pedidosRecogidos.isNotEmpty ? '\nRecogidos: ${pedidosRecogidos.length}' : ''}';
 
       _markers.add(
         Marker(

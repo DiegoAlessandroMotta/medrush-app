@@ -937,7 +937,7 @@ abstract class BaseApi {
         }
       } else {
         final error = 'Error HTTP ${response.statusCode}';
-        logError('$error');
+        logError(error);
         return RepositoryResult.error(error);
       }
     } catch (e) {

@@ -783,6 +783,32 @@ class PedidoRepository extends BaseRepository {
     }, errorMessage: 'Error al obtener ruta actual del repartidor');
   }
 
+  /// Elimina archivos multimedia de pedidos antiguos
+  Future<RepositoryResult<bool>> eliminarPedidosAntiguos(int semanas) {
+    return execute(() async {
+      validateNotNull(semanas, 'Número de semanas');
+
+      if (semanas < 1 || semanas > 52) {
+        throw Exception('El número de semanas debe estar entre 1 y 52');
+      }
+
+      logInfo(
+          'Iniciando limpieza de archivos multimedia de pedidos antiguos: $semanas semanas');
+
+      // FIX: Cache deshabilitado - eliminar directamente en la API
+      final resultado = await PedidosApi.eliminarPedidosAntiguos(semanas);
+
+      if (resultado) {
+        logInfo(
+            'Limpieza de archivos multimedia de pedidos antiguos iniciada exitosamente');
+      }
+
+      return resultado;
+    },
+        errorMessage:
+            'Error al iniciar la limpieza de archivos multimedia de pedidos antiguos');
+  }
+
   /// Convierte el enum EstadoPedido al formato esperado por el backend
   String _convertEstadoToBackend(EstadoPedido estado) {
     switch (estado) {

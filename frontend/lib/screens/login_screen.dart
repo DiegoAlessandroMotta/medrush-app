@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
         ],
       ),
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -283,7 +283,6 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: MedRushTheme.spacingXl),
 
