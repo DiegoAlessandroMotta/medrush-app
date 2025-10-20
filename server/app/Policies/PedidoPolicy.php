@@ -69,6 +69,11 @@ class PedidoPolicy
     return $user->hasPermissionTo(PermissionsEnum::PEDIDOS_DELETE_ANY);
   }
 
+  public function deleteAntiguos(User $user): bool
+  {
+    return $user->hasPermissionTo(PermissionsEnum::PEDIDOS_DELETE_ANY);
+  }
+
   public function asignar(User $user, Pedido $pedido): bool
   {
     if ($user->esAdmin() || $user->esRepartidor()) {
