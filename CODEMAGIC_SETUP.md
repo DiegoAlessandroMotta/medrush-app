@@ -1,38 +1,35 @@
-# Configuración de Codemagic para MedRush App - iOS
+# Configuración de Codemagic para MedRush App - iOS (Sin Cuenta de Desarrollador)
 
 ## 📋 Archivo codemagic.yaml Creado
 
 He creado un archivo `codemagic.yaml` específico para iOS que apunta al directorio `frontend/`:
 
-- **iOS** (IPA + App Store Connect)
+- **iOS** (Build sin code signing para desarrollo)
 - **Configuración para proyecto en subdirectorio `frontend/`**
+- **Sin necesidad de cuenta de desarrollador Apple**
 
 ## 🔧 Configuración Requerida
 
-### 1. Variables de Entorno en Codemagic
+### ✅ Sin Configuración Adicional Necesaria
 
-#### Para iOS:
-```
-APP_STORE_CONNECT_ISSUER_ID: [Tu Issuer ID]
-APP_STORE_CONNECT_KEY_IDENTIFIER: [Tu Key ID]
-APP_STORE_CONNECT_PRIVATE_KEY: [Tu Private Key]
-```
+**No necesitas:**
+- Cuenta de desarrollador Apple
+- Certificados de iOS
+- Variables de App Store Connect
+- Code signing
 
-### 2. Code Signing
+### 📱 Limitaciones del Build Sin Cuenta
 
-#### iOS Certificates:
-1. Ve a **Team Settings > Code signing identities**
-2. Sube tu certificado de distribución
-3. Configura las credenciales de App Store Connect
+**Lo que SÍ obtienes:**
+- ✅ Archivo `.app` compilado
+- ✅ Build funcional para desarrollo
+- ✅ Testing y análisis de código
 
-### 3. Grupos de Variables
-
-Crea este grupo en Codemagic:
-
-#### `app_store_connect`:
-- `APP_STORE_CONNECT_ISSUER_ID`
-- `APP_STORE_CONNECT_KEY_IDENTIFIER`
-- `APP_STORE_CONNECT_PRIVATE_KEY`
+**Lo que NO puedes hacer:**
+- ❌ Instalar en dispositivos físicos
+- ❌ Subir a App Store
+- ❌ Distribuir a TestFlight
+- ❌ Firmar el IPA
 
 ## 🚀 Características Incluidas
 
@@ -49,14 +46,13 @@ Crea este grupo en Codemagic:
 - **App Store**: Subida a TestFlight
 
 ### ✅ Artifacts
-- iOS: IPA + logs de Xcode
+- iOS: Archivo `.app` sin firmar + logs de Xcode
 
 ## 📝 Pasos Siguientes
 
 1. **Commit el archivo** `codemagic.yaml` a la raíz de tu repositorio
-2. **Configura las variables** en el panel de Codemagic
-3. **Sube los certificados** de code signing para iOS
-4. **Ejecuta el primer build** para verificar la configuración
+2. **Ejecuta el primer build** - no necesitas configuración adicional
+3. **Descarga el archivo `.app`** desde los artifacts del build
 
 ## 🔍 Troubleshooting
 
@@ -71,11 +67,11 @@ scripts:
       flutter pub get
 ```
 
-### Error: "App Store Connect credentials"
-Asegúrate de:
-- Tener un **App Store Connect API Key** válido
-- Configurar las variables en el grupo `app_store_connect`
-- Usar el bundle identifier correcto: `com.medrush.app`
+### Error: "No matching profiles found"
+Este error ya no debería aparecer porque:
+- Eliminamos la configuración de code signing
+- Usamos `--no-codesign` en el build
+- No necesitas certificados de iOS
 
 ### Error: "Flutter command not found"
 Verifica que:
