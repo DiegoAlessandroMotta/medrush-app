@@ -1,0 +1,53 @@
+workflows:
+  # Workflow para iOS
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 180
+    instance_type: mac_mini_m2
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.medrush.app
+      groups:
+        - app_store_connect
+      vars:
+        APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
+        APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
+      flutter: stable
+    scripts:
+      - name: Navigate to Flutter project
+        script: | 
+          cd frontend
+      - name: Get Flutter packages
+        script: | 
+          cd frontend
+          flutter pub get
+      - name: Flutter analyze
+        script: | 
+          cd frontend
+          flutter analyze
+      - name: Flutter unit tests
+        script: | 
+          cd frontend
+          flutter test
+        ignore_failure: true
+      - name: Build iOS IPA
+        script: | 
+          cd frontend
+          flutter build ipa --release
+    artifacts:
+      - frontend/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - developer@medrush.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
