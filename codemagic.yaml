@@ -22,7 +22,7 @@ workflows:
       - name: Flutter unit tests
         script: | 
           cd frontend
-          flutter test
+          flutter test --no-sound-null-safety
         ignore_failure: true
       - name: Build iOS IPA (Development)
         script: | 
