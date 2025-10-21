@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Policies\DownloadPolicy;
+use App\Policies\GoogleApiServicePolicy;
 use App\Policies\SignedUrlPolicy;
 use Gate;
 use Illuminate\Support\ServiceProvider;
@@ -20,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
   public function boot(): void
   {
     Gate::define('getSignedUrlCsvTemplate', [SignedUrlPolicy::class, 'getSignedUrlCsvTemplate']);
+    Gate::define('reverseGeocode', [GoogleApiServicePolicy::class, 'reverseGeocode']);
+    Gate::define('getDirectionsWithWaypoints', [GoogleApiServicePolicy::class, 'getDirectionsWithWaypoints']);
+    Gate::define('getRouteInfo', [GoogleApiServicePolicy::class, 'getRouteInfo']);
   }
 }

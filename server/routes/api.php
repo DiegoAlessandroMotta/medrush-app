@@ -21,6 +21,7 @@ use App\Models\Farmacia;
 use App\Models\Pedido;
 use App\Models\PerfilFarmacia;
 use App\Models\PerfilRepartidor;
+use App\Models\ReportePdf;
 use App\Models\Ruta;
 use App\Models\UbicacionRepartidor;
 use App\Models\User;
@@ -224,11 +225,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::patch('/{pedido}/devolver', [PedidoController::class, 'devolver'])
     //   ->whereUuid('pedido');
 
+    Route::delete('/antiguos', [PedidoController::class, 'deleteAntiguos'])
+      ->can('deleteAntiguos', 'pedido');
+
     Route::delete('/{pedido}', [PedidoController::class, 'destroy'])
       ->whereUuid('pedido')
       ->can('delete', 'pedido');
-
-    Route::delete('/antiguos', [PedidoController::class, 'deleteAntiguos']);
 
     Route::prefix('/{pedido}/eventos')->group(function () {
       Route::get('/', [EventoPedidoController::class, 'index'])
@@ -321,26 +323,33 @@ Route::middleware('auth:sanctum')->group(function () {
   });
 
   Route::prefix('reportes-pdf')->group(function () {
-    Route::get('/', [ReportePdfController::class, 'index']);
+    Route::get('/', [ReportePdfController::class, 'index'])
+      ->can('viewAny', ReportePdf::class);
 
     Route::get('/{reportePdf}', [ReportePdfController::class, 'show'])
-      ->whereUuid('reportePdf');
+      ->whereUuid('reportePdf')
+      ->can('view', 'reportePdf');
 
     Route::delete('/{reportePdf}', [ReportePdfController::class, 'delete'])
-      ->whereUuid('reportePdf');
+      ->whereUuid('reportePdf')
+      ->can('delete', 'reportePdf');
 
-    Route::delete('/antiguos', [ReportePdfController::class, 'deleteAntiguos']);
+    Route::delete('/antiguos', [ReportePdfController::class, 'deleteAntiguos'])
+      ->can('deleteAntiguos', ReportePdf::class);
 
     Route::patch('/{reportePdf}/regenerar', [ReportePdfController::class, 'regenerar'])
-      ->whereUuid('reportePdf');
+      ->whereUuid('reportePdf')
+      ->can('regenerar', 'reportePdf');
 
     Route::prefix('etiquetas-pedido')->group(function () {
-      Route::post('/', [ReportePdfController::class, 'etiquetasPedido']);
+      Route::post('/', [ReportePdfController::class, 'etiquetasPedido'])
+        ->can('createEtiquetasPedido', ReportePdf::class);
     });
   });
 
   Route::prefix('google-api-usage')->group(function () {
-    Route::get('/stats', [GoogleApiUsageController::class, 'getUsageStats']);
+    Route::get('/stats', [GoogleApiUsageController::class, 'getUsageStats'])
+      ->can('viewUsageStats');
   });
 
   Route::prefix('downloads')->group(function () {
@@ -350,12 +359,16 @@ Route::middleware('auth:sanctum')->group(function () {
   });
 
   Route::prefix('geocoding')->group(function () {
-    Route::post('/reverse', [GeocodingController::class, 'reverseGeocode']);
+    Route::post('/reverse', [GeocodingController::class, 'reverseGeocode'])
+      ->can('reverseGeocode');
   });
 
   Route::prefix('directions')->group(function () {
-    Route::post('/with-waypoints', [DirectionsController::class, 'getDirectionsWithWaypoints']);
-    Route::post('/route-info', [DirectionsController::class, 'getRouteInfo']);
+    Route::post('/with-waypoints', [DirectionsController::class, 'getDirectionsWithWaypoints'])
+      ->can('getDirectionsWithWaypoints');
+
+    Route::post('/route-info', [DirectionsController::class, 'getRouteInfo'])
+      ->can('getRouteInfo');
   });
 });
 
