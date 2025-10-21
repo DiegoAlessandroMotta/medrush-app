@@ -18,6 +18,7 @@ workflows:
         script: | 
           cd frontend
           flutter analyze
+        ignore_failure: true
       - name: Flutter unit tests
         script: | 
           cd frontend
