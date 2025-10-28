@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Policies\GoogleApiServicePolicy;
+use App\Policies\GoogleApiUsagePolicy;
 use App\Policies\SignedUrlPolicy;
 use Gate;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     Gate::define('reverseGeocode', [GoogleApiServicePolicy::class, 'reverseGeocode']);
     Gate::define('getDirectionsWithWaypoints', [GoogleApiServicePolicy::class, 'getDirectionsWithWaypoints']);
     Gate::define('getRouteInfo', [GoogleApiServicePolicy::class, 'getRouteInfo']);
+    Gate::define('viewUsageStats', [GoogleApiUsagePolicy::class, 'viewUsageStats']);
   }
 
   protected function configureRateLimiters(): void
