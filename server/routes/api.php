@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DirectionsController;
 use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\Download\DownloadController;
 use App\Http\Controllers\Entities\EventoPedidoController;
 use App\Http\Controllers\Entities\FarmaciaController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\User\AdminUserController;
 use App\Http\Controllers\User\BaseUserController;
 use App\Http\Controllers\User\FarmaciaUserController;
 use App\Http\Controllers\User\RepartidorUserController;
+use App\Models\ClientError;
 use App\Models\Farmacia;
 use App\Models\Pedido;
 use App\Models\PerfilFarmacia;
@@ -352,6 +354,11 @@ Route::middleware('auth:sanctum')->group(function () {
       ->can('viewUsageStats');
   });
 
+  Route::prefix('client-errors')->group(function () {
+    Route::get('/', [ClientErrorController::class, 'index'])
+      ->can('viewAny', ClientError::class);
+  });
+
   Route::prefix('downloads')->group(function () {
     Route::get('/templates/csv/{lang}/{templateKey}/signed-url', [DownloadController::class, 'getSignedCsvTemplateUrl'])
       ->name('downloads.csv_template.get_signed_url')
@@ -371,6 +378,9 @@ Route::middleware('auth:sanctum')->group(function () {
       ->can('getRouteInfo');
   });
 });
+
+Route::post('/client-errors/report', [ClientErrorController::class, 'report'])
+  ->middleware('throttle:client-errors-report');
 
 Route::middleware('signed')->group(function () {
   Route::prefix('downloads')->group(function () {
