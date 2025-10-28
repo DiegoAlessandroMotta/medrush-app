@@ -96,8 +96,51 @@ class RepartidoresApi extends BaseApi {
   static Future<Usuario?> createRepartidor(Usuario repartidor) {
     return ApiHelper.executeWithLogging(
       () async {
-        final response =
-            await BaseApi.post(EndpointManager.repartidores, data: {
+        // Logs detallados de los datos del repartidor
+        logInfo('🔍 DATOS DEL REPARTIDOR RECIBIDOS:');
+        logInfo('🔍 - ID: ${repartidor.id}');
+        logInfo('🔍 - Nombre: ${repartidor.nombre}');
+        logInfo('🔍 - Email: ${repartidor.email}');
+        logInfo(
+            '🔍 - Password: ${repartidor.password?.isNotEmpty == true ? "***${repartidor.password!.substring(repartidor.password!.length - 2)}" : "null"}');
+        logInfo('🔍 - Teléfono original: ${repartidor.telefono}');
+        logInfo('🔍 - DNI ID: ${repartidor.dniIdNumero}');
+        logInfo('🔍 - Licencia número: ${repartidor.licenciaNumero}');
+        logInfo('🔍 - Licencia vencimiento: ${repartidor.licenciaVencimiento}');
+        logInfo('🔍 - Vehículo placa: ${repartidor.vehiculoPlaca}');
+        logInfo('🔍 - Vehículo marca: ${repartidor.vehiculoMarca}');
+        logInfo('🔍 - Vehículo modelo: ${repartidor.vehiculoModelo}');
+        logInfo('🔍 - Farmacia ID: ${repartidor.farmaciaId}');
+
+        // Procesar teléfono
+        String? telefonoProcesado;
+        if (repartidor.telefono != null && repartidor.telefono!.isNotEmpty) {
+          if (repartidor.telefono!.startsWith('+')) {
+            telefonoProcesado = repartidor.telefono;
+            logInfo('🔍 - Teléfono ya tiene formato E.164: $telefonoProcesado');
+          } else {
+            telefonoProcesado =
+                '+1${repartidor.telefono!.replaceAll(RegExp(r'[^\d]'), '')}';
+            logInfo('🔍 - Teléfono procesado a E.164: $telefonoProcesado');
+          }
+        } else {
+          telefonoProcesado = null;
+          logInfo('🔍 - Teléfono es null o vacío');
+        }
+
+        // Procesar fecha de licencia
+        String? licenciaVencimientoProcesada;
+        if (repartidor.licenciaVencimiento != null) {
+          licenciaVencimientoProcesada =
+              repartidor.licenciaVencimiento!.toIso8601String().split('T')[0];
+          logInfo(
+              '🔍 - Licencia vencimiento procesada: $licenciaVencimientoProcesada');
+        } else {
+          licenciaVencimientoProcesada = null;
+          logInfo('🔍 - Licencia vencimiento es null');
+        }
+
+        final requestData = {
           // Campos base del usuario (según RegisterBaseUserRequest)
           'name': repartidor.nombre,
           'email': repartidor.email,
@@ -106,20 +149,44 @@ class RepartidoresApi extends BaseApi {
           'device_name': 'Flutter App',
 
           // Campos específicos del repartidor (según RegisterRepartidorUserRequest)
-          'codigo_iso_pais': 'PER', // Código ISO para Perú
+          'codigo_iso_pais': 'USA', // Código ISO para Estados Unidos
           'dni_id_numero': repartidor.dniIdNumero,
-          'telefono': repartidor.telefono,
+          'telefono': telefonoProcesado,
           'licencia_numero': repartidor.licenciaNumero,
-          'licencia_vencimiento':
-              repartidor.licenciaVencimiento?.toIso8601String(),
+          'licencia_vencimiento': licenciaVencimientoProcesada,
           'vehiculo_placa': repartidor.vehiculoPlaca,
           'vehiculo_marca': repartidor.vehiculoMarca,
           'vehiculo_modelo': repartidor.vehiculoModelo,
 
           // Campos adicionales que el backend podría aceptar
-          'farmacia_id': repartidor.farmaciaId,
+          if (repartidor.farmaciaId != null)
+            'farmacia_id': repartidor.farmaciaId,
+        };
+
+        logInfo('🔍 DATOS FINALES A ENVIAR AL BACKEND:');
+        requestData.forEach((key, value) {
+          if (key == 'password' || key == 'password_confirmation') {
+            logInfo(
+                '🔍 - $key: ${value != null ? "***${value.toString().substring(value.toString().length - 2)}" : "null"}');
+          } else {
+            logInfo('🔍 - $key: $value');
+          }
         });
-        return ApiHelper.processSingleResponse(response.data, Usuario.fromJson);
+
+        final response =
+            await BaseApi.post(EndpointManager.repartidores, data: requestData);
+
+        // Procesar respuesta específica para creación de repartidor
+        final responseData = response.data as Map<String, dynamic>?;
+        if (responseData == null) return null;
+
+        final data = responseData['data'] as Map<String, dynamic>?;
+        if (data == null) return null;
+
+        final userData = data['user'] as Map<String, dynamic>?;
+        if (userData == null) return null;
+
+        return Usuario.fromJson(userData);
       },
       operationName: 'Creando nuevo repartidor: ${repartidor.nombre}',
     );
@@ -142,7 +209,7 @@ class RepartidoresApi extends BaseApi {
 
             // Campos específicos del repartidor (según UpdateRepartidorUserRequest)
             'farmacia_id': repartidor.farmaciaId,
-            'codigo_iso_pais': 'PER', // Código ISO para Perú
+            'codigo_iso_pais': 'USA', // Código ISO para Estados Unidos
             'dni_id_numero': repartidor.dniIdNumero,
             'telefono': repartidor.telefono,
             'licencia_numero': repartidor.licenciaNumero,

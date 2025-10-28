@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/models/usuario.model.dart';
@@ -76,7 +77,17 @@ class _RepartidorFormState extends State<RepartidorForm> {
       final usuario = widget.initialData!;
       _nombreController.text = usuario.nombre;
       _emailController.text = usuario.email;
-      _telefonoController.text = usuario.telefono ?? '';
+
+      // Extraer número del teléfono existente (remover +1 si está presente)
+      final telefonoCompleto = usuario.telefono ?? '';
+      if (telefonoCompleto.isNotEmpty) {
+        if (telefonoCompleto.startsWith('+1')) {
+          _telefonoController.text = telefonoCompleto.substring(2);
+        } else {
+          _telefonoController.text = telefonoCompleto;
+        }
+      }
+
       _dniIdNumeroController.text = usuario.dniIdNumero ?? '';
       _fotoUrl = usuario.foto;
       _fotoDniUrl = usuario.dniIdImagenUrl;
@@ -208,6 +219,27 @@ class _RepartidorFormState extends State<RepartidorForm> {
       logInfo('💾 Guardando repartidor');
       logInfo('💾 Foto URL antes de crear usuario: $_fotoUrl');
 
+      // Logs detallados de los datos capturados del formulario
+      logInfo('📝 DATOS CAPTURADOS DEL FORMULARIO:');
+      logInfo('📝 - Nombre: "${_nombreController.text.trim()}"');
+      logInfo('📝 - Email: "${_emailController.text.trim()}"');
+      logInfo(
+          '📝 - Password: "${_passwordController.text.isNotEmpty ? "***${_passwordController.text.substring(_passwordController.text.length - 2)}" : "vacío"}"');
+      logInfo('📝 - Teléfono: "${_telefonoController.text.trim()}"');
+      logInfo('📝 - DNI ID: "${_dniIdNumeroController.text.trim()}"');
+      logInfo(
+          '📝 - Licencia número: "${_licenciaNumeroController.text.trim()}"');
+      logInfo('📝 - Licencia vencimiento: $_licenciaVencimiento');
+      logInfo('📝 - Vehículo placa: "${_vehiculoPlacaController.text.trim()}"');
+      logInfo('📝 - Vehículo marca: "${_vehiculoMarcaController.text.trim()}"');
+      logInfo(
+          '📝 - Vehículo modelo: "${_vehiculoModeloController.text.trim()}"');
+      logInfo('📝 - Estado seleccionado: $_estadoSeleccionado');
+      logInfo('📝 - Activo: $_activo');
+      logInfo('📝 - Foto URL: $_fotoUrl');
+      logInfo('📝 - Foto DNI URL: $_fotoDniUrl');
+      logInfo('📝 - Foto Licencia URL: $_fotoLicenciaUrl');
+
       final usuario = Usuario(
         id: widget.initialData?.id ??
             '', // Para nuevos usuarios, se generará UUID en el backend
@@ -219,7 +251,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
         tipoUsuario: TipoUsuario.repartidor,
         telefono: _telefonoController.text.trim().isEmpty
             ? null
-            : _telefonoController.text.trim(),
+            : _getTelefonoCompleto(),
         foto: _fotoUrl,
         dniIdNumero: _dniIdNumeroController.text.trim().isEmpty
             ? null
@@ -242,6 +274,25 @@ class _RepartidorFormState extends State<RepartidorForm> {
         updatedAt: DateTime.now(),
         activo: _activo,
       );
+
+      // Logs del objeto Usuario construido
+      logInfo('👤 OBJETO USUARIO CONSTRUIDO:');
+      logInfo('👤 - ID: ${usuario.id}');
+      logInfo('👤 - Nombre: ${usuario.nombre}');
+      logInfo('👤 - Email: ${usuario.email}');
+      logInfo(
+          '👤 - Password: ${usuario.password?.isNotEmpty == true ? "***${usuario.password!.substring(usuario.password!.length - 2)}" : "null"}');
+      logInfo('👤 - Tipo Usuario: ${usuario.tipoUsuario}');
+      logInfo('👤 - Teléfono: ${usuario.telefono}');
+      logInfo('👤 - DNI ID: ${usuario.dniIdNumero}');
+      logInfo('👤 - Licencia número: ${usuario.licenciaNumero}');
+      logInfo('👤 - Licencia vencimiento: ${usuario.licenciaVencimiento}');
+      logInfo('👤 - Vehículo placa: ${usuario.vehiculoPlaca}');
+      logInfo('👤 - Vehículo marca: ${usuario.vehiculoMarca}');
+      logInfo('👤 - Vehículo modelo: ${usuario.vehiculoModelo}');
+      logInfo('👤 - Estado repartidor: ${usuario.estadoRepartidor}');
+      logInfo('👤 - Activo: ${usuario.activo}');
+      logInfo('👤 - Foto: ${usuario.foto}');
 
       // Conectar con el backend real
       final repository = RepartidorRepository();
@@ -330,6 +381,13 @@ class _RepartidorFormState extends State<RepartidorForm> {
     }
   }
 
+  // Función para obtener el teléfono completo
+  String _getTelefonoCompleto() {
+    final soloNumeros =
+        _telefonoController.text.replaceAll(RegExp(r'[^\d]'), '');
+    return '+1$soloNumeros';
+  }
+
   @override
   void dispose() {
     _nombreController.dispose();
@@ -342,6 +400,42 @@ class _RepartidorFormState extends State<RepartidorForm> {
     _vehiculoMarcaController.dispose();
     _vehiculoModeloController.dispose();
     super.dispose();
+  }
+
+  // Widget personalizado para el campo de teléfono
+  Widget _buildTelefonoField() {
+    return TextFormField(
+      controller: _telefonoController,
+      decoration: const InputDecoration(
+        labelText: 'Número de Teléfono',
+        hintText: '5551234567',
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.phone),
+        prefixText: '+1 ',
+        helperText: '10 dígitos',
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      validator: (value) {
+        if (value == null || value.isEmpty) return null;
+
+        // Remover espacios y caracteres especiales excepto números
+        final soloNumeros = value.replaceAll(RegExp(r'[^\d]'), '');
+
+        if (soloNumeros.length != 10) {
+          return 'El teléfono debe tener exactamente 10 dígitos';
+        }
+
+        return null;
+      },
+      onChanged: (value) {
+        // Validación en tiempo real
+        setState(() {});
+      },
+    );
   }
 
   @override
@@ -515,6 +609,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           }
                           return null;
                         },
+                        onChanged: (value) {
+                          // Validación en tiempo real
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -547,16 +645,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           ],
                         ),
 
-                      // Teléfono
-                      TextFormField(
-                        controller: _telefonoController,
-                        decoration: const InputDecoration(
-                          labelText: 'Teléfono',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.phone),
-                        ),
-                        keyboardType: TextInputType.phone,
-                      ),
+                      // Teléfono con código de país
+                      _buildTelefonoField(),
                       const SizedBox(height: MedRushTheme.spacingMd),
 
                       // DNI/ID
@@ -566,8 +656,27 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           labelText: 'DNI/ID',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.credit_card),
+                          helperText: 'Solo números, sin espacios ni guiones',
                         ),
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(12),
+                        ],
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (value.length < 7) {
+                              return 'El DNI/ID debe tener al menos 7 dígitos';
+                            }
+                            if (value.length > 12) {
+                              return 'El DNI/ID no puede tener más de 12 dígitos';
+                            }
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -582,7 +691,23 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           labelText: 'Número de Licencia',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.credit_card),
+                          helperText: 'Formato: Letras y números',
                         ),
+                        textCapitalization: TextCapitalization.characters,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (value.length < 5) {
+                              return 'El número de licencia debe tener al menos 5 caracteres';
+                            }
+                            if (!RegExp(r'^[A-Z0-9]+$').hasMatch(value)) {
+                              return 'Solo letras mayúsculas y números';
+                            }
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -620,8 +745,23 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           labelText: 'Placa del Vehículo',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.pin),
+                          helperText: 'Formato: ABC-123 o ABC123',
                         ),
                         textCapitalization: TextCapitalization.characters,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (value.length < 4) {
+                              return 'La placa debe tener al menos 4 caracteres';
+                            }
+                            if (!RegExp(r'^[A-Z0-9\-]+$').hasMatch(value)) {
+                              return 'Solo letras mayúsculas, números y guiones';
+                            }
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -632,7 +772,23 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           labelText: 'Marca del Vehículo',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.directions_car),
+                          helperText: 'Ej: Toyota, Honda, Ford',
                         ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (value.length < 2) {
+                              return 'La marca debe tener al menos 2 caracteres';
+                            }
+                            if (!RegExp(r'^[A-Za-z\s]+$').hasMatch(value)) {
+                              return 'Solo letras y espacios';
+                            }
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -643,7 +799,24 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           labelText: 'Modelo del Vehículo',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.car_rental),
+                          helperText: 'Ej: Corolla, Civic, Focus',
                         ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (value.length < 2) {
+                              return 'El modelo debe tener al menos 2 caracteres';
+                            }
+                            if (!RegExp(r'^[A-Za-z0-9\s\-]+$')
+                                .hasMatch(value)) {
+                              return 'Solo letras, números, espacios y guiones';
+                            }
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                       const SizedBox(height: MedRushTheme.spacingLg),
 

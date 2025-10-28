@@ -102,7 +102,8 @@ abstract class BaseApi {
         }
 
         if (options.data != null) {
-          logDebug('Request Data: ${_sanitizeLogData(options.data)}');
+          logDebug(
+              'Request Data: ${_sanitizeLogData(options.data, httpMethod: options.method)}');
         }
         handler.next(options);
       },
@@ -128,7 +129,8 @@ abstract class BaseApi {
 
         logInfo(
             '$statusColor[${response.statusCode}]${ConsoleColor.reset} $methodColor[${response.requestOptions.method}]${ConsoleColor.reset} $fullUrl$timeInfo');
-        logDebug('Response Data: ${_sanitizeLogData(response.data)}');
+        logDebug(
+            'Response Data: ${_sanitizeLogData(response.data, httpMethod: response.requestOptions.method)}');
 
         // Log de paginación si existe
         final data = response.data;
@@ -484,7 +486,7 @@ abstract class BaseApi {
           '${ConsoleColor.cyan}DioException - Código: $statusCode, Mensaje: $errorMessage${ConsoleColor.reset}');
       if (responseData != null) {
         logDebug(
-            '${ConsoleColor.blue}Respuesta del servidor: ${_sanitizeLogData(responseData)}${ConsoleColor.reset}');
+            '${ConsoleColor.blue}Respuesta del servidor: ${_sanitizeLogData(responseData, httpMethod: 'ERROR')}${ConsoleColor.reset}');
       }
     } else if (error is Exception) {
       errorMessage = error.toString();
@@ -499,58 +501,14 @@ abstract class BaseApi {
     return errorMessage;
   }
 
-  /// Sanitiza datos sensibles para logging seguro
-  static Map<String, dynamic> _sanitizeLogData(data) {
+  /// Sanitiza datos para logging (versión simplificada para apps privadas)
+  static Map<String, dynamic> _sanitizeLogData(data, {String? httpMethod}) {
     if (data is! Map<String, dynamic>) {
       return {'data': data.toString()};
     }
 
-    final sensitiveFields = {
-      'password',
-      'contraseña',
-      'token',
-      'secret',
-      'key',
-      'auth',
-      'email',
-      'telefono',
-      'phone',
-      'documento',
-      'dni',
-      'cedula'
-    };
-
-    final sanitized = <String, dynamic>{};
-
-    for (final entry in data.entries) {
-      final key = entry.key.toLowerCase();
-      final value = entry.value;
-
-      if (sensitiveFields.any(key.contains)) {
-        // Enmascarar campos sensibles
-        if (value is String && value.isNotEmpty) {
-          sanitized[entry.key] =
-              '${value.substring(0, 1)}***${value.substring(value.length - 1)}';
-        } else {
-          sanitized[entry.key] = '[PROTEGIDO]';
-        }
-      } else if (value is Map<String, dynamic>) {
-        // Recursión para objetos anidados
-        sanitized[entry.key] = _sanitizeLogData(value);
-      } else if (value is List &&
-          value.isNotEmpty &&
-          value.first is Map<String, dynamic>) {
-        // Lista de objetos
-        sanitized[entry.key] = value
-            .map((item) =>
-                item is Map<String, dynamic> ? _sanitizeLogData(item) : item)
-            .toList();
-      } else {
-        sanitized[entry.key] = value;
-      }
-    }
-
-    return sanitized;
+    // Para apps privadas, mostrar todos los datos completos sin protección
+    return data;
   }
 
   /// Obtiene estadísticas de rendimiento de la API
