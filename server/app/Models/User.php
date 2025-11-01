@@ -141,4 +141,9 @@ class User extends Authenticatable
   {
     return $this->hasMany(GoogleApiUsage::class, 'user_id');
   }
+
+  public function clientErrors(): HasMany
+  {
+    return $this->hasMany(ClientError::class, 'user_id');
+  }
 }

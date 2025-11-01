@@ -27,7 +27,7 @@ class ClientErrorController extends Controller
       }
 
       $clientError = ClientError::create([
-        'user_id' => Auth::id(),
+        'user_id' => Auth::user()?->id,
         'context' => $context,
       ]);
 
@@ -53,8 +53,9 @@ class ClientErrorController extends Controller
 
   public function index(ClientErrorIndexRequest $request): JsonResponse
   {
-    $query = ClientError::with('user:id,name,email')
-      ->orderBy($request->getOrderBy(), $request->getOrderDirection());
+    $query = ClientError::query();
+
+    $query->with('user:id,name,email');
 
     if ($request->getErrorType()) {
       $query->whereJsonContains('context->error_type', $request->getErrorType());
@@ -88,11 +89,22 @@ class ClientErrorController extends Controller
       });
     }
 
-    $errors = $query->paginate($request->getPerPage());
+    $perPage = $request->getPerPage();
+    $currentPage = $request->getCurrentPage();
+    $orderBy = $request->getOrderBy();
+    $orderDirection = $request->getOrderDirection();
+
+    $query->orderBy($orderBy, $orderDirection);
+
+    $pagination = $query->paginate(
+      perPage: $perPage,
+      page: $currentPage,
+    );
 
     return ApiResponder::success(
       message: 'Lista de errores reportados por clientes',
-      data: $errors
+      data: $pagination->items(),
+      pagination: $pagination,
     );
   }
 
