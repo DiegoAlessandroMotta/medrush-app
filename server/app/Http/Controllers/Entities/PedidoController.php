@@ -16,6 +16,7 @@ use App\Http\Requests\Pedido\IndexPedidoRequest;
 use App\Http\Requests\Pedido\StorePedidoRequest;
 use App\Http\Requests\Pedido\UpdatePedidoRequest;
 use App\Http\Requests\UploadCsvFileRequest;
+use App\Http\Resources\Pedido\PedidoRepartidorResource;
 use App\Http\Resources\Pedido\PedidoResource;
 use App\Http\Resources\Pedido\PedidoSimpleResource;
 use App\Jobs\Pedido\DeleteOldPedidoFilesJob;
@@ -182,9 +183,24 @@ class PedidoController extends Controller
       'repartidor.user:id,name',
     ]);
 
+    $user = Auth::user();
+
+    if ($user === null) {
+      throw CustomException::unauthorized();
+    }
+
+    $isDelivery = $user->esRepartidor();
+
+    $pedidoResource = null;
+    if ($isDelivery) {
+      $pedidoResource = PedidoRepartidorResource::make($pedido);
+    } else {
+      $pedidoResource = PedidoResource::make($pedido);
+    }
+
     return ApiResponder::success(
       message: 'Mostrando datos del pedido',
-      data: PedidoResource::make($pedido)
+      data: $pedidoResource
     );
   }
 
