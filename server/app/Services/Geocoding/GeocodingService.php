@@ -19,10 +19,11 @@ class GeocodingService
   public function __construct()
   {
     $this->apiKey = config('services.google.geocoding.api_key', '');
+  }
 
-    if (empty($this->apiKey)) {
-      throw CustomException::serviceUnavailable();
-    }
+  private function isAvailable(): bool
+  {
+    return !empty($this->apiKey);
   }
 
   public function reverseGeocode(float $latitude, float $longitude): ?GeocodingResultDTO
@@ -32,6 +33,10 @@ class GeocodingService
     $cachedResult = Cache::get($cacheKey);
     if ($cachedResult !== null) {
       return $cachedResult;
+    }
+
+    if (!$this->isAvailable()) {
+      throw CustomException::serviceUnavailable();
     }
 
     try {
@@ -69,7 +74,6 @@ class GeocodingService
 
       $result = $results[0];
       $addressComponents = $result['address_components'] ?? [];
-      Log::info($results);
 
       $geocodingResult = $this->parseAddressComponents($addressComponents, $result);
 
