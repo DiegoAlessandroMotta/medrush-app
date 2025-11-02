@@ -120,6 +120,7 @@ class PedidoEventService
       EstadosPedidoEnum::RECOGIDO => [EstadosPedidoEnum::FALLIDO, EstadosPedidoEnum::EN_RUTA, EstadosPedidoEnum::FALLIDO, EstadosPedidoEnum::CANCELADO],
       EstadosPedidoEnum::EN_RUTA => [EstadosPedidoEnum::ENTREGADO, EstadosPedidoEnum::FALLIDO, EstadosPedidoEnum::CANCELADO],
       EstadosPedidoEnum::FALLIDO => [EstadosPedidoEnum::PENDIENTE, EstadosPedidoEnum::CANCELADO],
+      EstadosPedidoEnum::CANCELADO => [EstadosPedidoEnum::PENDIENTE],
       default => [],
     };
 
