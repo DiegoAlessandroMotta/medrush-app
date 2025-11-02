@@ -25,6 +25,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $vehiculo_placa
  * @property string|null $vehiculo_marca
  * @property string|null $vehiculo_modelo
+ * @property int|null $vehiculo_anio
+ * @property string|null $vehiculo_color
+ * @property string|null $vehiculo_vin_chasis
+ * @property string|null $vehiculo_tipo
+ * @property float|null $vehiculo_capacidad_carga
+ * @property string|null $vehiculo_codigo_registro
+ * @property string|null $soat_numero
+ * @property \Illuminate\Support\Carbon|null $soat_vencimiento
+ * @property string|null $foto_soat_path
+ * @property string|null $revision_tecnica_numero
+ * @property \Illuminate\Support\Carbon|null $revision_tecnica_vencimiento
+ * @property string|null $foto_revision_tecnica_path
+ * @property string|null $tarjeta_circulacion_numero
+ * @property string|null $foto_tarjeta_circulacion_path
+ * @property string|null $registro_estatal_numero
+ * @property \Illuminate\Support\Carbon|null $registro_estatal_vencimiento
+ * @property string|null $foto_registro_estatal_path
+ * @property string|null $inspeccion_numero
+ * @property \Illuminate\Support\Carbon|null $inspeccion_vencimiento
+ * @property string|null $foto_inspeccion_path
  * @property EstadosRepartidorEnum $estado
  * @property bool $verificado
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -86,6 +106,7 @@ class PerfilRepartidor extends Model
     'vehiculo_placa',
     'vehiculo_marca',
     'vehiculo_modelo',
+    'vehiculo_codigo_registro',
     'estado',
     'verificado',
   ];

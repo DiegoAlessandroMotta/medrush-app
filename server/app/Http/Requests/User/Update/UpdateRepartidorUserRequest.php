@@ -19,7 +19,8 @@ class UpdateRepartidorUserRequest extends UpdateBaseUserRequest
     'licencia_vencimiento',
     'vehiculo_placa',
     'vehiculo_marca',
-    'vehiculo_modelo'
+    'vehiculo_modelo',
+    'vehiculo_codigo_registro'
   ];
 
   public function rules(): array
@@ -37,6 +38,7 @@ class UpdateRepartidorUserRequest extends UpdateBaseUserRequest
       'vehiculo_placa' => ['sometimes', 'nullable', 'string', 'max:255'],
       'vehiculo_marca' => ['sometimes', 'nullable', 'string', 'max:255'],
       'vehiculo_modelo' => ['sometimes', 'nullable', 'string', 'max:255'],
+      'vehiculo_codigo_registro' => ['sometimes', 'nullable', 'string', 'max:255'],
     ]);
   }
 

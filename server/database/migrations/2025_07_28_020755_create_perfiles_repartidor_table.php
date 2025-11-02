@@ -26,6 +26,7 @@ return new class extends Migration
       $table->string('vehiculo_placa')->nullable();
       $table->string('vehiculo_marca')->nullable();
       $table->string('vehiculo_modelo')->nullable();
+      $table->string('vehiculo_codigo_registro')->nullable();
       $table->string('estado')->default(EstadosRepartidorEnum::DISPONIBLE->value);
       $table->boolean('verificado')->default(false);
       $table->timestamps();

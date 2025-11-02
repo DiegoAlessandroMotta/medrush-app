@@ -23,6 +23,7 @@ class PerfilRepartidorResource extends JsonResource
       'vehiculo_placa' => $this->vehiculo_placa,
       'vehiculo_marca' => $this->vehiculo_marca,
       'vehiculo_modelo' => $this->vehiculo_modelo,
+      'vehiculo_codigo_registro' => $this->vehiculo_codigo_registro,
       'estado' => $this->estado,
       'verificado' => $this->verificado,
     ];

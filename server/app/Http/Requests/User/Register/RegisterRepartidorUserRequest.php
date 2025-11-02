@@ -18,6 +18,7 @@ class RegisterRepartidorUserRequest extends RegisterBaseUserRequest
     'vehiculo_placa',
     'vehiculo_marca',
     'vehiculo_modelo',
+    'vehiculo_codigo_registro',
   ];
 
   public function authorize(): bool
@@ -37,6 +38,7 @@ class RegisterRepartidorUserRequest extends RegisterBaseUserRequest
       'vehiculo_placa' => ['sometimes', 'nullable', 'string', 'max:255'],
       'vehiculo_marca' => ['sometimes', 'nullable', 'string', 'max:255'],
       'vehiculo_modelo' => ['sometimes', 'nullable', 'string', 'max:255'],
+      'vehiculo_codigo_registro' => ['sometimes', 'nullable', 'string', 'max:255'],
     ]);
   }
 
