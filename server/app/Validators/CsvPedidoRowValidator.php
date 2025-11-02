@@ -2,12 +2,10 @@
 
 namespace App\Validators;
 
-use App\Enums\TiposPedidoEnum;
 use App\Helpers\PrepareData;
 use App\Rules\LocationArray;
 use App\Rules\PhoneNumberE164;
 use Illuminate\Contracts\Validation\Validator as ValidatorContract;
-use Illuminate\Validation\Rule;
 use Validator;
 
 class CsvPedidoRowValidator

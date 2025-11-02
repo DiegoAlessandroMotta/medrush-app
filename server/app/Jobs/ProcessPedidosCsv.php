@@ -30,19 +30,25 @@ class ProcessPedidosCsv implements ShouldQueue
 
   protected string $filePath;
   protected string $userId;
-  protected string $farmaciaId;
+  protected ?string $farmaciaId;
+  protected string $codigoIsoPaisEntrega;
+  protected array $ubicacionRecojo;
   protected int $chunkSize;
   protected CsvPedidoRowValidator $rowValidator;
 
   public function __construct(
     string $filePath,
     string $userId,
-    string $farmaciaId,
+    ?string $farmaciaId,
+    string $codigoIsoPaisEntrega,
+    array $ubicacionRecojo,
     ?int $chunkSize = 256
   ) {
     $this->filePath = $filePath;
     $this->userId = $userId;
     $this->farmaciaId = $farmaciaId;
+    $this->codigoIsoPaisEntrega = $codigoIsoPaisEntrega;
+    $this->ubicacionRecojo = $ubicacionRecojo;
     $this->chunkSize = $chunkSize;
     $this->rowValidator = new CsvPedidoRowValidator();
   }
@@ -63,32 +69,34 @@ class ProcessPedidosCsv implements ShouldQueue
         return;
       }
 
-      $farmaciaValidator = Validator::make(
-        ['farmacia_id' => $this->farmaciaId],
-        ['farmacia_id' => ['required', 'uuid']],
-      );
+      if ($this->farmaciaId !== null) {
+        $farmaciaValidator = Validator::make(
+          ['farmacia_id' => $this->farmaciaId],
+          ['farmacia_id' => ['required', 'uuid']],
+        );
 
-      /** @var Farmacia|null $farmacia */
-      $farmacia = Farmacia::find($this->farmaciaId);
+        /** @var Farmacia|null $farmacia */
+        $farmacia = Farmacia::find($this->farmaciaId);
 
-      if ($farmaciaValidator->failed() || $farmacia === null) {
-        $errorsArray = $farmaciaValidator->errors()->toArray();
-        if (sizeof($errorsArray) === 0) {
-          $errorsArray = ['farmacia_id' => 'La farmacia proporcionada no existe.'];
+        if ($farmaciaValidator->failed() || $farmacia === null) {
+          $errorsArray = $farmaciaValidator->errors()->toArray();
+          if (sizeof($errorsArray) === 0) {
+            $errorsArray = ['farmacia_id' => 'La farmacia proporcionada no existe.'];
+          }
+
+          \Log::error('El ID de la farmacia proporcionado no es válido o la farmacia no existe.', [
+            'farmacia_id' => $this->farmaciaId,
+            'errors' => $farmaciaValidator->errors()->toArray(),
+          ]);
+
+          $this->notifyUserOfError('General', $errorsArray);
+
+          if (file_exists($this->filePath)) {
+            unlink($this->filePath);
+          }
+
+          return;
         }
-
-        \Log::error('El ID de la farmacia proporcionado no es válido o la farmacia no existe.', [
-          'farmacia_id' => $this->farmaciaId,
-          'errors' => $farmaciaValidator->errors()->toArray(),
-        ]);
-
-        $this->notifyUserOfError('General', $errorsArray);
-
-        if (file_exists($this->filePath)) {
-          unlink($this->filePath);
-        }
-
-        return;
       }
 
       $csv = Reader::createFromPath($this->filePath, 'r');
@@ -100,8 +108,6 @@ class ProcessPedidosCsv implements ShouldQueue
       $processedRecords = 0;
       $csvRowIndex = 2;
       $validatedRecords = new Collection();
-
-      $model = new Pedido();
 
       foreach ($csv->getIterator() as $indexInChunk => $record) {
         $processedRecords++;
@@ -125,14 +131,14 @@ class ProcessPedidosCsv implements ShouldQueue
           if ($validatedData['ubicacion_recojo'] !== null) {
             $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_recojo']));
           } else {
-            $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression($farmacia->ubicacion);
+            $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression(AsPoint::pointFromArray($this->ubicacionRecojo));
           }
 
           $validatedData['ubicacion_entrega'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_entrega']));
 
           $validatedData['farmacia_id'] = $this->farmaciaId;
 
-          $validatedData['codigo_iso_pais_entrega'] = $farmacia->codigo_iso_pais->value;
+          $validatedData['codigo_iso_pais_entrega'] = $this->codigoIsoPaisEntrega;
 
           $validatedRecords->push($validatedData);
         }

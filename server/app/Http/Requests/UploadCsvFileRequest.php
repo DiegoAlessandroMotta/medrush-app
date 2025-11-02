@@ -2,22 +2,24 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CodigosIsoPaisEnum;
 use App\Models\Farmacia;
+use App\Rules\LocationArray;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UploadCsvFileRequest extends FormRequest
 {
-  public function authorize(): bool
-  {
-    return true;
-  }
+  private ?Farmacia $farmacia = null;
 
   public function rules(): array
   {
     return [
       'pedidos_csv' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
-      'farmacia_id' => ['required', 'uuid', Rule::exists(Farmacia::class, 'id')]
+      'farmacia_id' => ['sometimes', 'nullable', 'uuid'],
+      'codigo_iso_pais_entrega' => [Rule::requiredIf(fn() => $this->getFarmaciaId() === null), 'string', Rule::enum(CodigosIsoPaisEnum::class)],
+      'ubicacion_recojo' => [Rule::requiredIf(fn() => $this->getFarmaciaId() === null), new LocationArray],
     ];
   }
 
@@ -31,6 +33,26 @@ class UploadCsvFileRequest extends FormRequest
     ];
   }
 
+  public function after(): array
+  {
+    return [
+      function (Validator $validator) {
+        if (!$validator->messages()->isEmpty()) {
+          return;
+        }
+
+        $farmacia = $this->getFarmacia();
+        $farmaciaId = $this->getFarmaciaId();
+
+        if ($farmacia === null && $farmaciaId !== null) {
+          $validator->errors()
+            ->add('farmacia_id', 'The selected farmacia id is invalid.');
+          return;
+        }
+      }
+    ];
+  }
+
   public function hasFarmaciaId(): bool
   {
     return $this->has('farmacia_id');
@@ -39,5 +61,25 @@ class UploadCsvFileRequest extends FormRequest
   public function getFarmaciaId(): ?string
   {
     return $this->input('farmacia_id');
+  }
+
+  public function getCodigoIsoPaisEntrega(): ?string
+  {
+    return $this->input('codigo_iso_pais_entrega');
+  }
+
+  public function getUbicacionRecojo(): ?array
+  {
+    return $this->input('ubicacion_recojo');
+  }
+
+  public function getFarmacia(): ?Farmacia
+  {
+    $farmaciaId = $this->getFarmaciaId();
+    if ($this->farmacia === null && $farmaciaId !== null) {
+      $this->farmacia = Farmacia::find($farmaciaId);
+    }
+
+    return $this->farmacia;
   }
 }

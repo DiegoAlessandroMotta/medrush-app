@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Entities;
 
+use App\Casts\AsPoint;
 use App\Enums\EventosPedidoEnum;
 use App\Enums\MotivosFalloPedidoEnum;
 use App\Enums\PermissionsEnum;
@@ -253,7 +254,18 @@ class PedidoController extends Controller
     $path = $file->storeAs('temp_csv_uploads', $filename);
     $fullPath = Storage::disk()->path($path);
 
-    ProcessPedidosCsv::dispatch($fullPath, $user->id, $request->getFarmaciaId());
+    $farmacia = $request->getFarmacia();
+    $farmaciaId = $farmacia?->id;
+    $codigoIsoPaisEntrega = $farmacia?->codigo_iso_pais ?? $request->getCodigoIsoPaisEntrega();
+    $ubicacionRecojo = AsPoint::serializeValue($farmacia?->ubicacion) ?? $request->getUbicacionRecojo();
+
+    ProcessPedidosCsv::dispatch(
+      $fullPath,
+      $user->id,
+      $farmaciaId,
+      $codigoIsoPaisEntrega,
+      $ubicacionRecojo,
+    );
 
     return ApiResponder::accepted(
       message: 'El archivo CSV ha sido recibido y será procesado, recibirás una notificación cuando termine.',
