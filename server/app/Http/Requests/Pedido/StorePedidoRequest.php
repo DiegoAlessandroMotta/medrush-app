@@ -3,8 +3,7 @@
 namespace App\Http\Requests\Pedido;
 
 use App\Casts\AsPoint;
-use App\Enums\TiposPedidoEnum;
-use App\Helpers\OrderCodeGenerator;
+use App\Enums\CodigosIsoPaisEnum;
 use App\Models\Farmacia;
 use App\Rules\LocationArray;
 use App\Rules\PhoneNumberE164;
@@ -16,16 +15,18 @@ class StorePedidoRequest extends FormRequest
 {
   public const FARMACIA_ID_FIELD_KEY = 'farmacia_id';
   public const UBICACION_RECOJO_FIELD_KEY = 'ubicacion_recojo';
+  public const CODIGO_ISO_PAIS_ENTREGA_FIELD_KEY = 'codigo_iso_pais_entrega';
 
   private ?Farmacia $farmacia = null;
 
   public function rules(): array
   {
     return [
-      self::FARMACIA_ID_FIELD_KEY => ['required', 'uuid'],
+      self::FARMACIA_ID_FIELD_KEY => ['sometimes', 'nullable', 'uuid'],
       'paciente_nombre' => ['required', 'string', 'max:255'],
       'paciente_telefono' => ['required', new PhoneNumberE164],
       'paciente_email' => ['sometimes', 'nullable', 'email', 'max:255'],
+      self::CODIGO_ISO_PAIS_ENTREGA_FIELD_KEY => [Rule::requiredIf(fn() => $this->getFarmaciaId() === null), 'string', Rule::in(CodigosIsoPaisEnum::cases())],
       'direccion_entrega_linea_1' => ['required', 'string', 'max:255'],
       'direccion_entrega_linea_2' => ['sometimes', 'nullable', 'string', 'max:255'],
       'ciudad_entrega' => ['required', 'string', 'max:255'],
@@ -52,8 +53,9 @@ class StorePedidoRequest extends FormRequest
         }
 
         $farmacia = $this->getFarmacia();
+        $farmaciaId = $this->getFarmaciaId();
 
-        if ($farmacia === null) {
+        if ($farmacia === null && $farmaciaId !== null) {
           $validator->errors()
             ->add(self::FARMACIA_ID_FIELD_KEY, 'The selected farmacia id is invalid.');
           return;
@@ -68,17 +70,23 @@ class StorePedidoRequest extends FormRequest
     ];
   }
 
-  public function getFarmaciaId(): string
+  public function getFarmaciaId(): ?string
   {
     return $this->input(self::FARMACIA_ID_FIELD_KEY);
   }
 
   public function getFarmacia(): ?Farmacia
   {
-    if ($this->farmacia === null) {
-      $this->farmacia = Farmacia::find($this->getFarmaciaId());
+    $farmaciaId = $this->getFarmaciaId();
+    if ($this->farmacia === null && $farmaciaId !== null) {
+      $this->farmacia = Farmacia::find($farmaciaId);
     }
 
     return $this->farmacia;
+  }
+
+  public function getCodigoIsoPaisEntrega(): ?string
+  {
+    return $this->input(self::CODIGO_ISO_PAIS_ENTREGA_FIELD_KEY);
   }
 }

@@ -25,16 +25,22 @@ use Spatie\Permission\Traits\HasRoles;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ClientError> $clientErrors
+ * @property-read int|null $client_errors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventoPedido> $eventosPedido
  * @property-read int|null $eventos_pedido_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FcmDeviceToken> $fcmDeviceTokens
  * @property-read int|null $fcm_device_tokens_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GoogleApiUsage> $googleApiUsages
+ * @property-read int|null $google_api_usages_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \App\Models\PerfilFarmacia|null $perfilFarmacia
  * @property-read \App\Models\PerfilRepartidor|null $perfilRepartidor
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ReportePdf> $reportesPdf
+ * @property-read int|null $reportes_pdf_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens

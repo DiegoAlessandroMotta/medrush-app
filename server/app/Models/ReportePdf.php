@@ -10,6 +10,35 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Storage;
 
+/**
+ * @property string $id
+ * @property string $user_id
+ * @property string $nombre
+ * @property string|null $file_path
+ * @property int|null $file_size
+ * @property int|null $paginas
+ * @property PageSizeEnum $page_size
+ * @property array<array-key, mixed> $pedidos
+ * @property EstadoReportePdfEnum $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereFilePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereFileSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereNombre($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf wherePageSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf wherePaginas($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf wherePedidos($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ReportePdf whereUserId($value)
+ * @mixin \Eloquent
+ */
 class ReportePdf extends Model
 {
   use HasUuids;

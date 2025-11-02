@@ -150,7 +150,7 @@ class PedidoController extends Controller
     $farmacia = $request->getFarmacia();
 
     $pedidoData = array_merge($validatedData, [
-      'codigo_iso_pais_entrega' => $farmacia?->codigo_iso_pais,
+      'codigo_iso_pais_entrega' => $request->getCodigoIsoPaisEntrega() ?? $farmacia?->codigo_iso_pais,
       'codigo_barra' => OrderCodeGenerator::generateOrderCode(),
     ]);
 

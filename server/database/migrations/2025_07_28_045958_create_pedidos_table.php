@@ -15,8 +15,8 @@ return new class extends Migration
     Schema::create('pedidos', function (Blueprint $table) {
       $table->uuid('id')->primary();
       $table->string('codigo_barra')->unique();
-      $table->foreignUuid('farmacia_id')->constrained('farmacias')->onDelete('cascade');
-      $table->foreignUuid('repartidor_id')->nullable()->constrained('perfiles_repartidor')->onDelete('set null');
+      $table->foreignUuid('farmacia_id')->nullable()->constrained('farmacias')->nullOnDelete();
+      $table->foreignUuid('repartidor_id')->nullable()->constrained('perfiles_repartidor')->nullOnDelete();
 
       $table->string('paciente_nombre');
       $table->string('paciente_telefono'); // Formato E.164

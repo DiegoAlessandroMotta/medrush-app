@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 /**
  * @property string $id
  * @property string $codigo_barra
- * @property string $farmacia_id
+ * @property string|null $farmacia_id
  * @property string|null $repartidor_id
  * @property string $paciente_nombre
  * @property string $paciente_telefono
@@ -51,7 +51,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read \App\Models\EntregaPedido|null $entregaPedido
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventoPedido> $eventosPedido
  * @property-read int|null $eventos_pedido_count
- * @property-read \App\Models\Farmacia $farmacia
+ * @property-read \App\Models\Farmacia|null $farmacia
  * @property-read \App\Models\PerfilRepartidor|null $repartidor
  * @property-read \App\Models\Ruta|null $ruta
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UbicacionRepartidor> $ubicacionesRepartidor
