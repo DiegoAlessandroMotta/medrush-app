@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 class IndexPedidoRequest extends BasePaginationRequest
 {
   protected int $maxPerPage = 100;
+  protected string $defaultOrderBy = 'updated_at';
 
   public const ORDER_BY_FIELDS = [
     'created_at',
