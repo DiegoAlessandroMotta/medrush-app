@@ -524,6 +524,227 @@
                 ]
             }
         },
+        "/api/fcm/tokens": {
+            "post": {
+                "tags": [
+                    "FCM",
+                    "Device Tokens"
+                ],
+                "summary": "Registrar o actualizar token FCM",
+                "description": "Registra un nuevo token FCM para notificaciones push en el dispositivo actual. Si el token ya existe, actualiza la fecha de último uso. Útil para mantener múltiples dispositivos sincronizados.",
+                "operationId": "fcmTokensStore",
+                "requestBody": {
+                    "description": "Token FCM del dispositivo",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "description": "Token FCM proporcionado por Firebase Cloud Messaging",
+                                        "type": "string",
+                                        "example": "eJZY5g7xR..."
+                                    },
+                                    "platform": {
+                                        "description": "Plataforma del dispositivo (ios, android, web, etc)",
+                                        "type": "string",
+                                        "example": "ios",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token FCM registrado o actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El token FCM ha sido registrado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida - Token requerido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/fcm/tokens/{token}": {
+            "delete": {
+                "tags": [
+                    "FCM",
+                    "Device Tokens"
+                ],
+                "summary": "Eliminar un token FCM específico",
+                "description": "Elimina un token FCM específico del usuario. El usuario dejaría de recibir notificaciones push en ese dispositivo.",
+                "operationId": "fcmTokensDestroy",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token FCM a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "eJZY5g7xR..."
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token eliminado o no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El token FCM ha sido eliminado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/fcm/tokens/sesion/actual": {
+            "delete": {
+                "tags": [
+                    "FCM",
+                    "Device Tokens"
+                ],
+                "summary": "Eliminar tokens FCM de la sesión actual",
+                "description": "Elimina todos los tokens FCM asociados a la sesión actual del usuario. Útil al cerrar sesión o en un dispositivo específico.",
+                "operationId": "fcmTokensDestroyCurrentSessionTokens",
+                "responses": {
+                    "200": {
+                        "description": "Tokens de la sesión eliminados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se eliminaron 2 tokens FCM asociados a la sesión actual."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No hay sesión activa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/notifications": {
             "get": {
                 "tags": [
@@ -4607,6 +4828,14 @@
         {
             "name": "Auth",
             "description": "Endpoints de autenticación y gestión de sesiones"
+        },
+        {
+            "name": "FCM",
+            "description": "FCM"
+        },
+        {
+            "name": "Device Tokens",
+            "description": "Device Tokens"
         },
         {
             "name": "Notifications",
