@@ -524,6 +524,202 @@
                 ]
             }
         },
+        "/api/downloads/csv-template/{lang}/{templateKey}/url": {
+            "get": {
+                "tags": [
+                    "Downloads"
+                ],
+                "summary": "Obtener URL firmada para descargar plantilla CSV",
+                "description": "Genera una URL firmada y temporal (válida 15 minutos) para descargar una plantilla CSV en el idioma especificado. Útil para importación de datos masivos.",
+                "operationId": "downloadGetSignedCsvTemplateUrl",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "path",
+                        "description": "Código de idioma (ej: es, en)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "es"
+                        }
+                    },
+                    {
+                        "name": "templateKey",
+                        "in": "path",
+                        "description": "Identificador de la plantilla (ej: pedidos, farmacias, repartidores)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "pedidos"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "URL firmada generada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "URL firmada generada exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "signed_url": {
+                                                    "description": "URL temporal firmada para descargar",
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://api.example.com/downloads/csv-template/es/pedidos?signature=..."
+                                                },
+                                                "expires_at": {
+                                                    "description": "Fecha/hora de expiración de la URL",
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T11:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Plantilla CSV no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/downloads/csv-template/{lang}/{templateKey}": {
+            "get": {
+                "tags": [
+                    "Downloads"
+                ],
+                "summary": "Descargar plantilla CSV",
+                "description": "Descarga una plantilla CSV para importación de datos. Esta ruta debe ser accedida con la URL firmada generada por el endpoint anterior.",
+                "operationId": "downloadCsvTemplate",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "path",
+                        "description": "Código de idioma",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "es"
+                        }
+                    },
+                    {
+                        "name": "templateKey",
+                        "in": "path",
+                        "description": "Identificador de la plantilla",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "pedidos"
+                        }
+                    },
+                    {
+                        "name": "signature",
+                        "in": "query",
+                        "description": "Firma de URL (requerida si la ruta lo exige)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo CSV descargado exitosamente",
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Plantilla no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/downloads/app": {
+            "get": {
+                "tags": [
+                    "Downloads"
+                ],
+                "summary": "Descargar aplicación MedRush (APK)",
+                "description": "Descarga el archivo APK de la aplicación MedRush para instalar en dispositivos Android.",
+                "operationId": "downloadMedrushApp",
+                "responses": {
+                    "200": {
+                        "description": "Archivo APK descargado exitosamente",
+                        "content": {
+                            "application/vnd.android.package-archive": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Archivo de aplicación no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/fcm/tokens": {
             "post": {
                 "tags": [
@@ -4828,6 +5024,10 @@
         {
             "name": "Auth",
             "description": "Endpoints de autenticación y gestión de sesiones"
+        },
+        {
+            "name": "Downloads",
+            "description": "Downloads"
         },
         {
             "name": "FCM",
