@@ -95,8 +95,8 @@ namespace App\Http\Controllers;
  * )
  *
  * @OA\Tag(
- *     name="Reportes",
- *     description="Endpoints para generación de reportes"
+ *     name="ReportesPdf",
+ *     description="Endpoints para generación de reportes PDF"
  * )
  *
  * @OA\Tag(

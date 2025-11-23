@@ -2691,6 +2691,711 @@
                 ]
             }
         },
+        "/api/reportes-pdf/etiquetas-pedido": {
+            "post": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Generar PDF de etiquetas de pedidos",
+                "description": "Crea un PDF con etiquetas de códigos de barras para los pedidos especificados. La generación es asincrónica y se notificará al usuario cuando esté listo para descargar.",
+                "operationId": "reportesPdfEtiquetasPedido",
+                "requestBody": {
+                    "description": "Lista de UUIDs de pedidos",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pedidos"
+                                ],
+                                "properties": {
+                                    "pedidos": {
+                                        "description": "Array de UUIDs de pedidos (mínimo 1, máximo 500)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                                        },
+                                        "maxItems": 500,
+                                        "minItems": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Generación de PDF aceptada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La creación del PDF de etiquetas ha sido iniciada. Recibirás una notificación cuando esté listo."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "nombre": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "en_proceso",
+                                                        "creado",
+                                                        "fallido",
+                                                        "expirado"
+                                                    ],
+                                                    "example": "en_proceso"
+                                                },
+                                                "page_size": {
+                                                    "type": "string",
+                                                    "example": "A5"
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reportes-pdf": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Listar reportes PDF",
+                "description": "Obtiene una lista paginada de reportes PDF generados por el usuario actual o todos si es administrador.",
+                "operationId": "reportesPdfIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (por defecto: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (por defecto: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "fecha_desde",
+                        "in": "query",
+                        "description": "Filtrar por fecha de creación desde",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "fecha_hasta",
+                        "in": "query",
+                        "description": "Filtrar por fecha de creación hasta",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de reportes PDF obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando los reportes pdf."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "en_proceso",
+                                                            "creado",
+                                                            "fallido",
+                                                            "expirado"
+                                                        ]
+                                                    },
+                                                    "paginas": {
+                                                        "type": "integer",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/PaginationInfo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reportes-pdf/{reportePdf}": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Obtener reporte PDF",
+                "description": "Obtiene la información completa de un reporte PDF, incluyendo URL de descarga firmada y detalles del archivo.",
+                "operationId": "reportesPdfShow",
+                "parameters": [
+                    {
+                        "name": "reportePdf",
+                        "in": "path",
+                        "description": "UUID del reporte PDF",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del reporte PDF obtenidos exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando información del reporte"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "user_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "nombre": {
+                                                    "type": "string"
+                                                },
+                                                "file_url": {
+                                                    "description": "URL de descarga firmada válida por 60 minutos",
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "nullable": true
+                                                },
+                                                "file_size": {
+                                                    "description": "Tamaño del archivo en bytes",
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "page_size": {
+                                                    "type": "string",
+                                                    "example": "A5"
+                                                },
+                                                "paginas": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    }
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "en_proceso",
+                                                        "creado",
+                                                        "fallido",
+                                                        "expirado"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reporte PDF no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Eliminar reporte PDF",
+                "description": "Elimina un reporte PDF y su archivo asociado del almacenamiento.",
+                "operationId": "reportesPdfDelete",
+                "parameters": [
+                    {
+                        "name": "reportePdf",
+                        "in": "path",
+                        "description": "UUID del reporte PDF",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Reporte PDF eliminado exitosamente"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reporte PDF no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reportes-pdf/antiguos": {
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Eliminar reportes PDF antiguos",
+                "description": "Inicia un trabajo asíncrono para eliminar automáticamente todos los reportes PDF cuya fecha de creación sea anterior a 30 días desde hoy.",
+                "operationId": "reportesPdfDeleteAntiguos",
+                "responses": {
+                    "202": {
+                        "description": "Proceso de eliminación iniciado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La eliminación de reportes PDF antiguos ha sido iniciada."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reportes-pdf/{reportePdf}/regenerar": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "ReportesPdf"
+                ],
+                "summary": "Regenerar reporte PDF",
+                "description": "Elimina el archivo PDF actual y reinicia el proceso de generación. La URL de descarga estará disponible cuando el proceso asíncrono se complete.",
+                "operationId": "reportesPdfRegenenar",
+                "parameters": [
+                    {
+                        "name": "reportePdf",
+                        "in": "path",
+                        "description": "UUID del reporte PDF",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Proceso de regeneración iniciado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La regeneración del PDF ha sido iniciada. Recibirás una notificación cuando esté listo."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "user_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "nombre": {
+                                                    "type": "string"
+                                                },
+                                                "file_url": {
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "nullable": true
+                                                },
+                                                "file_size": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "page_size": {
+                                                    "type": "string"
+                                                },
+                                                "paginas": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    }
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "en_proceso",
+                                                        "creado",
+                                                        "fallido",
+                                                        "expirado"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Reporte PDF no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/ubicaciones-repartidor": {
             "get": {
                 "tags": [
@@ -7516,6 +8221,10 @@
         {
             "name": "Entities",
             "description": "Endpoints para gestión de entidades relacionadas"
+        },
+        {
+            "name": "ReportesPdf",
+            "description": "Endpoints para generación de reportes PDF"
         },
         {
             "name": "Maps",
