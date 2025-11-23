@@ -55,6 +55,11 @@ namespace App\Http\Controllers;
  * )
  *
  * @OA\Tag(
+ *     name="Eventos",
+ *     description="Endpoints para gestión de eventos de pedidos"
+ * )
+ *
+ * @OA\Tag(
  *     name="Farmacias",
  *     description="Endpoints para gestión de farmacias"
  * )

@@ -1176,6 +1176,184 @@
                 }
             }
         },
+        "/api/pedidos/{pedido}/eventos": {
+            "get": {
+                "tags": [
+                    "Pedidos",
+                    "Eventos"
+                ],
+                "summary": "Obtener eventos de un pedido",
+                "description": "Obtiene el historial completo de eventos asociados a un pedido específico, ordenados por fecha de creación descendente. Los eventos registran cambios de estado, asignaciones, entregas y otras acciones importantes del pedido.",
+                "operationId": "eventosPedidoIndex",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eventos del pedido obtenidos exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando los eventos del pedido"
+                                        },
+                                        "data": {
+                                            "description": "Array de eventos del pedido",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "ID único del evento",
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "pedido_id": {
+                                                        "description": "UUID del pedido al que pertenece el evento",
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                    },
+                                                    "user_id": {
+                                                        "description": "UUID del usuario que causó el evento (nullable)",
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                                                        "nullable": true
+                                                    },
+                                                    "tipo_evento": {
+                                                        "description": "Tipo de evento (Estado del pedido)",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "pedido_creado",
+                                                            "pedido_asignado",
+                                                            "pedido_reasignado",
+                                                            "pedido_asignacion_retirada",
+                                                            "pedido_recogido",
+                                                            "pedido_en_ruta",
+                                                            "pedido_entregado",
+                                                            "pedido_entrega_fallida",
+                                                            "pedido_cancelado",
+                                                            "pedido_asignacion_automatica_fallida"
+                                                        ],
+                                                        "example": "pedido_asignado"
+                                                    },
+                                                    "descripcion": {
+                                                        "description": "Descripción adicional del evento",
+                                                        "type": "string",
+                                                        "example": "Pedido asignado a repartidor XYZ",
+                                                        "nullable": true
+                                                    },
+                                                    "metadata": {
+                                                        "description": "Datos adicionales asociados al evento (estructura variable según el tipo)",
+                                                        "type": "object",
+                                                        "example": {
+                                                            "repartidor_id": "123",
+                                                            "razon": "disponibilidad"
+                                                        },
+                                                        "nullable": true
+                                                    },
+                                                    "ubicacion": {
+                                                        "description": "Ubicación geográfica del evento (punto GIS)",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "Point"
+                                                                ],
+                                                                "example": "Point"
+                                                            },
+                                                            "coordinates": {
+                                                                "description": "[longitude, latitude]",
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "number"
+                                                                },
+                                                                "example": [
+                                                                    -74.0087,
+                                                                    4.711
+                                                                ]
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T15:30:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T15:30:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado para ver este pedido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/fcm/tokens": {
             "post": {
                 "tags": [
@@ -5480,6 +5658,14 @@
         {
             "name": "Auth",
             "description": "Endpoints de autenticación y gestión de sesiones"
+        },
+        {
+            "name": "Pedidos",
+            "description": "Endpoints para gestión de pedidos"
+        },
+        {
+            "name": "Eventos",
+            "description": "Endpoints para gestión de eventos de pedidos"
         },
         {
             "name": "Maps",
