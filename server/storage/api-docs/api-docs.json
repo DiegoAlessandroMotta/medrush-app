@@ -1,0 +1,1727 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "MedRushApp API",
+        "description": "API REST para el sistema de distribución de medicinas MedRush",
+        "termsOfService": "https://example.com/terms",
+        "contact": {
+            "name": "API Support",
+            "url": "https://example.com/support",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:4000",
+            "description": "Servidor Local"
+        },
+        {
+            "url": "https://api.medrush.com",
+            "description": "Servidor de Producción"
+        }
+    ],
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inicio de sesión",
+                "description": "Autentica un usuario con email y contraseña. Retorna un token de acceso (Sanctum) que debe usarse en las peticiones posteriores.",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "description": "Credenciales del usuario",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email del usuario",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Contraseña del usuario",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "device_name": {
+                                        "description": "Nombre del dispositivo (móvil, web, etc)",
+                                        "type": "string",
+                                        "example": "iPhone 15 Pro"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inicio de sesión exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Inicio de sesión exitoso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Admin User"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "admin@example.com"
+                                                        },
+                                                        "avatar": {
+                                                            "description": "URL firmada de la foto de perfil",
+                                                            "type": "string",
+                                                            "format": "url",
+                                                            "example": "https://example.com/storage/signed-url"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-11-22T10:30:00Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-11-22T10:30:00Z"
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "admin"
+                                                            ]
+                                                        },
+                                                        "perfil_repartidor": {
+                                                            "description": "Perfil del repartidor si el usuario tiene ese rol",
+                                                            "type": "object",
+                                                            "nullable": true
+                                                        },
+                                                        "perfil_farmacia": {
+                                                            "description": "Perfil de la farmacia si el usuario tiene ese rol",
+                                                            "type": "object",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "access_token": {
+                                                    "description": "Token de acceso Sanctum a usar en el header Authorization",
+                                                    "type": "string",
+                                                    "example": "1|abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Email, contraseña inválidos o cuenta desactivada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "fail"
+                                            ],
+                                            "example": "fail"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Los datos proporcionados no son válidos."
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "VALIDATION_ERROR"
+                                                },
+                                                "errors": {
+                                                    "properties": {
+                                                        "email": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "Las credenciales proporcionadas son incorrectas. (Email/Contraseña)",
+                                                                "Tu cuenta está desactivada. Contacta al administrador."
+                                                            ]
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Obtener información del usuario autenticado",
+                "description": "Retorna la información completa del usuario actualmente autenticado.",
+                "operationId": "authMe",
+                "responses": {
+                    "200": {
+                        "description": "Información del usuario obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Información del usuario autenticado."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Admin User"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "admin@example.com"
+                                                },
+                                                "avatar": {
+                                                    "description": "URL firmada de la foto de perfil",
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://example.com/storage/signed-url"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T10:30:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T10:30:00Z"
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "admin"
+                                                    ]
+                                                },
+                                                "perfil_repartidor": {
+                                                    "description": "Perfil del repartidor si el usuario tiene ese rol",
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "perfil_farmacia": {
+                                                    "description": "Perfil de la farmacia si el usuario tiene ese rol",
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cerrar sesión en el dispositivo actual",
+                "description": "Revoca el token del dispositivo actual. El usuario seguirá autenticado en otros dispositivos.",
+                "operationId": "authLogout",
+                "responses": {
+                    "204": {
+                        "description": "Sesión cerrada exitosamente"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout-all": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cerrar sesión en todos los dispositivos",
+                "description": "Revoca todos los tokens del usuario. El usuario quedará completamente desautenticado en todos los dispositivos.",
+                "operationId": "authLogoutAll",
+                "responses": {
+                    "204": {
+                        "description": "Sesión cerrada en todos los dispositivos"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/tokens": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Listar todas las sesiones activas",
+                "description": "Retorna una lista de todos los tokens (sesiones activas) del usuario autenticado, incluyendo en cuál dispositivo fue usado por última vez.",
+                "operationId": "authListTokens",
+                "responses": {
+                    "200": {
+                        "description": "Lista de sesiones obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesiones activas obtenidas exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "description": "Nombre del dispositivo",
+                                                        "type": "string",
+                                                        "example": "iPhone 15 Pro"
+                                                    },
+                                                    "last_used_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T14:30:00Z",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T10:30:00Z"
+                                                    },
+                                                    "is_current": {
+                                                        "description": "Indica si es el token/sesión actual",
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/tokens/{tokenId}": {
+            "delete": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revocar una sesión específica",
+                "description": "Revoca un token específico (sesión) del usuario. No puedes revocar el token que estás usando actualmente.",
+                "operationId": "authRevokeToken",
+                "parameters": [
+                    {
+                        "name": "tokenId",
+                        "in": "path",
+                        "description": "ID del token a revocar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Sesión revocada exitosamente"
+                    },
+                    "400": {
+                        "description": "No puedes revocar el token que estás usando actualmente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Token no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/users/admins": {
+            "get": {
+                "tags": [
+                    "User",
+                    "Admin"
+                ],
+                "summary": "Listar usuarios administradores",
+                "description": "Obtiene una lista paginada de usuarios administradores. Soporta filtrado por estado activo y búsqueda por nombre o email, con ordenamiento personalizable.",
+                "operationId": "adminUsersIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (por defecto: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de elementos por página (por defecto: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo por el que ordenar (created_at, updated_at, name, email, is_active)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección del ordenamiento (asc, desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filtrar por estado activo (true, false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda por nombre o email",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "admin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de administradores obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando todos los usuarios administradores."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Admin User"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "format": "email",
+                                                        "example": "admin@example.com"
+                                                    },
+                                                    "avatar": {
+                                                        "description": "URL firmada de la foto de perfil",
+                                                        "type": "string",
+                                                        "format": "url",
+                                                        "example": "https://example.com/storage/signed-url",
+                                                        "nullable": true
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T10:30:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-11-22T10:30:00Z"
+                                                    },
+                                                    "roles": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "administrador"
+                                                        ]
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 42
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación en parámetros de paginación o filtrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User",
+                    "Admin"
+                ],
+                "summary": "Crear nuevo usuario administrador",
+                "description": "Registra un nuevo usuario administrador en el sistema. Se genera automáticamente un token de acceso para inicio de sesión inmediato.",
+                "operationId": "adminUsersRegister",
+                "requestBody": {
+                    "description": "Datos del nuevo administrador",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Nombre completo del administrador",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Juan García"
+                                    },
+                                    "email": {
+                                        "description": "Email único del administrador",
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "juan@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Contraseña del administrador (mín 8 caracteres, debe incluir mayúscula, número y símbolo)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "SecurePass123!"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Confirmación de la contraseña",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "SecurePass123!"
+                                    },
+                                    "device_name": {
+                                        "description": "Nombre del dispositivo para identificar la sesión",
+                                        "type": "string",
+                                        "example": "Web - Chrome"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Administrador registrado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario registrado exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Juan García"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "juan@example.com"
+                                                        },
+                                                        "avatar": {
+                                                            "type": "string",
+                                                            "format": "url",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-11-22T10:30:00Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-11-22T10:30:00Z"
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "administrador"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "access_token": {
+                                                    "description": "Token de acceso Sanctum para sesión inmediata",
+                                                    "type": "string",
+                                                    "example": "1|abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Datos inválidos o email ya existe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/users/admins/{userId}": {
+            "get": {
+                "tags": [
+                    "User",
+                    "Admin"
+                ],
+                "summary": "Obtener detalles de un administrador",
+                "description": "Retorna la información completa de un usuario administrador específico, incluyendo sus roles.",
+                "operationId": "adminUsersShow",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "UUID del administrador",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Información del administrador obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando datos del usuario administrador."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juan García"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "juan@example.com"
+                                                },
+                                                "avatar": {
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://example.com/storage/signed-url",
+                                                    "nullable": true
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T10:30:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T10:30:00Z"
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "administrador"
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario administrador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User",
+                    "Admin"
+                ],
+                "summary": "Actualizar datos de un administrador",
+                "description": "Actualiza la información de un usuario administrador. Los campos son opcionales; solo se actualizan los que se envían. Si se proporciona contraseña, debe incluirse la confirmación.",
+                "operationId": "adminUsersUpdate",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "UUID del administrador",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Datos a actualizar del administrador",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Nombre completo (opcional)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Juan Carlos García"
+                                    },
+                                    "email": {
+                                        "description": "Email único (opcional)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "juan.garcia@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Nueva contraseña (opcional, requiere password_confirmation)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewSecurePass123!"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Confirmación de nueva contraseña",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewSecurePass123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Administrador actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Los datos del usuario han sido actualizados."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juan Carlos García"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "juan.garcia@example.com"
+                                                },
+                                                "avatar": {
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://example.com/storage/signed-url",
+                                                    "nullable": true
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T10:30:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-11-22T15:45:00Z"
+                                                },
+                                                "roles": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "administrador"
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No se recibió información para actualizar",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario administrador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Datos inválidos o email duplicado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User",
+                    "Admin"
+                ],
+                "summary": "Eliminar un usuario administrador",
+                "description": "Elimina un usuario administrador del sistema. Se revoca automáticamente todos sus tokens activos. No permite eliminar el último administrador del sistema.",
+                "operationId": "adminUsersDestroy",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "UUID del administrador a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Administrador eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El usuario administrador ha sido eliminado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "null",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario administrador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "No se puede eliminar el último usuario administrador del sistema",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "error"
+                                            ],
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se puede eliminar el último usuario administrador del sistema."
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "CONFLICT"
+                                                },
+                                                "errors": {
+                                                    "type": "null"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Error": {
+                "description": "Estructura base de error en la respuesta",
+                "properties": {
+                    "code": {
+                        "description": "Código de error único",
+                        "type": "string",
+                        "example": "VALIDATION_ERROR"
+                    },
+                    "errors": {
+                        "description": "Mapa de errores por campo (opcional)",
+                        "type": "object",
+                        "example": {
+                            "email": [
+                                "Las credenciales proporcionadas son incorrectas."
+                            ]
+                        },
+                        "nullable": true,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "BadRequestResponse": {
+                "description": "Respuesta 400 - Solicitud malformada",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "La solicitud no pudo ser procesada debido a una sintaxis inválida o datos incorrectos."
+                    },
+                    "error": {
+                        "$ref": "#/components/schemas/Error"
+                    }
+                },
+                "type": "object"
+            },
+            "UnauthorizedResponse": {
+                "description": "Respuesta 401 - No autenticado",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "No autenticado. Por favor, inicie sesión."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "UNAUTHORIZED"
+                                ],
+                                "example": "UNAUTHORIZED"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "ForbiddenResponse": {
+                "description": "Respuesta 403 - Acceso prohibido/No tiene permiso",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "No tiene permiso para realizar esta acción."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "FORBIDDEN"
+                                ],
+                                "example": "FORBIDDEN"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "NotFoundResponse": {
+                "description": "Respuesta 404 - Recurso no encontrado",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "El recurso solicitado no fue encontrado."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "NOT_FOUND"
+                                ],
+                                "example": "NOT_FOUND"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "description": "Respuesta 422 - Error de validación en los datos",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Los datos proporcionados no son válidos."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "VALIDATION_ERROR"
+                                ],
+                                "example": "VALIDATION_ERROR"
+                            },
+                            "errors": {
+                                "description": "Errores de validación por campo",
+                                "type": "object",
+                                "example": {
+                                    "email": [
+                                        "Email es requerido"
+                                    ],
+                                    "password": [
+                                        "Password debe tener al menos 8 caracteres"
+                                    ]
+                                },
+                                "additionalProperties": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "MethodNotAllowedResponse": {
+                "description": "Respuesta 405 - Método HTTP no permitido",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Método HTTP no permitido para esta ruta."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "METHOD_NOT_ALLOWED"
+                                ],
+                                "example": "METHOD_NOT_ALLOWED"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "InvalidSignatureResponse": {
+                "description": "Respuesta 403 - Enlace de descarga inválido o expirado",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "fail"
+                        ],
+                        "example": "fail"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "El enlace de descarga es inválido o ha expirado. Por favor, solicite uno nuevo."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "INVALID_SIGNED_URL"
+                                ],
+                                "example": "INVALID_SIGNED_URL"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "ServerErrorResponse": {
+                "description": "Respuesta 500 - Error interno del servidor",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "error"
+                        ],
+                        "example": "error"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Error interno del servidor."
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "enum": [
+                                    "SERVER_ERROR"
+                                ],
+                                "example": "SERVER_ERROR"
+                            },
+                            "errors": {
+                                "type": "null"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "SuccessResponse": {
+                "description": "Estructura genérica de respuesta exitosa",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "success"
+                        ],
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Operación completada exitosamente."
+                    },
+                    "data": {
+                        "description": "Datos de la respuesta",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "pagination": {
+                        "description": "Información de paginación",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "cursor_pagination": {
+                        "description": "Información de paginación por cursor",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "description": "Metadatos adicionales",
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationInfo": {
+                "description": "Información de paginación",
+                "properties": {
+                    "total": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "count": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "links": {
+                        "properties": {
+                            "first": {
+                                "type": "string",
+                                "format": "url",
+                                "nullable": true
+                            },
+                            "last": {
+                                "type": "string",
+                                "format": "url",
+                                "nullable": true
+                            },
+                            "next": {
+                                "type": "string",
+                                "format": "url",
+                                "nullable": true
+                            },
+                            "prev": {
+                                "type": "string",
+                                "format": "url",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "CursorPaginationInfo": {
+                "description": "Información de paginación por cursor",
+                "properties": {
+                    "next_cursor": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string",
+                        "format": "url"
+                    },
+                    "per_page": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Token de acceso Sanctum. Se obtiene en el endpoint de login.",
+                "name": "Token based based auth",
+                "in": "header",
+                "bearerFormat": "Sanctum",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Endpoints de autenticación y gestión de sesiones"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Admin",
+            "description": "Admin"
+        }
+    ]
+}
