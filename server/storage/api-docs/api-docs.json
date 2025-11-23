@@ -3396,6 +3396,1879 @@
                 ]
             }
         },
+        "/api/rutas": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Listar rutas",
+                "description": "Obtiene una lista paginada de rutas de entrega. Los repartidores solo pueden ver sus propias rutas.",
+                "operationId": "rutasIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (por defecto: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (por defecto: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "updated_at",
+                                "nombre",
+                                "distancia_total_estimada",
+                                "tiempo_total_estimado",
+                                "fecha_hora_calculo",
+                                "fecha_inicio",
+                                "fecha_completado"
+                            ],
+                            "example": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "repartidor_id",
+                        "in": "query",
+                        "description": "Filtrar por UUID del repartidor (solo disponible para administradores)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    },
+                    {
+                        "name": "fecha_desde",
+                        "in": "query",
+                        "description": "Filtrar rutas creadas desde esta fecha",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "fecha_hasta",
+                        "in": "query",
+                        "description": "Filtrar rutas creadas hasta esta fecha",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Buscar por nombre de la ruta",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Ruta Centro"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de rutas obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando lista de rutas."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string"
+                                                    },
+                                                    "distancia_total_estimada": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "tiempo_total_estimado": {
+                                                        "description": "En segundos",
+                                                        "type": "integer"
+                                                    },
+                                                    "cantidad_pedidos": {
+                                                        "type": "integer"
+                                                    },
+                                                    "fecha_hora_calculo": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "fecha_inicio": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "fecha_completado": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "repartidor": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string",
+                                                                        "format": "uuid"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/PaginationInfo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Crear ruta",
+                "description": "Crea una nueva ruta de entrega para un repartidor específico.",
+                "operationId": "rutasStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "repartidor_id"
+                                ],
+                                "properties": {
+                                    "repartidor_id": {
+                                        "description": "UUID del perfil del repartidor",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                                    },
+                                    "nombre": {
+                                        "description": "Nombre descriptivo de la ruta",
+                                        "type": "string",
+                                        "example": "Ruta Centro",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ruta creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ruta creada exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "nombre": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "punto_inicio": {
+                                                    "properties": {
+                                                        "latitude": {
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "longitude": {
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "punto_final": {
+                                                    "properties": {
+                                                        "latitude": {
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "longitude": {
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "polyline_encoded": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "distancia_total_estimada": {
+                                                    "type": "number",
+                                                    "format": "float"
+                                                },
+                                                "tiempo_total_estimado": {
+                                                    "type": "integer"
+                                                },
+                                                "cantidad_pedidos": {
+                                                    "type": "integer"
+                                                },
+                                                "fecha_hora_calculo": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "fecha_inicio": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "fecha_completado": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "repartidor": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "user": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "uuid"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/{ruta}": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Obtener detalles de ruta",
+                "description": "Obtiene los datos completos de una ruta, incluyendo la lista de pedidos asignados a ella.",
+                "operationId": "rutasShow",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenamiento de pedidos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tipo_pedido",
+                                "estado",
+                                "updated_at",
+                                "orden_optimizado",
+                                "orden_personalizado",
+                                "orden_recojo"
+                            ],
+                            "example": "orden_personalizado"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    },
+                    {
+                        "name": "estado",
+                        "in": "query",
+                        "description": "Filtrar pedidos por estado",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pendiente",
+                                "asignado",
+                                "en_ruta",
+                                "entregado",
+                                "rechazado"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "optimizado",
+                        "in": "query",
+                        "description": "Filtrar por optimización (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la ruta obtenidos exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando datos y lista de pedidos de la ruta."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ruta": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "nombre": {
+                                                            "type": "string"
+                                                        },
+                                                        "punto_inicio": {
+                                                            "properties": {
+                                                                "latitude": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "longitude": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "punto_final": {
+                                                            "properties": {
+                                                                "latitude": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                },
+                                                                "longitude": {
+                                                                    "type": "number",
+                                                                    "format": "float"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "polyline_encoded": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "distancia_total_estimada": {
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "tiempo_total_estimado": {
+                                                            "type": "integer"
+                                                        },
+                                                        "cantidad_pedidos": {
+                                                            "type": "integer"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "repartidor": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "uuid"
+                                                                },
+                                                                "user": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "string",
+                                                                            "format": "uuid"
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "codigo_barra": {
+                                                                "type": "string"
+                                                            },
+                                                            "ubicacion_recojo": {
+                                                                "properties": {
+                                                                    "latitude": {
+                                                                        "type": "number",
+                                                                        "format": "float"
+                                                                    },
+                                                                    "longitude": {
+                                                                        "type": "number",
+                                                                        "format": "float"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "ubicacion_entrega": {
+                                                                "properties": {
+                                                                    "latitude": {
+                                                                        "type": "number",
+                                                                        "format": "float"
+                                                                    },
+                                                                    "longitude": {
+                                                                        "type": "number",
+                                                                        "format": "float"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "direccion_entrega_linea_1": {
+                                                                "type": "string"
+                                                            },
+                                                            "paciente_nombre": {
+                                                                "type": "string"
+                                                            },
+                                                            "paciente_telefono": {
+                                                                "type": "string"
+                                                            },
+                                                            "observaciones": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "tipo_pedido": {
+                                                                "type": "string"
+                                                            },
+                                                            "estado": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "pendiente",
+                                                                    "asignado",
+                                                                    "en_ruta",
+                                                                    "entregado",
+                                                                    "rechazado"
+                                                                ]
+                                                            },
+                                                            "entregas": {
+                                                                "properties": {
+                                                                    "orden_optimizado": {
+                                                                        "type": "integer",
+                                                                        "nullable": true
+                                                                    },
+                                                                    "orden_personalizado": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "orden_recojo": {
+                                                                        "type": "integer",
+                                                                        "nullable": true
+                                                                    },
+                                                                    "optimizado": {
+                                                                        "type": "boolean"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acceso prohibido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Eliminar ruta",
+                "description": "Elimina una ruta de entrega del sistema.",
+                "operationId": "rutasDestroy",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Ruta eliminada exitosamente"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Actualizar ruta",
+                "description": "Actualiza los datos de una ruta existente. Si se cambia el repartidor, todos los pedidos sin asignar se reasignan al nuevo repartidor.",
+                "operationId": "rutasUpdate",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "repartidor_id": {
+                                        "description": "UUID del nuevo repartidor",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Ruta Centro Actualizada",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ruta actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ruta actualizada exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/current": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Obtener ruta actual",
+                "description": "Obtiene la ruta asignada actualmente al usuario repartidor autenticado con sus pedidos.",
+                "operationId": "rutasCurrent",
+                "parameters": [
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenamiento de pedidos",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tipo_pedido",
+                                "estado",
+                                "updated_at",
+                                "orden_optimizado",
+                                "orden_personalizado",
+                                "orden_recojo"
+                            ],
+                            "example": "orden_personalizado"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    },
+                    {
+                        "name": "estado",
+                        "in": "query",
+                        "description": "Filtrar pedidos por estado",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pendiente",
+                                "asignado",
+                                "en_ruta",
+                                "entregado",
+                                "rechazado"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "optimizado",
+                        "in": "query",
+                        "description": "Filtrar por optimización",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ruta actual obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando datos y lista de pedidos de la ruta."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ruta": {
+                                                    "type": "object"
+                                                },
+                                                "pedidos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Solo repartidores pueden acceder",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "El repartidor no tiene ruta asignada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/{ruta}/optimizar": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Optimizar ruta",
+                "description": "Inicia un proceso asíncrono para optimizar la secuencia de entregas en una ruta específica basado en horarios de jornada.",
+                "operationId": "rutasOptimizar",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "inicio_jornada",
+                                    "fin_jornada"
+                                ],
+                                "properties": {
+                                    "inicio_jornada": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-12-01T08:00:00"
+                                    },
+                                    "fin_jornada": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-12-01T18:00:00"
+                                    },
+                                    "ubicacion_actual": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "ignorar_recojos": {
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Proceso de optimización iniciado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Su solicitud está siendo procesada. Recibirás una notificación cuando los pedidos de la ruta hayan sido optimizados."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/optimizar": {
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Optimizar todas las rutas",
+                "description": "Inicia un proceso asíncrono para crear y optimizar rutas para todos los pedidos pendientes de entrega en una región específica.",
+                "operationId": "rutasOptimizarAll",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "codigo_iso_pais",
+                                    "inicio_jornada",
+                                    "fin_jornada"
+                                ],
+                                "properties": {
+                                    "codigo_iso_pais": {
+                                        "description": "Código ISO del país (PE, CO, BR, etc)",
+                                        "type": "string",
+                                        "example": "PE"
+                                    },
+                                    "inicio_jornada": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-12-01T08:00:00"
+                                    },
+                                    "fin_jornada": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-12-01T18:00:00"
+                                    },
+                                    "codigo_postal": {
+                                        "description": "Código postal para filtrar por región",
+                                        "type": "string",
+                                        "example": "28001",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Proceso de optimización iniciado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Su solicitud está siendo procesada. Recibirás una notificación cuando las rutas y pedidos hayan sido optimizados y asignados a los repartidores adecuados."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/{ruta}/pedidos": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Listar pedidos de ruta",
+                "description": "Obtiene la lista de pedidos asignados a una ruta específica.",
+                "operationId": "rutasPedidosList",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tipo_pedido",
+                                "estado",
+                                "updated_at",
+                                "orden_optimizado",
+                                "orden_personalizado",
+                                "orden_recojo"
+                            ],
+                            "example": "orden_personalizado"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    },
+                    {
+                        "name": "estado",
+                        "in": "query",
+                        "description": "Filtrar por estado del pedido",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pendiente",
+                                "asignado",
+                                "en_ruta",
+                                "entregado",
+                                "rechazado"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "optimizado",
+                        "in": "query",
+                        "description": "Filtrar por optimización",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando lista de pedidos de la ruta."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acceso prohibido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Agregar pedido a ruta",
+                "description": "Agrega un pedido existente a una ruta. El pedido debe estar en estado pendiente o asignado.",
+                "operationId": "rutasPedidosAdd",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pedido_id"
+                                ],
+                                "properties": {
+                                    "pedido_id": {
+                                        "description": "UUID del pedido a agregar",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido agregado a la ruta exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El pedido ha sido agregado a la ruta."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta o pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflicto (pedido ya asignado o estado inválido)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/{ruta}/pedidos/{pedido}": {
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Remover pedido de ruta",
+                "description": "Remueve un pedido específico de una ruta y recalcula el orden de entrega de los pedidos restantes.",
+                "operationId": "rutasPedidosRemove",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    },
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido removido de la ruta exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El pedido ha sido removido de la ruta."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta o pedido no encontrado en la ruta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rutas/{ruta}/pedidos/reordenar": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Rutas"
+                ],
+                "summary": "Reordenar pedidos",
+                "description": "Actualiza el orden personalizado de entrega de los pedidos en una ruta.",
+                "operationId": "rutasPedidosReordenar",
+                "parameters": [
+                    {
+                        "name": "ruta",
+                        "in": "path",
+                        "description": "UUID de la ruta",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cambios"
+                                ],
+                                "properties": {
+                                    "cambios": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "pedido_id",
+                                                "orden_personalizado"
+                                            ],
+                                            "properties": {
+                                                "pedido_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "orden_personalizado": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "minItems": 1,
+                                        "example": [
+                                            {
+                                                "pedido_id": "550e8400-e29b-41d4-a716-446655440001",
+                                                "orden_personalizado": 2
+                                            },
+                                            {
+                                                "pedido_id": "550e8400-e29b-41d4-a716-446655440002",
+                                                "orden_personalizado": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Orden de pedidos actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El orden de la ruta ha sido actualizado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/ubicaciones-repartidor": {
             "get": {
                 "tags": [
@@ -8217,6 +10090,10 @@
         {
             "name": "Farmacias",
             "description": "Endpoints para gestión de farmacias"
+        },
+        {
+            "name": "Rutas",
+            "description": "Endpoints para gestión de rutas de entrega"
         },
         {
             "name": "Entities",
