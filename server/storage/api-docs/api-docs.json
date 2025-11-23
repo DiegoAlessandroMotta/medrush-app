@@ -2691,6 +2691,1778 @@
                 ]
             }
         },
+        "/api/pedidos": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Listar pedidos",
+                "description": "Obtiene una lista paginada de pedidos. Las farmacias y repartidores solo ven sus propios pedidos.",
+                "operationId": "pedidosIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página (por defecto: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Cantidad de registros por página (por defecto: 15, máximo: 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "updated_at",
+                                "tipo_pedido",
+                                "estado",
+                                "fecha_asignacion",
+                                "fecha_recogida",
+                                "fecha_entrega",
+                                "tiempo_entrega_estimado",
+                                "distancia_estimada"
+                            ],
+                            "example": "updated_at"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "estado",
+                        "in": "query",
+                        "description": "Filtrar por estado(s), puede ser un estado o múltiples separados por coma",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "pendiente,asignado"
+                        }
+                    },
+                    {
+                        "name": "repartidor_id",
+                        "in": "query",
+                        "description": "Filtrar por UUID del repartidor (solo para administradores)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "farmacia_id",
+                        "in": "query",
+                        "description": "Filtrar por UUID de la farmacia (solo para administradores)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "fecha_desde",
+                        "in": "query",
+                        "description": "Filtrar pedidos creados desde esta fecha",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "fecha_hasta",
+                        "in": "query",
+                        "description": "Filtrar pedidos creados hasta esta fecha",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Buscar por nombre del paciente, código de barra, teléfono, dirección o ciudad",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Juan Pérez"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando lista de pedidos."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "codigo_barra": {
+                                                        "type": "string"
+                                                    },
+                                                    "paciente_nombre": {
+                                                        "type": "string"
+                                                    },
+                                                    "paciente_telefono": {
+                                                        "type": "string"
+                                                    },
+                                                    "direccion_entrega_linea_1": {
+                                                        "type": "string"
+                                                    },
+                                                    "ciudad_entrega": {
+                                                        "type": "string"
+                                                    },
+                                                    "estado": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "pendiente",
+                                                            "asignado",
+                                                            "en_ruta",
+                                                            "entregado",
+                                                            "rechazado"
+                                                        ]
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/PaginationInfo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Crear pedido",
+                "description": "Crea un nuevo pedido. Las farmacias solo pueden crear pedidos para sí mismas.",
+                "operationId": "pedidosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "paciente_nombre",
+                                    "paciente_telefono",
+                                    "direccion_entrega_linea_1",
+                                    "ciudad_entrega",
+                                    "tipo_pedido"
+                                ],
+                                "properties": {
+                                    "farmacia_id": {
+                                        "description": "UUID de la farmacia",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "paciente_nombre": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "paciente_telefono": {
+                                        "description": "Formato E.164 (+país-número)",
+                                        "type": "string"
+                                    },
+                                    "paciente_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "nullable": true
+                                    },
+                                    "codigo_iso_pais_entrega": {
+                                        "description": "Requerido si no se especifica farmacia_id",
+                                        "type": "string",
+                                        "example": "PE"
+                                    },
+                                    "direccion_entrega_linea_1": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "direccion_entrega_linea_2": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "ciudad_entrega": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "estado_region_entrega": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "codigo_postal_entrega": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "nullable": true
+                                    },
+                                    "ubicacion_recojo": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "ubicacion_entrega": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "codigo_acceso_edificio": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "nullable": true
+                                    },
+                                    "medicamentos": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    },
+                                    "tipo_pedido": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "observaciones": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    },
+                                    "requiere_firma_especial": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "tiempo_entrega_estimado": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "distancia_estimada": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pedido creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pedido creado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acceso prohibido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Obtener detalles del pedido",
+                "description": "Obtiene la información completa de un pedido. Los repartidores ven una vista diferente con información de entrega.",
+                "operationId": "pedidosShow",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del pedido obtenidos exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando datos del pedido"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Eliminar pedido",
+                "description": "Elimina un pedido del sistema.",
+                "operationId": "pedidosDestroy",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Pedido eliminado exitosamente"
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Actualizar pedido",
+                "description": "Actualiza los datos de un pedido existente.",
+                "operationId": "pedidosUpdate",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "paciente_nombre": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "paciente_telefono": {
+                                        "type": "string"
+                                    },
+                                    "paciente_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "nullable": true
+                                    },
+                                    "direccion_entrega_linea_1": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "direccion_entrega_linea_2": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "ciudad_entrega": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "estado_region_entrega": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "codigo_postal_entrega": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "nullable": true
+                                    },
+                                    "ubicacion_recojo": {
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "ubicacion_entrega": {
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "codigo_acceso_edificio": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "nullable": true
+                                    },
+                                    "medicamentos": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    },
+                                    "tipo_pedido": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "observaciones": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    },
+                                    "requiere_firma_especial": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "tiempo_entrega_estimado": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "distancia_estimada": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pedido actualizado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/cargar-csv": {
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Cargar pedidos por CSV",
+                "description": "Carga múltiples pedidos desde un archivo CSV. El procesamiento es asíncrono.",
+                "operationId": "pedidosUploadCsv",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "pedidos_csv"
+                                ],
+                                "properties": {
+                                    "pedidos_csv": {
+                                        "description": "Archivo CSV",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "farmacia_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "codigo_iso_pais_entrega": {
+                                        "type": "string",
+                                        "example": "PE",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Archivo CSV aceptado para procesamiento",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El archivo CSV ha sido recibido y será procesado, recibirás una notificación cuando termine."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acceso prohibido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/asignar": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Asignar pedido",
+                "description": "Asigna un pedido a un repartidor. Si el pedido ya estaba asignado, se reasigna.",
+                "operationId": "pedidosAsignar",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "repartidor_id"
+                                ],
+                                "properties": {
+                                    "repartidor_id": {
+                                        "description": "UUID del perfil del repartidor",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido asignado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pedido asignado exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acceso prohibido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido o repartidor no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/retirar-repartidor": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Retirar asignación",
+                "description": "Retira la asignación de repartidor de un pedido, dejándolo sin asignar.",
+                "operationId": "pedidosRetirarRepartidor",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Asignación retirada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La asignación del pedido ha sido retirada exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/cancelar": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Cancelar pedido",
+                "description": "Marca un pedido como cancelado.",
+                "operationId": "pedidosCancelar",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido cancelado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El pedido ha sido cancelado."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/recoger": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Marcar como recogido",
+                "description": "Marca un pedido como recogido en la farmacia, registrando la ubicación de recojo.",
+                "operationId": "pedidosRecoger",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "ubicacion": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido marcado como recogido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se ha marcado el pedido como recogido."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/en-ruta": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Marcar como en ruta",
+                "description": "Marca un pedido como en ruta para entrega.",
+                "operationId": "pedidosEnRuta",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido marcado como en ruta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se ha marcado el pedido como en ruta."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/entregar": {
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Marcar como entregado",
+                "description": "Marca un pedido como entregado, incluyendo foto de entrega y firmas digitales opcionales.",
+                "operationId": "pedidosEntregar",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "ubicacion"
+                                ],
+                                "properties": {
+                                    "ubicacion": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "foto_entrega": {
+                                        "description": "Foto de la entrega (máx 5MB, JPEG/PNG/WEBP)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "firma_digital": {
+                                        "description": "Firma digital en SVG",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "firma_documento_consentimiento": {
+                                        "description": "Firma de consentimiento en SVG",
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido marcado como entregado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El pedido ha sido marcado como entregado."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/{pedido}/fallo-entrega": {
+            "patch": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Marcar como fallo de entrega",
+                "description": "Marca un pedido como no entregado, incluyendo ubicación, motivo del fallo y observaciones.",
+                "operationId": "pedidosFalloEntrega",
+                "parameters": [
+                    {
+                        "name": "pedido",
+                        "in": "path",
+                        "description": "UUID del pedido",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ubicacion",
+                                    "motivo_fallo"
+                                ],
+                                "properties": {
+                                    "ubicacion": {
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "format": "float"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "motivo_fallo": {
+                                        "description": "Razón del fallo de entrega",
+                                        "type": "string",
+                                        "enum": [
+                                            "puerta_cerrada",
+                                            "cliente_ausente",
+                                            "direccion_incorrecta",
+                                            "cliente_rechazo",
+                                            "otro"
+                                        ]
+                                    },
+                                    "observaciones_fallo": {
+                                        "description": "Notas adicionales sobre el fallo",
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido marcado como fallo de entrega",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El pedido ha sido marcado como fallido."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pedidos/antiguos": {
+            "delete": {
+                "tags": [
+                    "Entities",
+                    "Pedidos"
+                ],
+                "summary": "Eliminar archivos antiguos",
+                "description": "Inicia un proceso asíncrono para eliminar fotos y firmas de pedidos antiguos (más de X semanas).",
+                "operationId": "pedidosDeleteAntiguos",
+                "parameters": [
+                    {
+                        "name": "semanas",
+                        "in": "query",
+                        "description": "Número de semanas atrás para considerar 'antiguo' (por defecto: 3, máximo: 52)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 52,
+                            "minimum": 1,
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Proceso de eliminación iniciado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "La eliminación de fotos y firmas de pedidos antiguos ha sido iniciada."
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de validación inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/reportes-pdf/etiquetas-pedido": {
             "post": {
                 "tags": [
