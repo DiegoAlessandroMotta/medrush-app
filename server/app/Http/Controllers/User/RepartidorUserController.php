@@ -28,7 +28,7 @@ class RepartidorUserController extends Controller
    * @OA\Get(
    *     path="/api/users/repartidores",
    *     operationId="repartidorUsersIndex",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Listar usuarios repartidores",
    *     description="Obtiene una lista paginada de usuarios repartidores. Soporta filtrado por estado activo, verificación, código país, rango de fechas y búsqueda por nombre/email.",
    *     security={{"sanctum":{}}},
@@ -226,7 +226,7 @@ class RepartidorUserController extends Controller
    * @OA\Post(
    *     path="/api/users/repartidores",
    *     operationId="repartidorUsersRegister",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Crear nuevo usuario repartidor",
    *     description="Registra un nuevo usuario repartidor en el sistema con información básica y datos del perfil. Se genera un token de acceso para sesión inmediata.",
    *     security={{"sanctum":{}}},
@@ -308,7 +308,7 @@ class RepartidorUserController extends Controller
    * @OA\Get(
    *     path="/api/users/repartidores/{perfilRepartidorId}",
    *     operationId="repartidorUsersShow",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Obtener detalles de un repartidor",
    *     description="Retorna la información completa de un repartidor incluyendo documentos verificables.",
    *     security={{"sanctum":{}}},
@@ -355,7 +355,7 @@ class RepartidorUserController extends Controller
    * @OA\Put(
    *     path="/api/users/repartidores/{perfilRepartidorId}",
    *     operationId="repartidorUsersUpdate",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Actualizar datos de un repartidor",
    *     description="Actualiza información del usuario y/o perfil del repartidor. Se puede actualizar datos básicos o específicos del perfil repartidor.",
    *     security={{"sanctum":{}}},
@@ -442,7 +442,7 @@ class RepartidorUserController extends Controller
    * @OA\Patch(
    *     path="/api/users/repartidores/{perfilRepartidorId}/estado",
    *     operationId="repartidorUsersUpdateEstado",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Actualizar estado del repartidor",
    *     description="Actualiza el estado operacional del repartidor (activo, inactivo, suspendido).",
    *     security={{"sanctum":{}}},
@@ -503,7 +503,7 @@ class RepartidorUserController extends Controller
    * @OA\Patch(
    *     path="/api/users/repartidores/{perfilRepartidorId}/verificado",
    *     operationId="repartidorUsersUpdateVerificado",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Actualizar estado de verificación",
    *     description="Marca un repartidor como verificado o no verificado después de validar sus documentos.",
    *     security={{"sanctum":{}}},
@@ -564,7 +564,7 @@ class RepartidorUserController extends Controller
    * @OA\Post(
    *     path="/api/users/repartidores/{perfilRepartidorId}/documentos/dni",
    *     operationId="repartidorUploadFotoDni",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Subir foto de documento de identidad",
    *     description="Carga la foto del documento de identidad del repartidor. Reemplaza la anterior si existe.",
    *     security={{"sanctum":{}}},
@@ -674,7 +674,7 @@ class RepartidorUserController extends Controller
    * @OA\Post(
    *     path="/api/users/repartidores/{perfilRepartidorId}/documentos/licencia",
    *     operationId="repartidorUploadFotoLicencia",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Subir foto de licencia de conducir",
    *     description="Carga la foto de la licencia de conducir del repartidor. Reemplaza la anterior si existe.",
    *     security={{"sanctum":{}}},
@@ -784,7 +784,7 @@ class RepartidorUserController extends Controller
    * @OA\Post(
    *     path="/api/users/repartidores/{perfilRepartidorId}/documentos/seguro",
    *     operationId="repartidorUploadFotoSeguroVehiculo",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Subir foto de seguro del vehículo",
    *     description="Carga la foto del seguro del vehículo del repartidor. Reemplaza la anterior si existe.",
    *     security={{"sanctum":{}}},
@@ -894,7 +894,7 @@ class RepartidorUserController extends Controller
    * @OA\Delete(
    *     path="/api/users/repartidores/{perfilRepartidorId}",
    *     operationId="repartidorUsersDestroy",
-   *     tags={"User","Repartidor"},
+   *     tags={"User","PerfilRepartidor"},
    *     summary="Eliminar un repartidor",
    *     description="Elimina un repartidor del sistema. Se revoca automáticamente todos sus tokens y se elimina su perfil.",
    *     security={{"sanctum":{}}},

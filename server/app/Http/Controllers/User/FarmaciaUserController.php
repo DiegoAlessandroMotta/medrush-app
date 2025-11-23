@@ -23,7 +23,7 @@ class FarmaciaUserController extends Controller
    * @OA\Get(
    *     path="/api/users/farmacias",
    *     operationId="farmaciaUsersIndex",
-   *     tags={"User","Farmacia"},
+   *     tags={"User","PerfilFarmacia"},
    *     summary="Listar usuarios de farmacias",
    *     description="Obtiene una lista paginada de usuarios con rol de farmacia. Los usuarios farmacia solo pueden ver sus propios usuarios. Soporta búsqueda por nombre o email, y filtrado por estado activo.",
    *     security={{"sanctum":{}}},
@@ -173,7 +173,7 @@ class FarmaciaUserController extends Controller
    * @OA\Post(
    *     path="/api/users/farmacias",
    *     operationId="farmaciaUsersRegister",
-   *     tags={"User","Farmacia"},
+   *     tags={"User","PerfilFarmacia"},
    *     summary="Crear nuevo usuario de farmacia",
    *     description="Registra un nuevo usuario con rol de farmacia en el sistema. Se genera automáticamente un token de acceso para sesión inmediata.",
    *     security={{"sanctum":{}}},
@@ -258,7 +258,7 @@ class FarmaciaUserController extends Controller
    * @OA\Get(
    *     path="/api/users/farmacias/{perfilFarmaciaId}",
    *     operationId="farmaciaUsersShow",
-   *     tags={"User","Farmacia"},
+   *     tags={"User","PerfilFarmacia"},
    *     summary="Obtener detalles de un usuario de farmacia",
    *     description="Retorna la información completa de un usuario de farmacia específico, incluyendo su perfil de farmacia.",
    *     security={{"sanctum":{}}},
@@ -315,7 +315,7 @@ class FarmaciaUserController extends Controller
    * @OA\Put(
    *     path="/api/users/farmacias/{perfilFarmaciaId}",
    *     operationId="farmaciaUsersUpdate",
-   *     tags={"User","Farmacia"},
+   *     tags={"User","PerfilFarmacia"},
    *     summary="Actualizar datos de un usuario de farmacia",
    *     description="Actualiza la información de un usuario de farmacia. Los campos son opcionales; solo se actualizan los que se envían.",
    *     security={{"sanctum":{}}},
@@ -402,7 +402,7 @@ class FarmaciaUserController extends Controller
    * @OA\Delete(
    *     path="/api/users/farmacias/{perfilFarmaciaId}",
    *     operationId="farmaciaUsersDestroy",
-   *     tags={"User","Farmacia"},
+   *     tags={"User","PerfilFarmacia"},
    *     summary="Eliminar un usuario de farmacia",
    *     description="Elimina un usuario de farmacia del sistema. Se revoca automáticamente todos sus tokens activos y se elimina su perfil de farmacia.",
    *     security={{"sanctum":{}}},

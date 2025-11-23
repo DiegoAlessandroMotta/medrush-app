@@ -18,7 +18,7 @@ class BaseUserController extends Controller
    * @OA\Patch(
    *     path="/api/users/{userId}/activo",
    *     operationId="userToggleActive",
-   *     tags={"User","Base"},
+   *     tags={"User","PerfilBase"},
    *     summary="Activar o desactivar usuario",
    *     description="Activa o desactiva un usuario. Los administradores no pueden desactivarse a sí mismos ni puede haber solo uno activo en el sistema.",
    *     security={{"sanctum":{}}},
@@ -95,7 +95,7 @@ class BaseUserController extends Controller
    * @OA\Post(
    *     path="/api/users/{userId}/avatar",
    *     operationId="userUploadPicture",
-   *     tags={"User","Base"},
+   *     tags={"User","PerfilBase"},
    *     summary="Subir o actualizar foto de perfil",
    *     description="Carga o actualiza la foto de perfil del usuario. Puede omitirse el archivo para eliminar la foto actual.",
    *     security={{"sanctum":{}}},

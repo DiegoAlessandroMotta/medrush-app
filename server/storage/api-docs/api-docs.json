@@ -2714,7 +2714,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Admin"
+                    "PerfilAdministrador"
                 ],
                 "summary": "Listar usuarios administradores",
                 "description": "Obtiene una lista paginada de usuarios administradores. Soporta filtrado por estado activo y búsqueda por nombre o email, con ordenamiento personalizable.",
@@ -2920,7 +2920,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Admin"
+                    "PerfilAdministrador"
                 ],
                 "summary": "Crear nuevo usuario administrador",
                 "description": "Registra un nuevo usuario administrador en el sistema. Se genera automáticamente un token de acceso para inicio de sesión inmediato.",
@@ -3089,7 +3089,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Admin"
+                    "PerfilAdministrador"
                 ],
                 "summary": "Obtener detalles de un administrador",
                 "description": "Retorna la información completa de un usuario administrador específico, incluyendo sus roles.",
@@ -3209,7 +3209,7 @@
             "put": {
                 "tags": [
                     "User",
-                    "Admin"
+                    "PerfilAdministrador"
                 ],
                 "summary": "Actualizar datos de un administrador",
                 "description": "Actualiza la información de un usuario administrador. Los campos son opcionales; solo se actualizan los que se envían. Si se proporciona contraseña, debe incluirse la confirmación.",
@@ -3387,7 +3387,7 @@
             "delete": {
                 "tags": [
                     "User",
-                    "Admin"
+                    "PerfilAdministrador"
                 ],
                 "summary": "Eliminar un usuario administrador",
                 "description": "Elimina un usuario administrador del sistema. Se revoca automáticamente todos sus tokens activos. No permite eliminar el último administrador del sistema.",
@@ -3500,7 +3500,7 @@
             "patch": {
                 "tags": [
                     "User",
-                    "Base"
+                    "PerfilBase"
                 ],
                 "summary": "Activar o desactivar usuario",
                 "description": "Activa o desactiva un usuario. Los administradores no pueden desactivarse a sí mismos ni puede haber solo uno activo en el sistema.",
@@ -3607,7 +3607,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Base"
+                    "PerfilBase"
                 ],
                 "summary": "Subir o actualizar foto de perfil",
                 "description": "Carga o actualiza la foto de perfil del usuario. Puede omitirse el archivo para eliminar la foto actual.",
@@ -3720,7 +3720,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Farmacia"
+                    "PerfilFarmacia"
                 ],
                 "summary": "Listar usuarios de farmacias",
                 "description": "Obtiene una lista paginada de usuarios con rol de farmacia. Los usuarios farmacia solo pueden ver sus propios usuarios. Soporta búsqueda por nombre o email, y filtrado por estado activo.",
@@ -3941,7 +3941,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Farmacia"
+                    "PerfilFarmacia"
                 ],
                 "summary": "Crear nuevo usuario de farmacia",
                 "description": "Registra un nuevo usuario con rol de farmacia en el sistema. Se genera automáticamente un token de acceso para sesión inmediata.",
@@ -4122,7 +4122,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Farmacia"
+                    "PerfilFarmacia"
                 ],
                 "summary": "Obtener detalles de un usuario de farmacia",
                 "description": "Retorna la información completa de un usuario de farmacia específico, incluyendo su perfil de farmacia.",
@@ -4247,7 +4247,7 @@
             "put": {
                 "tags": [
                     "User",
-                    "Farmacia"
+                    "PerfilFarmacia"
                 ],
                 "summary": "Actualizar datos de un usuario de farmacia",
                 "description": "Actualiza la información de un usuario de farmacia. Los campos son opcionales; solo se actualizan los que se envían.",
@@ -4425,7 +4425,7 @@
             "delete": {
                 "tags": [
                     "User",
-                    "Farmacia"
+                    "PerfilFarmacia"
                 ],
                 "summary": "Eliminar un usuario de farmacia",
                 "description": "Elimina un usuario de farmacia del sistema. Se revoca automáticamente todos sus tokens activos y se elimina su perfil de farmacia.",
@@ -4503,7 +4503,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Listar usuarios repartidores",
                 "description": "Obtiene una lista paginada de usuarios repartidores. Soporta filtrado por estado activo, verificación, código país, rango de fechas y búsqueda por nombre/email.",
@@ -4778,7 +4778,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Crear nuevo usuario repartidor",
                 "description": "Registra un nuevo usuario repartidor en el sistema con información básica y datos del perfil. Se genera un token de acceso para sesión inmediata.",
@@ -4942,7 +4942,7 @@
             "get": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Obtener detalles de un repartidor",
                 "description": "Retorna la información completa de un repartidor incluyendo documentos verificables.",
@@ -5015,7 +5015,7 @@
             "put": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Actualizar datos de un repartidor",
                 "description": "Actualiza información del usuario y/o perfil del repartidor. Se puede actualizar datos básicos o específicos del perfil repartidor.",
@@ -5140,7 +5140,7 @@
             "delete": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Eliminar un repartidor",
                 "description": "Elimina un repartidor del sistema. Se revoca automáticamente todos sus tokens y se elimina su perfil.",
@@ -5215,7 +5215,7 @@
             "patch": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Actualizar estado del repartidor",
                 "description": "Actualiza el estado operacional del repartidor (activo, inactivo, suspendido).",
@@ -5315,7 +5315,7 @@
             "patch": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Actualizar estado de verificación",
                 "description": "Marca un repartidor como verificado o no verificado después de validar sus documentos.",
@@ -5410,7 +5410,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Subir foto de documento de identidad",
                 "description": "Carga la foto del documento de identidad del repartidor. Reemplaza la anterior si existe.",
@@ -5523,7 +5523,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Subir foto de licencia de conducir",
                 "description": "Carga la foto de la licencia de conducir del repartidor. Reemplaza la anterior si existe.",
@@ -5635,7 +5635,7 @@
             "post": {
                 "tags": [
                     "User",
-                    "Repartidor"
+                    "PerfilRepartidor"
                 ],
                 "summary": "Subir foto de seguro del vehículo",
                 "description": "Carga la foto del seguro del vehículo del repartidor. Reemplaza la anterior si existe.",
@@ -6149,6 +6149,22 @@
             "description": "Endpoints de autenticación y gestión de sesiones"
         },
         {
+            "name": "PerfilBase",
+            "description": "Endpoints para usuarios base"
+        },
+        {
+            "name": "PerfilAdministrador",
+            "description": "Endpoints para administradores del sistema"
+        },
+        {
+            "name": "PerfilFarmacia",
+            "description": "Endpoints para usuarios de farmacias"
+        },
+        {
+            "name": "PerfilRepartidor",
+            "description": "Endpoints para usuarios repartidores"
+        },
+        {
             "name": "Pedidos",
             "description": "Endpoints para gestión de pedidos"
         },
@@ -6195,22 +6211,6 @@
         {
             "name": "User",
             "description": "User"
-        },
-        {
-            "name": "Admin",
-            "description": "Admin"
-        },
-        {
-            "name": "Base",
-            "description": "Base"
-        },
-        {
-            "name": "Farmacia",
-            "description": "Farmacia"
-        },
-        {
-            "name": "Repartidor",
-            "description": "Repartidor"
         }
     ]
 }

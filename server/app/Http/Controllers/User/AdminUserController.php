@@ -19,7 +19,7 @@ class AdminUserController extends Controller
    * @OA\Get(
    *     path="/api/users/admins",
    *     operationId="adminUsersIndex",
-   *     tags={"User","Admin"},
+   *     tags={"User","PerfilAdministrador"},
    *     summary="Listar usuarios administradores",
    *     description="Obtiene una lista paginada de usuarios administradores. Soporta filtrado por estado activo y búsqueda por nombre o email, con ordenamiento personalizable.",
    *     security={{"sanctum":{}}},
@@ -145,7 +145,7 @@ class AdminUserController extends Controller
    * @OA\Post(
    *     path="/api/users/admins",
    *     operationId="adminUsersRegister",
-   *     tags={"User","Admin"},
+   *     tags={"User","PerfilAdministrador"},
    *     summary="Crear nuevo usuario administrador",
    *     description="Registra un nuevo usuario administrador en el sistema. Se genera automáticamente un token de acceso para inicio de sesión inmediato.",
    *     security={{"sanctum":{}}},
@@ -216,7 +216,7 @@ class AdminUserController extends Controller
    * @OA\Get(
    *     path="/api/users/admins/{userId}",
    *     operationId="adminUsersShow",
-   *     tags={"User","Admin"},
+   *     tags={"User","PerfilAdministrador"},
    *     summary="Obtener detalles de un administrador",
    *     description="Retorna la información completa de un usuario administrador específico, incluyendo sus roles.",
    *     security={{"sanctum":{}}},
@@ -271,7 +271,7 @@ class AdminUserController extends Controller
    * @OA\Put(
    *     path="/api/users/admins/{userId}",
    *     operationId="adminUsersUpdate",
-   *     tags={"User","Admin"},
+   *     tags={"User","PerfilAdministrador"},
    *     summary="Actualizar datos de un administrador",
    *     description="Actualiza la información de un usuario administrador. Los campos son opcionales; solo se actualizan los que se envían. Si se proporciona contraseña, debe incluirse la confirmación.",
    *     security={{"sanctum":{}}},
@@ -355,7 +355,7 @@ class AdminUserController extends Controller
    * @OA\Delete(
    *     path="/api/users/admins/{userId}",
    *     operationId="adminUsersDestroy",
-   *     tags={"User","Admin"},
+   *     tags={"User","PerfilAdministrador"},
    *     summary="Eliminar un usuario administrador",
    *     description="Elimina un usuario administrador del sistema. Se revoca automáticamente todos sus tokens activos. No permite eliminar el último administrador del sistema.",
    *     security={{"sanctum":{}}},

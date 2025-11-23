@@ -50,6 +50,26 @@ namespace App\Http\Controllers;
  * )
  *
  * @OA\Tag(
+ *     name="PerfilBase",
+ *     description="Endpoints para usuarios base"
+ * )
+ *
+ * @OA\Tag(
+ *     name="PerfilAdministrador",
+ *     description="Endpoints para administradores del sistema"
+ * )
+ *
+ * @OA\Tag(
+ *     name="PerfilFarmacia",
+ *     description="Endpoints para usuarios de farmacias"
+ * )
+ *
+ * @OA\Tag(
+ *     name="PerfilRepartidor",
+ *     description="Endpoints para usuarios repartidores"
+ * )
+ *
+ * @OA\Tag(
  *     name="Pedidos",
  *     description="Endpoints para gestión de pedidos"
  * )
