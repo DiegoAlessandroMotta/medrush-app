@@ -1354,6 +1354,182 @@
                 ]
             }
         },
+        "/api/google-api-usage/stats": {
+            "get": {
+                "tags": [
+                    "Maps",
+                    "Google APIs"
+                ],
+                "summary": "Obtener estadísticas de uso de Google APIs",
+                "description": "Obtiene estadísticas detalladas de uso de servicios de Google APIs (Geocoding, Directions, Route Optimization) para un período específico. Incluye el costo estimado por servicio basado en la tarifa actual de Google.",
+                "operationId": "googleApiUsageStats",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Año para filtrar estadísticas (2020-2030, por defecto año actual)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2024
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Mes para filtrar estadísticas (1-12, por defecto mes actual)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 11
+                        }
+                    },
+                    {
+                        "name": "service_type",
+                        "in": "query",
+                        "description": "Tipo de servicio para filtrar (route_optimization_fleetrouting, geocoding, directions)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "route_optimization_fleetrouting",
+                                "geocoding",
+                                "directions"
+                            ],
+                            "example": "geocoding"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estadísticas obtenidas exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Estadísticas de uso de Google API"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "period": {
+                                                    "properties": {
+                                                        "start_date": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2024-11-01T00:00:00.000000Z"
+                                                        },
+                                                        "end_date": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2024-11-30T23:59:59.000000Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "summary": {
+                                                    "properties": {
+                                                        "total_requests": {
+                                                            "type": "integer",
+                                                            "example": 1250
+                                                        },
+                                                        "total_estimated_cost": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 7.5
+                                                        },
+                                                        "currency": {
+                                                            "type": "string",
+                                                            "example": "USD"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "geocoding"
+                                                            },
+                                                            "service_name": {
+                                                                "type": "string",
+                                                                "example": "Geocoding"
+                                                            },
+                                                            "total_requests": {
+                                                                "type": "integer",
+                                                                "example": 500
+                                                            },
+                                                            "cost_per_request": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0.005
+                                                            },
+                                                            "estimated_cost": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 2.5
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación en los parámetros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/ubicaciones-repartidor": {
             "get": {
                 "tags": [
@@ -6199,6 +6375,10 @@
         {
             "name": "Geocoding",
             "description": "Geocoding"
+        },
+        {
+            "name": "Google APIs",
+            "description": "Google APIs"
         },
         {
             "name": "Ubicaciones Repartidor",
