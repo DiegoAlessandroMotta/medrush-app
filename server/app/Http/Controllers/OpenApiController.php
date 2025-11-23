@@ -70,6 +70,11 @@ namespace App\Http\Controllers;
  * )
  *
  * @OA\Tag(
+ *     name="Entities",
+ *     description="Endpoints para gestión de entidades relacionadas"
+ * )
+ *
+ * @OA\Tag(
  *     name="Reportes",
  *     description="Endpoints para generación de reportes"
  * )

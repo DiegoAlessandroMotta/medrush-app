@@ -1354,6 +1354,495 @@
                 ]
             }
         },
+        "/api/ubicaciones-repartidor": {
+            "get": {
+                "tags": [
+                    "Entities",
+                    "Ubicaciones Repartidor"
+                ],
+                "summary": "Listar ubicaciones de repartidores",
+                "description": "Obtiene una lista de ubicaciones registradas de repartidores con soporte para paginación por cursor y filtros. Los administradores pueden ver ubicaciones de cualquier repartidor, mientras que los repartidores solo ven sus propias ubicaciones.",
+                "operationId": "ubicacionesRepartidorIndex",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Número máximo de ubicaciones a retornar (1-500)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 100
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Cursor codificado en base64 para la siguiente página de resultados",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "eyJmZWNoYV9yZWdpc3RybyI6IjIwMjQtMDItMDZUMDg6MzA6MzAuMDAwMDAwWiIsImlkIjoiNTUwZTg0MzMtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMDAwIiwib3JkZXJfZGlyZWN0aW9uIjoiYXNjIiwib3JkZXJfYnkiOiJmZWNoYV9yZWdpc3RybyJ9"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Dirección de ordenamiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo por el cual ordenar",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "fecha_registro"
+                            ],
+                            "example": "fecha_registro"
+                        }
+                    },
+                    {
+                        "name": "start_ts",
+                        "in": "query",
+                        "description": "Fecha y hora de inicio para filtrar ubicaciones",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-02-06"
+                        }
+                    },
+                    {
+                        "name": "end_ts",
+                        "in": "query",
+                        "description": "Fecha y hora de fin para filtrar ubicaciones",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-02-08"
+                        }
+                    },
+                    {
+                        "name": "repartidor_id",
+                        "in": "query",
+                        "description": "UUID del repartidor para filtrar ubicaciones (requerido para administradores, se ignora para repartidores)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    },
+                    {
+                        "name": "pedido_id",
+                        "in": "query",
+                        "description": "UUID del pedido para filtrar ubicaciones",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440001"
+                        }
+                    },
+                    {
+                        "name": "ruta_id",
+                        "in": "query",
+                        "description": "UUID de la ruta para filtrar ubicaciones",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440002"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de ubicaciones obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mostrando las ubicaciones de los repartidores"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440003"
+                                                    },
+                                                    "repartidor_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                    },
+                                                    "pedido_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                                                        "nullable": true
+                                                    },
+                                                    "ruta_id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440002",
+                                                        "nullable": true
+                                                    },
+                                                    "ubicacion": {
+                                                        "properties": {
+                                                            "latitude": {
+                                                                "description": "Latitud",
+                                                                "type": "number",
+                                                                "example": 4.711
+                                                            },
+                                                            "longitude": {
+                                                                "description": "Longitud",
+                                                                "type": "number",
+                                                                "example": -74.0087
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "precision_m": {
+                                                        "description": "Precisión de la ubicación en metros",
+                                                        "type": "number",
+                                                        "example": 5.5,
+                                                        "nullable": true
+                                                    },
+                                                    "velocidad_ms": {
+                                                        "description": "Velocidad en metros por segundo",
+                                                        "type": "number",
+                                                        "example": 15.3,
+                                                        "nullable": true
+                                                    },
+                                                    "direccion": {
+                                                        "description": "Dirección en grados (0-360)",
+                                                        "type": "number",
+                                                        "example": 45.5,
+                                                        "nullable": true
+                                                    },
+                                                    "fecha_registro": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-02-06T08:30:00.000000Z"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-02-06T08:30:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "cursor_pagination": {
+                                            "properties": {
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "has_more": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "next_cursor": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "last_item": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entities",
+                    "Ubicaciones Repartidor"
+                ],
+                "summary": "Registrar ubicación de repartidor",
+                "description": "Registra una nueva ubicación para un repartidor. Si se proporciona un pedido_id, valida que el repartidor esté asignado al pedido y que éste se encuentre en estado 'EN_RUTA'. La ubicación se registra como un punto GIS (latitud, longitud).",
+                "operationId": "ubicacionesRepartidorStore",
+                "requestBody": {
+                    "description": "Datos de la ubicación a registrar",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "repartidor_id",
+                                    "ubicacion"
+                                ],
+                                "properties": {
+                                    "repartidor_id": {
+                                        "description": "UUID del repartidor",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                                    },
+                                    "pedido_id": {
+                                        "description": "UUID del pedido asociado (opcional)",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                                        "nullable": true
+                                    },
+                                    "ubicacion": {
+                                        "description": "Coordenadas del repartidor",
+                                        "properties": {
+                                            "latitude": {
+                                                "description": "Latitud",
+                                                "type": "number",
+                                                "example": 4.711
+                                            },
+                                            "longitude": {
+                                                "description": "Longitud",
+                                                "type": "number",
+                                                "example": -74.0087
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "precision_m": {
+                                        "description": "Precisión de la ubicación en metros",
+                                        "type": "number",
+                                        "example": 5.5,
+                                        "nullable": true
+                                    },
+                                    "velocidad_ms": {
+                                        "description": "Velocidad en metros por segundo",
+                                        "type": "number",
+                                        "example": 15.3,
+                                        "nullable": true
+                                    },
+                                    "direccion": {
+                                        "description": "Dirección en grados (0-360)",
+                                        "type": "number",
+                                        "example": 45.5,
+                                        "nullable": true
+                                    },
+                                    "fecha_registro": {
+                                        "description": "Fecha y hora del registro (debe ser anterior o igual a ahora)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-02-06T08:30:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ubicación registrada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ubicación del repartidor registrada exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440003"
+                                                },
+                                                "repartidor_id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                },
+                                                "pedido_id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440001",
+                                                    "nullable": true
+                                                },
+                                                "ruta_id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440002",
+                                                    "nullable": true
+                                                },
+                                                "ubicacion": {
+                                                    "properties": {
+                                                        "latitude": {
+                                                            "description": "Latitud",
+                                                            "type": "number",
+                                                            "example": 4.711
+                                                        },
+                                                        "longitude": {
+                                                            "description": "Longitud",
+                                                            "type": "number",
+                                                            "example": -74.0087
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "precision_m": {
+                                                    "type": "number",
+                                                    "example": 5.5,
+                                                    "nullable": true
+                                                },
+                                                "velocidad_ms": {
+                                                    "type": "number",
+                                                    "example": 15.3,
+                                                    "nullable": true
+                                                },
+                                                "direccion": {
+                                                    "type": "number",
+                                                    "example": 45.5,
+                                                    "nullable": true
+                                                },
+                                                "fecha_registro": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-02-06T08:30:00.000000Z"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-02-06T08:30:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación o validación de negocio",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/fcm/tokens": {
             "post": {
                 "tags": [
@@ -5668,6 +6157,10 @@
             "description": "Endpoints para gestión de eventos de pedidos"
         },
         {
+            "name": "Entities",
+            "description": "Endpoints para gestión de entidades relacionadas"
+        },
+        {
             "name": "Maps",
             "description": "Endpoints para servicios de mapas y geolocalización"
         },
@@ -5690,6 +6183,10 @@
         {
             "name": "Geocoding",
             "description": "Geocoding"
+        },
+        {
+            "name": "Ubicaciones Repartidor",
+            "description": "Ubicaciones Repartidor"
         },
         {
             "name": "Device Tokens",
