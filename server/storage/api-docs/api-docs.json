@@ -26,6 +26,462 @@
         }
     ],
     "paths": {
+        "/api/directions": {
+            "get": {
+                "tags": [
+                    "Maps",
+                    "Directions"
+                ],
+                "summary": "Obtener direcciones con puntos intermedios",
+                "description": "Calcula la ruta optimizada entre un origen y destino, pasando por múltiples waypoints (puntos intermedios). Utiliza Google Maps Directions API internamente.",
+                "operationId": "directionsGetWithWaypoints",
+                "parameters": [
+                    {
+                        "name": "origen",
+                        "in": "query",
+                        "description": "Ubicación de origen en formato 'latitude,longitude'",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7110,-74.0087"
+                        }
+                    },
+                    {
+                        "name": "destino",
+                        "in": "query",
+                        "description": "Ubicación de destino en formato 'latitude,longitude'",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7169,-74.0072"
+                        }
+                    },
+                    {
+                        "name": "waypoints",
+                        "in": "query",
+                        "description": "Puntos intermedios separados por '|', cada uno en formato 'latitude,longitude'",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7120,-74.0080|4.7140,-74.0075"
+                        }
+                    },
+                    {
+                        "name": "optimize_waypoints",
+                        "in": "query",
+                        "description": "Si es true, optimiza el orden de los waypoints para distancia mínima",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Direcciones obtenidas exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Directions obtenido exitosamente"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "encoded_polyline": {
+                                                    "description": "Polilínea codificada de la ruta",
+                                                    "type": "string",
+                                                    "example": "_p~iF~ps|U_ulLnnqC_mqNvxq`@"
+                                                },
+                                                "legs": {
+                                                    "description": "Array de tramos de la ruta",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "distance_text": {
+                                                                "type": "string",
+                                                                "example": "5.2 km"
+                                                            },
+                                                            "duration_text": {
+                                                                "type": "string",
+                                                                "example": "12 mins"
+                                                            },
+                                                            "distance_meters": {
+                                                                "type": "integer",
+                                                                "example": 5200
+                                                            },
+                                                            "duration_seconds": {
+                                                                "type": "integer",
+                                                                "example": 720
+                                                            },
+                                                            "cumulative_distance_meters": {
+                                                                "type": "integer",
+                                                                "example": 5200
+                                                            },
+                                                            "cumulative_duration_seconds": {
+                                                                "type": "integer",
+                                                                "example": 720
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total_distance_meters": {
+                                                    "type": "integer",
+                                                    "example": 5200
+                                                },
+                                                "total_duration_seconds": {
+                                                    "type": "integer",
+                                                    "example": 720
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Parámetros inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Servicio de mapas no disponible",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes": {
+            "get": {
+                "tags": [
+                    "Maps",
+                    "Directions"
+                ],
+                "summary": "Obtener información detallada de ruta",
+                "description": "Obtiene información detallada sobre una ruta entre origen y destino, incluyendo distancia y duración total. Versión simplificada sin waypoints.",
+                "operationId": "directionsGetRouteInfo",
+                "parameters": [
+                    {
+                        "name": "origen",
+                        "in": "query",
+                        "description": "Ubicación de origen en formato 'latitude,longitude'",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7110,-74.0087"
+                        }
+                    },
+                    {
+                        "name": "destino",
+                        "in": "query",
+                        "description": "Ubicación de destino en formato 'latitude,longitude'",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7169,-74.0072"
+                        }
+                    },
+                    {
+                        "name": "waypoints",
+                        "in": "query",
+                        "description": "Puntos intermedios separados por '|', cada uno en formato 'latitude,longitude'",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "4.7120,-74.0080|4.7140,-74.0075"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Información de ruta obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Información de ruta obtenida exitosamente"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "legs": {
+                                                    "description": "Array de tramos de la ruta",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "distance_text": {
+                                                                "type": "string",
+                                                                "example": "5.2 km"
+                                                            },
+                                                            "duration_text": {
+                                                                "type": "string",
+                                                                "example": "12 mins"
+                                                            },
+                                                            "distance_meters": {
+                                                                "type": "integer",
+                                                                "example": 5200
+                                                            },
+                                                            "duration_seconds": {
+                                                                "type": "integer",
+                                                                "example": 720
+                                                            },
+                                                            "cumulative_distance_meters": {
+                                                                "type": "integer",
+                                                                "example": 5200
+                                                            },
+                                                            "cumulative_duration_seconds": {
+                                                                "type": "integer",
+                                                                "example": 720
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total_distance_meters": {
+                                                    "type": "integer",
+                                                    "example": 5200
+                                                },
+                                                "total_duration_seconds": {
+                                                    "type": "integer",
+                                                    "example": 720
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Parámetros inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Servicio de mapas no disponible",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/geocoding/reverse": {
+            "post": {
+                "tags": [
+                    "Maps",
+                    "Geocoding"
+                ],
+                "summary": "Geocodificación inversa - Obtener dirección desde coordenadas",
+                "description": "Convierte coordenadas geográficas (latitud, longitud) a dirección legible. Utiliza Google Maps Reverse Geocoding API para obtener componentes de dirección (línea 1, ciudad, estado, código postal, país).",
+                "operationId": "geocodingReverse",
+                "requestBody": {
+                    "description": "Coordenadas a geocodificar",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "location"
+                                ],
+                                "properties": {
+                                    "location": {
+                                        "required": [
+                                            "latitude",
+                                            "longitude"
+                                        ],
+                                        "properties": {
+                                            "latitude": {
+                                                "description": "Latitud de la ubicación",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 4.711
+                                            },
+                                            "longitude": {
+                                                "description": "Longitud de la ubicación",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": -74.0087
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Geocodificación realizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Geocodificación exitosa"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "address_line_1": {
+                                                    "description": "Primera línea de la dirección",
+                                                    "type": "string",
+                                                    "example": "Carrera 7 #72-41"
+                                                },
+                                                "city": {
+                                                    "description": "Ciudad",
+                                                    "type": "string",
+                                                    "example": "Bogotá"
+                                                },
+                                                "state": {
+                                                    "description": "Departamento o estado",
+                                                    "type": "string",
+                                                    "example": "Bogotá D.C."
+                                                },
+                                                "postal_code": {
+                                                    "description": "Código postal",
+                                                    "type": "string",
+                                                    "example": "110221"
+                                                },
+                                                "country": {
+                                                    "description": "País",
+                                                    "type": "string",
+                                                    "example": "Colombia"
+                                                },
+                                                "formatted_address": {
+                                                    "description": "Dirección formateada completa",
+                                                    "type": "string",
+                                                    "example": "Carrera 7 #72-41, Bogotá, Bogotá D.C., 110221, Colombia"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Coordenadas inválidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor - Servicio de geocodificación no disponible",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "tags": [
@@ -5026,20 +5482,32 @@
             "description": "Endpoints de autenticación y gestión de sesiones"
         },
         {
-            "name": "Downloads",
-            "description": "Downloads"
+            "name": "Maps",
+            "description": "Endpoints para servicios de mapas y geolocalización"
+        },
+        {
+            "name": "Notifications",
+            "description": "Endpoints para gestión de notificaciones"
         },
         {
             "name": "FCM",
-            "description": "FCM"
+            "description": "Endpoints para gestión de tokens FCM (Firebase Cloud Messaging)"
+        },
+        {
+            "name": "Downloads",
+            "description": "Endpoints para descargas de archivos"
+        },
+        {
+            "name": "Directions",
+            "description": "Directions"
+        },
+        {
+            "name": "Geocoding",
+            "description": "Geocoding"
         },
         {
             "name": "Device Tokens",
             "description": "Device Tokens"
-        },
-        {
-            "name": "Notifications",
-            "description": "Notifications"
         },
         {
             "name": "User",

@@ -68,5 +68,25 @@ namespace App\Http\Controllers;
  *     name="Reportes",
  *     description="Endpoints para generación de reportes"
  * )
+ *
+ * @OA\Tag(
+ *     name="Maps",
+ *     description="Endpoints para servicios de mapas y geolocalización"
+ * )
+ *
+ * @OA\Tag(
+ *     name="Notifications",
+ *     description="Endpoints para gestión de notificaciones"
+ * )
+ *
+ * @OA\Tag(
+ *     name="FCM",
+ *     description="Endpoints para gestión de tokens FCM (Firebase Cloud Messaging)"
+ * )
+ *
+ * @OA\Tag(
+ *     name="Downloads",
+ *     description="Endpoints para descargas de archivos"
+ * )
  */
 class OpenApiController extends Controller {}
