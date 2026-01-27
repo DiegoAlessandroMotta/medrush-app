@@ -10,8 +10,6 @@ import 'package:medrush/utils/loggers.dart';
 /// Repositorio para la gestión de pedidos
 /// Proporciona una capa de abstracción entre los providers y la API de pedidos
 class PedidoRepository extends BaseRepository {
-  // FIX: Sistema de caché eliminado completamente
-
   PedidoRepository();
 
   /// Obtiene un pedido por su ID
@@ -19,7 +17,6 @@ class PedidoRepository extends BaseRepository {
     return execute(() async {
       validateId(id, 'ID de pedido');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedido = await PedidosApi.getPedidoById(id.toString());
       return pedido;
     }, errorMessage: 'Error al obtener pedido por ID');
@@ -31,16 +28,14 @@ class PedidoRepository extends BaseRepository {
     int page = 1,
     int perPage = 20,
     EstadoPedido? estado,
-    List<EstadoPedido>? estados, // FIX: Agregar soporte para múltiples estados
+    List<EstadoPedido>? estados,
     String? repartidorId,
     String? farmaciaId,
     DateTime? fechaDesde,
     DateTime? fechaHasta,
-    String? search, // FIX: Agregar parámetro de búsqueda
-    String? orderBy =
-        'updated_at', // FIX: Usar updated_at por defecto para consistencia
-    String? orderDirection =
-        'desc', // FIX: Usar desc por defecto para consistencia
+    String? search,
+    String? orderBy = 'updated_at',
+    String? orderDirection = 'desc',
   }) {
     return execute(() async {
       logInfo(
@@ -52,7 +47,6 @@ class PedidoRepository extends BaseRepository {
         // Convertir estado único a lista para usar filtro 'estados'
         filters['estados'] = _convertEstadoToBackend(estado);
       } else if (estados != null && estados.isNotEmpty) {
-        // FIX: Usar filtro múltiple de estados como string separado por comas
         filters['estados'] = estados.map(_convertEstadoToBackend).join(',');
       }
       if (repartidorId != null) {
@@ -68,20 +62,17 @@ class PedidoRepository extends BaseRepository {
         filters['fecha_hasta'] = fechaHasta.toIso8601String();
       }
       if (search != null && search.isNotEmpty) {
-        filters['search'] = search; // FIX: Agregar filtro de búsqueda
+        filters['search'] = search;
       }
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final response = await BaseApi.getPaginated<Pedido>(
         '/pedidos',
         fromJson: Pedido.fromJson,
         page: page,
         perPage: perPage,
         filters: filters,
-        orderBy:
-            orderBy, // FIX: Solo pasar si se especifica - el backend maneja el ordenamiento por defecto
-        orderDirection:
-            orderDirection, // FIX: Solo pasar si se especifica - el backend maneja el ordenamiento por defecto
+        orderBy: orderBy,
+        orderDirection: orderDirection,
       );
 
       return response;
@@ -96,7 +87,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Creando nuevo pedido');
 
-      // FIX: Cache deshabilitado - crear directamente en la API
       final pedido = await PedidosApi.createPedido(pedidoData);
 
       if (pedido != null) {
@@ -118,7 +108,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Actualizando pedido: $id');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.updatePedido(id, pedidoData);
 
       if (pedido != null) {
@@ -136,7 +125,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Eliminando pedido: $id');
 
-      // FIX: Cache deshabilitado - eliminar directamente de la API
       final resultado = await PedidosApi.deletePedido(id);
 
       if (resultado) {
@@ -158,7 +146,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Asignando pedido $pedidoId al repartidor $repartidorId');
 
-      // FIX: Cache deshabilitado - asignar directamente en la API
       final pedido = await PedidosApi.asignarPedido(pedidoId, repartidorId);
 
       if (pedido != null) {
@@ -176,7 +163,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Marcando pedido como recogido: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.marcarPedidoRecogido(pedidoId);
 
       if (pedido != null) {
@@ -194,7 +180,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Marcando pedido como en ruta: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.marcarPedidoEnRuta(pedidoId);
 
       if (pedido != null) {
@@ -220,7 +205,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Marcando pedido como entregado: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.marcarPedidoEntregado(
         pedidoId,
         latitud: latitud,
@@ -253,7 +237,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Marcando pedido como fallido: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.marcarPedidoFallido(
         pedidoId,
         motivoFallo: motivoFallo,
@@ -277,7 +260,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Marcando pedido como devuelto: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.marcarPedidoDevuelto(pedidoId);
 
       if (pedido != null) {
@@ -297,7 +279,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo eventos del pedido: $pedidoId');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final eventos = await PedidosApi.getEventosPedido(pedidoId);
 
       logInfo('${eventos.length} eventos obtenidos del pedido');
@@ -314,7 +295,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo pedidos con estado: ${estado.name}');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.getPedidosByEstado(estado.name);
 
       logInfo('${pedidos.length} pedidos con estado ${estado.name} obtenidos');
@@ -331,7 +311,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo pedidos del repartidor: $repartidorId');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.getPedidosByRepartidor(repartidorId);
 
       logInfo('${pedidos.length} pedidos del repartidor obtenidos');
@@ -348,7 +327,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo pedidos de la farmacia: $farmaciaId');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.getPedidosByFarmacia(farmaciaId);
 
       logInfo('${pedidos.length} pedidos de la farmacia obtenidos');
@@ -363,7 +341,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Buscando pedidos con: $query');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.searchPedidos(query);
 
       logInfo('${pedidos.length} pedidos encontrados');
@@ -422,7 +399,6 @@ class PedidoRepository extends BaseRepository {
       logInfo(
           'Obteniendo pedidos del ${fechaInicio.toIso8601String()} al ${fechaFin.toIso8601String()}');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.getPedidosByDateRange(
         fechaInicio,
         fechaFin,
@@ -449,7 +425,6 @@ class PedidoRepository extends BaseRepository {
       logInfo(
           'Obteniendo pedidos cercanos a ($latitud, $longitud) en un radio de ${radioKm}km');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedidos = await PedidosApi.getPedidosCercanos(
         latitud,
         longitud,
@@ -479,7 +454,6 @@ class PedidoRepository extends BaseRepository {
       logInfo(
           'Obteniendo pedidos paginados: página $page, $perPage por página');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final response = await PedidosApi.getPedidosPaginated(
         page: page,
         perPage: perPage,
@@ -506,7 +480,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo pedido por código de barras: $codigoBarra');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final pedido = await PedidosApi.getPedidoByCodigoBarra(codigoBarra);
 
       if (pedido != null) {
@@ -526,7 +499,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Cargando pedidos desde CSV: $filePath');
 
-      // FIX: Cache deshabilitado - cargar directamente en la API
       final resultado = await PedidosApi.cargarPedidosCsv(filePath);
 
       if (resultado) {
@@ -545,7 +517,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Subiendo archivo CSV de pedidos para farmacia: $farmaciaId');
 
-      // FIX: Cache deshabilitado - subir directamente a la API
       final resultado = await PedidosApi.uploadCsv(csvFile, farmaciaId);
 
       if (resultado) {
@@ -590,7 +561,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Retirando repartidor del pedido: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.retirarRepartidor(pedidoId);
 
       if (pedido != null) {
@@ -608,7 +578,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Cancelando pedido: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.cancelarPedido(pedidoId);
 
       if (pedido != null) {
@@ -631,7 +600,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Actualizando ruta del pedido: $pedidoId');
 
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final pedido = await PedidosApi.actualizarRutaPedido(
         pedidoId,
         waypoints: waypoints,
@@ -657,7 +625,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Obteniendo URL firmada para plantilla CSV: $lang/$templateKey');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final urlData = await PedidosApi.getSignedTemplateUrl(
         lang: lang,
         templateKey: templateKey,
@@ -682,7 +649,6 @@ class PedidoRepository extends BaseRepository {
 
       logInfo('Descargando plantilla CSV: $lang/$templateKey');
 
-      // FIX: Cache deshabilitado - descargar directamente de la API
       final templateData = await PedidosApi.downloadTemplate(
         lang: lang,
         templateKey: templateKey,
@@ -695,8 +661,6 @@ class PedidoRepository extends BaseRepository {
       return templateData;
     }, errorMessage: 'Error al descargar plantilla CSV');
   }
-
-  // FIX: Métodos de caché eliminados completamente
 
   /// Genera PDF de etiquetas de envío para pedidos seleccionados
   Future<RepositoryResult<Map<String, dynamic>?>> generarEtiquetasPdf({
@@ -766,7 +730,6 @@ class PedidoRepository extends BaseRepository {
     return execute(() async {
       logInfo('Obteniendo ruta actual del repartidor autenticado');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final rutaActual = await PedidosApi.getRutaActual(
         estado: estado,
         orderBy: orderBy,
@@ -795,7 +758,6 @@ class PedidoRepository extends BaseRepository {
       logInfo(
           'Iniciando limpieza de archivos multimedia de pedidos antiguos: $semanas semanas');
 
-      // FIX: Cache deshabilitado - eliminar directamente en la API
       final resultado = await PedidosApi.eliminarPedidosAntiguos(semanas);
 
       if (resultado) {
@@ -819,7 +781,7 @@ class PedidoRepository extends BaseRepository {
       case EstadoPedido.recogido:
         return 'recogido';
       case EstadoPedido.enRuta:
-        return 'en_ruta'; // FIX: Backend espera 'en_ruta' con guión bajo
+        return 'en_ruta';
       case EstadoPedido.entregado:
         return 'entregado';
       case EstadoPedido.fallido:

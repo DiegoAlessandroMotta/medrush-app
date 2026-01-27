@@ -348,15 +348,34 @@ class Pedido {
 
       // Corregir formato de fecha mal formateado del backend
       // Ejemplo: "2025-09-02T15:08:9.000000Z" -> "2025-09-02T15:08:09.000000Z"
-      final regex =
-          RegExp(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}):(\d{1})\.(\d{6}Z)');
-      final match = regex.firstMatch(dateStr);
+      // Buscar patrón: YYYY-MM-DDTHH:MM:(\d)\.(6 dígitos)Z donde \d es un solo dígito
 
-      if (match != null) {
-        final prefix = match.group(1)!;
-        final second = match.group(2)!.padLeft(2, '0');
-        final suffix = match.group(3)!;
-        dateStr = '$prefix:$second.$suffix';
+      // Buscar posición de "T" que separa fecha y hora
+      final tIndex = dateStr.indexOf('T');
+      if (tIndex != -1 && dateStr.length > tIndex + 13) {
+        // Buscar dos puntos después de T (HH:MM:)
+        final colonIndex1 = dateStr.indexOf(':', tIndex);
+        if (colonIndex1 != -1) {
+          final colonIndex2 = dateStr.indexOf(':', colonIndex1 + 1);
+          if (colonIndex2 != -1 && colonIndex2 + 1 < dateStr.length) {
+            // Verificar si después de "HH:MM:" hay un solo dígito seguido de "."
+            final secondsStart = colonIndex2 + 1;
+            if (secondsStart + 8 < dateStr.length) {
+              final char1 = dateStr.codeUnitAt(secondsStart);
+              final char2 = dateStr.codeUnitAt(secondsStart + 1);
+              final isDigit1 = char1 >= 48 && char1 <= 57; // '0'-'9'
+              final isDot = char2 == 46; // '.'
+
+              // Si hay un solo dígito antes del punto, necesita padding
+              if (isDigit1 && isDot) {
+                final prefix = dateStr.substring(0, secondsStart);
+                final singleDigit = dateStr[secondsStart];
+                final suffix = dateStr.substring(secondsStart + 1);
+                dateStr = '$prefix${singleDigit.padLeft(2, '0')}$suffix';
+              }
+            }
+          }
+        }
       }
 
       return DateTime.parse(dateStr);

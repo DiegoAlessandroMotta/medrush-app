@@ -11,6 +11,7 @@ import 'package:medrush/services/csv.service.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/validators.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Transición personalizada para la pantalla de CSV
@@ -336,7 +337,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                     ),
                     SizedBox(height: MedRushTheme.spacingSm),
                     Text(
-                      'Las coordenadas deben estar en formato decimal: "-12.0464, -77.0428" para Lima, Perú.',
+                      'Las coordenadas deben estar en formato decimal: "26.037737, -80.179550" para EEUU.',
                       style: TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                       ),
@@ -1075,8 +1076,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
     try {
       // Limpiar el texto y dividir por comas
-      final cleanText = locationText.trim().replaceAll(RegExp(r'\s+'), ' ');
-      final parts = cleanText.split(RegExp(r'[,\s]+'));
+      final cleanText = Validators.normalizeSpaces(locationText.trim());
+      final parts = Validators.splitByCommasAndSpaces(cleanText);
 
       if (parts.length >= 2) {
         final lat = double.tryParse(parts[0]);

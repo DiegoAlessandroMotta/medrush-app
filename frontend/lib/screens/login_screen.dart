@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
@@ -23,7 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FocusNode _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
+  bool _isCapsLockOn = false;
 
   // Estado de conexión al servidor
   bool _isCheckingConnection = false;
@@ -38,6 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     // Verificar conexión al servidor al inicializar
     _checkServerConnection();
+
+    if (_supportsCapsLockDetection) {
+      _passwordFocusNode.addListener(_handlePasswordFocusChange);
+      HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
+    }
 
     // Mostrar mensaje si se redirigió por token expirado
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,6 +65,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    if (_supportsCapsLockDetection) {
+      _passwordFocusNode.removeListener(_handlePasswordFocusChange);
+      HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+    }
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -160,6 +173,61 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+  }
+
+  bool get _supportsCapsLockDetection {
+    if (kIsWeb) {
+      return true;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void _updateCapsLockStatus() {
+    if (!_supportsCapsLockDetection) {
+      return;
+    }
+
+    final isEnabled = HardwareKeyboard.instance.lockModesEnabled.contains(
+      KeyboardLockMode.capsLock,
+    );
+
+    if (mounted && isEnabled != _isCapsLockOn) {
+      setState(() {
+        _isCapsLockOn = isEnabled;
+      });
+    }
+  }
+
+  void _handlePasswordFocusChange() {
+    if (!_passwordFocusNode.hasFocus) {
+      if (_isCapsLockOn && mounted) {
+        setState(() {
+          _isCapsLockOn = false;
+        });
+      }
+    } else {
+      _updateCapsLockStatus();
+    }
+  }
+
+  bool _handleHardwareKeyEvent(KeyEvent event) {
+    if (!_supportsCapsLockDetection || !_passwordFocusNode.hasFocus) {
+      return false;
+    }
+
+    if (event is KeyDownEvent || event is KeyUpEvent) {
+      _updateCapsLockStatus();
+    }
+
+    return false;
   }
 
   @override
@@ -353,6 +421,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Campo Contraseña
               TextFormField(
                 controller: _passwordController,
+                focusNode: _passwordFocusNode,
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _login(),
@@ -395,6 +464,53 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 validator: Validators.password,
               ),
+
+              if (_supportsCapsLockDetection)
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _isCapsLockOn
+                      ? Container(
+                          key: const ValueKey('caps-lock-indicator'),
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(
+                            top: MedRushTheme.spacingSm,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: MedRushTheme.spacingMd,
+                            vertical: MedRushTheme.spacingSm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: MedRushTheme.info.withValues(alpha: 0.12),
+                            border: Border.all(
+                              color: MedRushTheme.info.withValues(alpha: 0.4),
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              MedRushTheme.borderRadiusMd,
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                LucideIcons.keyboard,
+                                size: 16,
+                                color: MedRushTheme.info,
+                              ),
+                              SizedBox(width: MedRushTheme.spacingSm),
+                              Expanded(
+                                child: Text(
+                                  'Bloq Mayús activado',
+                                  style: TextStyle(
+                                    color: MedRushTheme.info,
+                                    fontSize: MedRushTheme.fontSizeLabelSmall,
+                                    fontWeight: MedRushTheme.fontWeightMedium,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
 
               const SizedBox(height: MedRushTheme.spacingXl),
 

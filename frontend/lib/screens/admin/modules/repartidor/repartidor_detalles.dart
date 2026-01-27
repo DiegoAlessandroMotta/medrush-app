@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/usuario.model.dart';
@@ -186,7 +187,7 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                           IconButton(
                             onPressed: () => Navigator.of(context).pop(),
                             icon: const Icon(
-                              Icons.close,
+                              LucideIcons.x,
                               color: MedRushTheme.textSecondary,
                               size: 24,
                             ),
@@ -217,32 +218,32 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                         // Información Personal
                         _buildInfoSection('Información Personal', [
                           _buildInfoRow('Nombre', widget.repartidor.nombre,
-                              icon: Icons.person),
+                              icon: LucideIcons.user),
                           _buildInfoRow(
                               'Tipo de Usuario', _getTipoUsuarioDisplayName(),
-                              icon: Icons.person_outline),
+                              icon: LucideIcons.user),
                           if (widget.repartidor.telefono != null)
                             _buildInfoRow(
                                 'Teléfono', widget.repartidor.telefono!,
-                                icon: Icons.phone),
+                                icon: LucideIcons.phone),
                           if (widget.repartidor.codigoIsoPais != null)
                             _buildInfoRow(
                                 'País', widget.repartidor.codigoIsoPais!,
-                                icon: Icons.flag),
+                                icon: LucideIcons.flag),
                           if (widget.repartidor.verificado != null)
                             _buildInfoRow('Verificado',
                                 widget.repartidor.verificado! ? 'Sí' : 'No',
                                 icon: widget.repartidor.verificado!
-                                    ? Icons.verified
-                                    : Icons.verified_user_outlined,
+                                    ? LucideIcons.badgeCheck
+                                    : LucideIcons.shieldAlert,
                                 iconColor: widget.repartidor.verificado!
                                     ? MedRushTheme.primaryGreen
                                     : MedRushTheme.textSecondary),
                           _buildInfoRow('Usuario Activo',
                               widget.repartidor.activo ? 'Sí' : 'No',
                               icon: widget.repartidor.activo
-                                  ? Icons.check_circle
-                                  : Icons.cancel,
+                                  ? LucideIcons.circleCheck
+                                  : LucideIcons.circleX,
                               iconColor: widget.repartidor.activo
                                   ? MedRushTheme.primaryGreen
                                   : MedRushTheme.textSecondary),
@@ -257,13 +258,13 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                               _buildInfoSection('Documentos', [
                                 if (widget.repartidor.dniIdNumero != null)
                                   _buildInfoRow(
-                                      'DNI/ID', widget.repartidor.dniIdNumero!,
-                                      icon: Icons.badge),
+                                      'ID', widget.repartidor.dniIdNumero!,
+                                      icon: LucideIcons.idCard),
                                 if (widget.repartidor.fotoDniId != null)
                                   _buildDocumentRow(
-                                      'Foto DNI/ID',
+                                      'Foto ID',
                                       widget.repartidor.fotoDniId!,
-                                      Icons.badge),
+                                      LucideIcons.idCard),
                                 if (widget.repartidor.firmaDigital != null)
                                   _buildDocumentRow(
                                       'Firma Digital',
@@ -282,7 +283,7 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                                 if (widget.repartidor.licenciaNumero != null)
                                   _buildInfoRow('Número de Licencia',
                                       widget.repartidor.licenciaNumero!,
-                                      icon: Icons.credit_card),
+                                      icon: LucideIcons.idCard),
                                 if (widget.repartidor.licenciaVencimiento !=
                                     null)
                                   _buildInfoRow(
@@ -290,13 +291,22 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                                     _formatDate(
                                         widget.repartidor.licenciaVencimiento!),
                                     isExpiring: _isLicenseExpiring(),
-                                    icon: Icons.calendar_today,
+                                    icon: LucideIcons.calendar,
                                   ),
                                 if (widget.repartidor.fotoLicencia != null)
                                   _buildDocumentRow(
                                       'Foto Licencia',
                                       widget.repartidor.fotoLicencia!,
-                                      Icons.credit_card),
+                                      LucideIcons.idCard),
+                                if ((widget.repartidor.fotoSeguroVehiculo ??
+                                        widget.repartidor.seguroVehiculoUrl) !=
+                                    null)
+                                  _buildDocumentRow(
+                                    'Foto Seguro del Vehículo',
+                                    (widget.repartidor.fotoSeguroVehiculo ??
+                                        widget.repartidor.seguroVehiculoUrl)!,
+                                    LucideIcons.shield,
+                                  ),
                               ]),
                               const SizedBox(height: MedRushTheme.spacingLg),
                             ],
@@ -310,15 +320,22 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                                 if (widget.repartidor.vehiculoPlaca != null)
                                   _buildInfoRow(
                                       'Placa', widget.repartidor.vehiculoPlaca!,
-                                      icon: Icons.pin),
+                                      icon: LucideIcons.mapPin),
                                 if (widget.repartidor.vehiculoMarca != null)
                                   _buildInfoRow(
                                       'Marca', widget.repartidor.vehiculoMarca!,
-                                      icon: Icons.directions_car),
+                                      icon: LucideIcons.car),
                                 if (widget.repartidor.vehiculoModelo != null)
                                   _buildInfoRow('Modelo',
                                       widget.repartidor.vehiculoModelo!,
-                                      icon: Icons.car_rental),
+                                      icon: LucideIcons.car),
+                                if (widget.repartidor.vehiculoCodigoRegistro !=
+                                    null)
+                                  _buildInfoRow(
+                                    'Código de Registro',
+                                    widget.repartidor.vehiculoCodigoRegistro!,
+                                    icon: LucideIcons.badge,
+                                  ),
                               ]),
                               const SizedBox(height: MedRushTheme.spacingLg),
                             ],
@@ -682,12 +699,13 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow('Nombre', _farmacia!.nombre, icon: Icons.local_pharmacy),
+        _buildInfoRow('Nombre', _farmacia!.nombre, icon: LucideIcons.pill),
         if (_farmacia!.direccion.isNotEmpty)
           _buildInfoRow('Dirección', _farmacia!.direccion,
-              icon: Icons.location_on),
+              icon: LucideIcons.mapPin),
         if (_farmacia!.telefono != null && _farmacia!.telefono!.isNotEmpty)
-          _buildInfoRow('Teléfono', _farmacia!.telefono!, icon: Icons.phone),
+          _buildInfoRow('Teléfono', _farmacia!.telefono!,
+              icon: LucideIcons.phone),
       ],
     );
   }
@@ -702,13 +720,17 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
   bool _hasLicenseInfo() {
     return widget.repartidor.licenciaNumero != null ||
         widget.repartidor.licenciaVencimiento != null ||
-        widget.repartidor.fotoLicencia != null;
+        widget.repartidor.fotoLicencia != null ||
+        (widget.repartidor.fotoSeguroVehiculo ??
+                widget.repartidor.seguroVehiculoUrl) !=
+            null;
   }
 
   bool _hasVehicleInfo() {
     return widget.repartidor.vehiculoPlaca != null ||
         widget.repartidor.vehiculoMarca != null ||
-        widget.repartidor.vehiculoModelo != null;
+        widget.repartidor.vehiculoModelo != null ||
+        widget.repartidor.vehiculoCodigoRegistro != null;
   }
 
   bool _isLicenseExpiring() {
@@ -978,7 +1000,7 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                           child: IconButton(
                             onPressed: () => Navigator.of(context).pop(),
                             icon: const Icon(
-                              Icons.close,
+                              LucideIcons.x,
                               color: Colors.white,
                               size: 20,
                             ),

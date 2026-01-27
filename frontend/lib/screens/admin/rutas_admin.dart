@@ -9,6 +9,7 @@ import 'package:medrush/screens/admin/modules/rutas/ruta_detalle.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
 import 'package:medrush/widgets/mapa_ruta_completa_widget.dart';
+import 'package:medrush/widgets/mapa_ruta_compacto_widget.dart';
 
 class RutasAdminScreen extends StatefulWidget {
   const RutasAdminScreen({super.key});
@@ -807,7 +808,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
     });
 
     // FIX: Cargar pedidos si se está expandiendo y no están en cache
-    if (_rutaExpandida == rutaId && !_pedidosPorRuta.containsKey(rutaId)) {
+    if (_rutaExpandida == rutaId && ! _pedidosPorRuta.containsKey(rutaId)) {
       await _cargarPedidosRuta(rutaId);
     }
   }
@@ -894,6 +895,42 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
           ] else ...[
             // Progreso de la ruta
             _buildProgresoRuta(ruta),
+
+            const SizedBox(height: MedRushTheme.spacingMd),
+
+            // Layout de dos paneles: Lista de paradas y Mapa
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // En pantallas pequeñas, apilar verticalmente
+                if (constraints.maxWidth < 800) {
+                  return Column(
+                    children: [
+                      // Lista de paradas
+                      _buildListaParadas(ruta),
+                      const SizedBox(height: MedRushTheme.spacingMd),
+                      // Mapa compacto
+                      _buildMapaIntegrado(ruta),
+                    ],
+                  );
+                } else {
+                  // En pantallas grandes, dos columnas
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Panel izquierdo: Lista de paradas
+                      Expanded(
+                        child: _buildListaParadas(ruta),
+                      ),
+                      const SizedBox(width: MedRushTheme.spacingMd),
+                      // Panel derecho: Mapa
+                      Expanded(
+                        child: _buildMapaIntegrado(ruta),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
 
             const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -984,6 +1021,295 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
         ),
       ],
     );
+  }
+
+  /// Construir la lista de paradas (stops)
+  Widget _buildListaParadas(RutaOptimizada ruta) {
+    final pedidos = _pedidosPorRuta[ruta.id] ?? [];
+
+    if (pedidos.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(MedRushTheme.spacingLg),
+          child: Text(
+            'No hay paradas disponibles',
+            style: TextStyle(
+              fontSize: MedRushTheme.fontSizeBodyMedium,
+              color: MedRushTheme.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Ordenar pedidos por orden de entrega
+    final pedidosOrdenados = List<Map<String, dynamic>>.from(pedidos);
+    pedidosOrdenados.sort((a, b) {
+      final ordenA = _obtenerOrdenPedido(a);
+      final ordenB = _obtenerOrdenPedido(b);
+      return ordenA.compareTo(ordenB);
+    });
+
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 400),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Paradas de la Ruta',
+            style: TextStyle(
+              fontSize: MedRushTheme.fontSizeBodyMedium,
+              fontWeight: MedRushTheme.fontWeightBold,
+              color: MedRushTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: MedRushTheme.spacingSm),
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: pedidosOrdenados.length,
+              itemBuilder: (context, index) {
+                final pedido = pedidosOrdenados[index];
+                final orden = _obtenerOrdenPedido(pedido);
+                return _buildParadaItem(pedido, orden);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Construir un item de parada individual
+  Widget _buildParadaItem(Map<String, dynamic> pedido, int orden) {
+    final estado = pedido['estado'] as String? ?? 'pendiente';
+    final estadoColor = _getEstadoColorPedido(estado);
+    final estadoTexto = _getEstadoTextoPedido(estado);
+    final nombreCliente = pedido['paciente_nombre']?.toString() ?? 'Cliente';
+    final direccion =
+        pedido['direccion_entrega_linea_1']?.toString() ?? 'Sin dirección';
+
+    // Obtener fecha/hora de entrega si está disponible
+    String? horaEntrega;
+    if (pedido['fecha_entrega'] != null) {
+      try {
+        final fecha = DateTime.parse(pedido['fecha_entrega']);
+        horaEntrega =
+            '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')}';
+      } catch (e) {
+        // Ignorar error de parsing
+      }
+    }
+
+    final esEntregado = estado == 'entregado' || estado == 'completado';
+    final esEnTransito = estado == 'en_ruta' || estado == 'asignado';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: MedRushTheme.spacingSm),
+      padding: const EdgeInsets.all(MedRushTheme.spacingSm),
+      decoration: BoxDecoration(
+        color: MedRushTheme.surface,
+        borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusMd),
+        border: Border.all(
+          color: esEntregado
+              ? MedRushTheme.success.withValues(alpha: 0.3)
+              : MedRushTheme.borderLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Número de parada
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: estadoColor,
+              borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
+            ),
+            child: Center(
+              child: Text(
+                '$orden',
+                style: const TextStyle(
+                  fontSize: MedRushTheme.fontSizeBodySmall,
+                  fontWeight: MedRushTheme.fontWeightBold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: MedRushTheme.spacingSm),
+          // Información de la parada
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Parada $orden: $nombreCliente',
+                        style: const TextStyle(
+                          fontSize: MedRushTheme.fontSizeBodyMedium,
+                          fontWeight: MedRushTheme.fontWeightBold,
+                          color: MedRushTheme.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (esEntregado)
+                      const Icon(
+                        LucideIcons.check,
+                        size: 16,
+                        color: MedRushTheme.success,
+                      )
+                    else if (esEnTransito)
+                      const Icon(
+                        LucideIcons.truck,
+                        size: 16,
+                        color: MedRushTheme.primaryGreen,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  direccion,
+                  style: const TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: MedRushTheme.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (horaEntrega != null || estadoTexto != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      if (horaEntrega != null) ...[
+                        Text(
+                          horaEntrega,
+                          style: TextStyle(
+                            fontSize: MedRushTheme.fontSizeBodySmall,
+                            fontWeight: MedRushTheme.fontWeightMedium,
+                            color: esEntregado
+                                ? MedRushTheme.success
+                                : MedRushTheme.textSecondary,
+                          ),
+                        ),
+                        if (estadoTexto != null)
+                          const Text(
+                            ' • ',
+                            style: TextStyle(
+                              fontSize: MedRushTheme.fontSizeBodySmall,
+                              color: MedRushTheme.textSecondary,
+                            ),
+                          ),
+                      ],
+                      if (estadoTexto != null)
+                        Text(
+                          estadoTexto,
+                          style: TextStyle(
+                            fontSize: MedRushTheme.fontSizeBodySmall,
+                            color: estadoColor,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Construir el mapa integrado
+  Widget _buildMapaIntegrado(RutaOptimizada ruta) {
+    final pedidos = _pedidosPorRuta[ruta.id] ?? [];
+
+    // Obtener ubicación del repartidor (simulada por ahora)
+    LatLng? ubicacionRepartidor;
+    if (ruta.puntoInicio != null) {
+      final lat = ruta.puntoInicio!['latitude'] as num?;
+      final lng = ruta.puntoInicio!['longitude'] as num?;
+      if (lat != null && lng != null) {
+        ubicacionRepartidor = LatLng(lat.toDouble(), lng.toDouble());
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Vista del Mapa',
+          style: TextStyle(
+            fontSize: MedRushTheme.fontSizeBodyMedium,
+            fontWeight: MedRushTheme.fontWeightBold,
+            color: MedRushTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: MedRushTheme.spacingSm),
+        MapaRutaCompactoWidget(
+          ruta: ruta,
+          pedidos: pedidos,
+          ubicacionRepartidor: ubicacionRepartidor,
+        ),
+      ],
+    );
+  }
+
+  /// Obtener orden del pedido
+  int _obtenerOrdenPedido(Map<String, dynamic> pedido) {
+    final entregas = pedido['entregas'] as Map<String, dynamic>?;
+    if (entregas != null) {
+      return entregas['orden_personalizado'] as int? ??
+          entregas['orden_optimizado'] as int? ??
+          1;
+    }
+    return 1;
+  }
+
+  /// Obtener color del estado del pedido
+  Color _getEstadoColorPedido(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'entregado':
+      case 'completado':
+        return MedRushTheme.success;
+      case 'en_ruta':
+        return MedRushTheme.primaryGreen;
+      case 'asignado':
+        return MedRushTheme.primaryBlue;
+      case 'pendiente':
+        return MedRushTheme.statusPending;
+      case 'cancelado':
+        return MedRushTheme.statusCancelled;
+      case 'fallido':
+        return MedRushTheme.statusFailed;
+      default:
+        return MedRushTheme.textSecondary;
+    }
+  }
+
+  /// Obtener texto del estado del pedido
+  String? _getEstadoTextoPedido(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'entregado':
+      case 'completado':
+        return 'Entregado';
+      case 'en_ruta':
+        return 'En Tránsito';
+      case 'asignado':
+        return 'Asignado';
+      case 'pendiente':
+        return 'Pendiente';
+      case 'cancelado':
+        return 'Cancelado';
+      case 'fallido':
+        return 'Fallido';
+      default:
+        return null;
+    }
   }
 
   /// FIX: Construir las acciones de la ruta
@@ -1154,7 +1480,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
     try {
       // Llamar a la API de optimización
       final result = await _rutaRepository.optimizarRutas(
-        codigoIsoPais: 'PER', // TODO: Obtener del usuario o configuración
+        codigoIsoPais: 'PE', // FIX: Usar PE para coincidir con la data de prueba en Lima
         inicioJornada: DateTime.now().toIso8601String(),
         finJornada:
             DateTime.now().add(const Duration(hours: 8)).toIso8601String(),

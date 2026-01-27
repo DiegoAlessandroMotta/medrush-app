@@ -9,19 +9,14 @@ import 'package:medrush/repositories/base.repository.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// FIX: Función de generación de claves de caché eliminada
-
 abstract class BaseApi {
   static Dio? _dio;
   static final _storage = const FlutterSecureStorage(
-    // Configuración específica para web
     webOptions: WebOptions(
       dbName: "medrush_secure_storage",
       publicKey: "medrush_public_key",
     ),
   );
-
-  // FIX: Sistema de caché eliminado completamente
 
   /// Obtiene la instancia de Dio configurada
   static Dio get client {
@@ -73,8 +68,6 @@ abstract class BaseApi {
       sendTimeout: const Duration(milliseconds: EndpointManager.sendTimeout),
       headers: EndpointManager.defaultHeaders,
     ));
-
-    // FIX: Sistema de caché eliminado - todas las peticiones van directo al servidor
 
     // Interceptor para logging
     dio.interceptors.add(InterceptorsWrapper(
@@ -457,30 +450,101 @@ abstract class BaseApi {
     );
   }
 
-  /// Método para manejar errores HTTP con logging detallado
-  static String handleError(Object error) {
-    String errorMessage;
-
+  /// Extrae un mensaje de error legible desde una excepción DioException
+  /// Prioriza mensajes específicos del servidor sobre mensajes genéricos
+  static String extractErrorMessage(Object error) {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
       final responseData = error.response?.data;
 
+      // Para errores 422 (Validación), extraer el mensaje específico del servidor
+      if (statusCode == 422 && responseData != null) {
+        try {
+          // Intentar extraer mensaje del formato Laravel
+          if (responseData is Map<String, dynamic>) {
+            // Buscar en error.errors (formato Laravel validation)
+            final errorData = responseData['error'];
+            if (errorData is Map<String, dynamic>) {
+              final errors = errorData['errors'] as Map<String, dynamic>?;
+              if (errors != null && errors.isNotEmpty) {
+                // Tomar el primer error del primer campo
+                final firstFieldErrors = errors.values.first;
+                if (firstFieldErrors is List && firstFieldErrors.isNotEmpty) {
+                  return firstFieldErrors.first as String;
+                }
+              }
+            }
+
+            // Buscar en errors directamente (formato alternativo)
+            final errors = responseData['errors'] as Map<String, dynamic>?;
+            if (errors != null && errors.isNotEmpty) {
+              final firstFieldErrors = errors.values.first;
+              if (firstFieldErrors is List && firstFieldErrors.isNotEmpty) {
+                return firstFieldErrors.first as String;
+              }
+            }
+
+            // Buscar mensaje general
+            final message = responseData['message'] as String?;
+            if (message != null && message.isNotEmpty) {
+              return message;
+            }
+          }
+        } catch (_) {
+          // Si falla el parseo, usar mensaje genérico
+        }
+
+        return 'Las credenciales proporcionadas son incorrectas.';
+      }
+
+      // Para otros códigos de error HTTP, intentar extraer mensaje del servidor primero
+      String? serverMessage;
+      if (responseData is Map<String, dynamic>) {
+        serverMessage = responseData['message'] as String?;
+      }
+
+      // Usar mensaje del servidor si está disponible, sino usar mensajes genéricos
       switch (statusCode) {
         case 400:
-          errorMessage = 'Solicitud incorrecta';
+          return serverMessage ?? 'Solicitud incorrecta';
         case 401:
-          errorMessage = 'No autenticado';
+          return serverMessage ??
+              'Credenciales incorrectas. Verifica tu email y contraseña.';
         case 403:
-          errorMessage = 'Acceso denegado';
+          return serverMessage ?? 'No tienes permisos para acceder.';
         case 404:
-          errorMessage = 'Recurso no encontrado';
-        case 422:
-          errorMessage = 'Datos de validación incorrectos';
+          return serverMessage ?? 'Servicio no encontrado.';
         case 500:
-          errorMessage = 'Error interno del servidor';
+          return serverMessage ??
+              'Error interno del servidor. Intenta más tarde.';
+        case 503:
+          return serverMessage ?? 'Servicio temporalmente no disponible.';
         default:
-          errorMessage = 'Error HTTP $statusCode';
+          if (statusCode != null) {
+            return serverMessage ?? 'Error del servidor (código $statusCode)';
+          }
       }
+    }
+
+    // Para otros tipos de errores
+    final errorString = error.toString();
+    if (errorString.contains('connection') ||
+        errorString.contains('network') ||
+        errorString.contains('timeout')) {
+      return 'Error de conexión. Verifica tu internet.';
+    }
+
+    return 'Error al procesar la solicitud. Intenta nuevamente.';
+  }
+
+  /// Método para manejar errores HTTP con logging detallado
+  /// @deprecated Use extractErrorMessage() en su lugar para obtener mensajes más específicos
+  static String handleError(Object error) {
+    final errorMessage = extractErrorMessage(error);
+
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      final responseData = error.response?.data;
 
       logError(
           '${ConsoleColor.cyan}DioException - Código: $statusCode, Mensaje: $errorMessage${ConsoleColor.reset}');
@@ -489,13 +553,11 @@ abstract class BaseApi {
             '${ConsoleColor.blue}Respuesta del servidor: ${_sanitizeLogData(responseData, httpMethod: 'ERROR')}${ConsoleColor.reset}');
       }
     } else if (error is Exception) {
-      errorMessage = error.toString();
       logError(
           '${ConsoleColor.yellow}Exception genérica: $errorMessage${ConsoleColor.reset}');
     } else {
-      errorMessage = 'Error desconocido: $error';
       logError(
-          '${ConsoleColor.red}Error desconocido: $error${ConsoleColor.reset}');
+          '${ConsoleColor.red}Error desconocido: $errorMessage${ConsoleColor.reset}');
     }
 
     return errorMessage;
@@ -681,8 +743,6 @@ abstract class BaseApi {
     logInfo(
         '${ConsoleColor.yellow}Token de autenticación removido${ConsoleColor.reset}');
   }
-
-  // FIX: setCustomHeaders eliminado - usar EndpointManager.buildAuthHeaders() directamente
 
   // ===== MÉTODOS DE ALMACENAMIENTO DE IMÁGENES =====
 
@@ -1162,8 +1222,8 @@ abstract class BaseApi {
     String? orderDirection,
   }) {
     final params = <String, dynamic>{
-      'current_page': page, // FIX: Backend espera 'current_page', no 'page'
-      'per_page': limit, // FIX: Laravel espera 'per_page', no 'limit'
+      'current_page': page,
+      'per_page': limit,
     };
 
     if (orderBy != null) {

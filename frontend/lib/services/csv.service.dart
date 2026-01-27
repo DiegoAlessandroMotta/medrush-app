@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/validators.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:universal_html/html.dart' as html;
@@ -137,8 +138,7 @@ class CsvService {
     };
     // ignore: cascade_invocations
     accents.forEach((k, v) => h = h.replaceAll(k, v));
-    h = h.replaceAll(RegExp(r"[^a-z0-9_\s]"), '');
-    h = h.replaceAll(RegExp(r"\s+"), '_');
+    h = Validators.cleanCsvHeader(h);
     return h;
   }
 
@@ -420,8 +420,7 @@ class CsvService {
     }
 
     // Remover caracteres de control problemáticos
-    cleanedContent = cleanedContent
-        .replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]'), '')
+    cleanedContent = Validators.removeControlCharacters(cleanedContent)
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n');
 
@@ -569,8 +568,7 @@ class CsvService {
       String sanitized = str.replaceAll('\uFFFD', '?');
 
       // Reemplazar otros caracteres problemáticos
-      sanitized =
-          sanitized.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]'), '');
+      sanitized = Validators.removeControlCharacters(sanitized);
 
       return sanitized;
     } catch (e) {
@@ -893,15 +891,12 @@ class CsvService {
 
   /// Valida formato de teléfono
   static bool _isValidPhone(String phone) {
-    final phoneRegex = RegExp(r'^\+?[\d\s\-\(\)]{7,15}$');
-    return phoneRegex.hasMatch(phone);
+    return Validators.isValidPhoneFormat(phone);
   }
 
   /// Valida formato de email
   static bool _isValidEmail(String email) {
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
+    return Validators.isValidEmailStrict(email);
   }
 
   /// Valida tipo de pedido según los valores del backend

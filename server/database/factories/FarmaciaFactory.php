@@ -33,7 +33,7 @@ class FarmaciaFactory extends Factory
       'estado_region' => $faker->state,
       'codigo_postal' => $faker->numberBetween(1, 51),
       'codigo_iso_pais' => CodigosIsoPaisEnum::PERU,
-      'ubicacion' => AsPoint::pointFromArray($randomLocation),
+      'ubicacion' => AsPoint::fromArray($randomLocation, \MatanYadaev\EloquentSpatial\Enums\Srid::WGS84),
       'telefono' => '+51' . $faker->numerify('#########'),
       'email' => $this->faker->unique()->companyEmail,
       'contacto_responsable' => $faker->name,

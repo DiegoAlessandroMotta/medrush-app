@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/validators.dart';
 
 class BarcodeGeneratorWidget extends StatefulWidget {
   final String? initialBarcode;
@@ -78,7 +79,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
   }
 
   bool _isNumericBarcode(String barcode) {
-    return RegExp(r'^\d+$').hasMatch(barcode);
+    return Validators.isNumericOnly(barcode);
   }
 
   @override
@@ -324,7 +325,7 @@ class SimpleBarcodeWidget extends StatelessWidget {
   }
 
   bool _isNumericBarcode(String barcode) {
-    return RegExp(r'^\d+$').hasMatch(barcode);
+    return Validators.isNumericOnly(barcode);
   }
 
   bool _isValidBarcode(String barcode) {

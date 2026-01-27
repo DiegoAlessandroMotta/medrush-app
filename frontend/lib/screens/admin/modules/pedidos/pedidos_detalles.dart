@@ -319,8 +319,8 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                           pedido.latitudEntrega!,
                                           pedido.longitudEntrega!,
                                         )
-                                      : const LatLng(-12.0464,
-                                          -77.0428), // Lima, Perú por defecto
+                                      : const LatLng(26.037737,
+                                          -80.179550), // EEUU por defecto
                                   zoom: 15,
                                 ),
                                 markers: pedido.latitudEntrega != null &&
@@ -730,12 +730,15 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
     return OutlinedButton.icon(
       onPressed: () async {
         final uri = Uri.parse(url);
-        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se pudo abrir el documento')),
-            );
+        final launched =
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          if (!mounted) {
+            return;
           }
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se pudo abrir el documento')),
+          );
         }
       },
       icon: const Icon(LucideIcons.fileText, size: 18),

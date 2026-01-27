@@ -186,7 +186,8 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       logError('❌ Error en login: $e');
-      _setError('Error de conexión: $e');
+      final errorMessage = BaseApi.extractErrorMessage(e);
+      _setError(errorMessage);
       _setState(AuthState.error);
       return false;
     }
@@ -288,6 +289,7 @@ class AuthProvider extends ChangeNotifier {
     String? nombre,
     String? telefono,
     String? foto,
+    String? email,
   }) async {
     try {
       if (!isLoggedIn || _usuario == null) {
@@ -298,6 +300,7 @@ class AuthProvider extends ChangeNotifier {
         nombre: nombre,
         telefono: telefono,
         foto: foto,
+        email: email,
       );
 
       // TODO: Implementar actualización de perfil cuando el backend soporte endpoint /usuarios/{id}

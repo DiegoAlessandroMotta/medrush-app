@@ -9,6 +9,7 @@ import 'package:medrush/screens/repartidor/modules/pedidos/pedidos_detalle_repar
 import 'package:medrush/screens/repartidor/widgets/grid_pedidos_infinite.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/debug_helpers.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/pagination_helper.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -32,7 +33,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
   String? _error;
   String _selectedFilter = 'Todos los estados';
   EstadoPedido? _filtroEstado;
-  String _searchTerm = ''; // FIX: Agregar término de búsqueda
+  String _searchTerm = '';
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -91,7 +92,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
       logInfo(
           '[LOAD_HISTORIAL] Cargando historial desde repositorio (página ${_paginationHelper.currentPage})');
 
-      // FIX: Cargar pedidos del historial usando paginación simple
       final result = await _obtenerHistorialActivos();
 
       if (!mounted) {
@@ -100,10 +100,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
       }
 
       if (result.success && result.data != null) {
-        // FIX: Debug - verificar duplicados en la respuesta del backend
-        _debugDuplicates(result.data!.items, 'Primera página historial');
-
-        // FIX: Procesar normalmente sin auto-skip
+        DebugHelpers.checkDuplicates(
+            result.data!.items, 'DUPLICADOS_HISTORIAL');
         _paginationHelper.updateFirstPage(result.data!);
         setState(() {
           _pedidosFiltrados = result.data!.items;
@@ -163,7 +161,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
       if (result.success && result.data != null) {
         // Verificar duplicados en la respuesta
-        _debugDuplicates(result.data!.items, 'Página $nextPage historial');
+        DebugHelpers.checkDuplicates(
+            result.data!.items, 'DUPLICADOS_HISTORIAL');
 
         // Actualizar con la nueva página
         _paginationHelper.updateAdditionalPage(result.data!);
@@ -194,6 +193,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
   }
 
   /// Obtiene solo pedidos del historial (entregado, cancelado, fallido)
+  /// Ordena por updated_at (fecha de último cambio) para mostrar los más recientes primero
   Future<RepositoryResult<PaginatedResponse<Pedido>>> _obtenerHistorialActivos(
       {int? page}) {
     final targetPage = page ?? _paginationHelper.currentPage;
@@ -222,29 +222,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
       ],
       search: _searchTerm.isNotEmpty ? _searchTerm : null,
     );
-  }
-
-  /// Método para verificar duplicados en las respuestas del backend
-  void _debugDuplicates(List<Pedido> pedidos, String context) {
-    final ids = pedidos.map((p) => p.id).toList();
-    final uniqueIds = ids.toSet();
-
-    // Solo logear si hay duplicados (problema)
-    if (ids.length != uniqueIds.length) {
-      final duplicateIds = <String>[];
-      final seenIds = <String>{};
-
-      for (final id in ids) {
-        if (seenIds.contains(id)) {
-          duplicateIds.add(id);
-        } else {
-          seenIds.add(id);
-        }
-      }
-
-      logWarning(
-          '[DUPLICADOS_HISTORIAL] $context: ${ids.length - uniqueIds.length} duplicados - IDs: ${duplicateIds.join(', ')}');
-    }
   }
 
   Future<void> _onRefresh() async {
@@ -309,7 +286,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
                 setState(() {
                   _searchTerm = value;
                 });
-                // FIX: Recargar datos cuando cambie la búsqueda
                 await _loadHistorial(refresh: true);
               },
               decoration: const InputDecoration(

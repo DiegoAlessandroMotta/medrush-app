@@ -5,6 +5,7 @@ import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/validators.dart';
 
 /// Helpers centralizados para mostrar estado y tipo de pedidos
 class StatusHelpers {
@@ -620,7 +621,7 @@ class StatusHelpers {
   static String formatearCodigoBarras(
       String pedidoId, String farmaciaId, DateTime timestamp) {
     final timestampStr =
-        timestamp.toIso8601String().replaceAll(RegExp(r'[^\d]'), '');
+        Validators.removeDigitsFromString(timestamp.toIso8601String());
     return 'MR${pedidoId.padLeft(4, '0')}${farmaciaId.padLeft(3, '0')}${timestampStr.substring(8)}${timestampStr.substring(0, 6)}';
   }
 

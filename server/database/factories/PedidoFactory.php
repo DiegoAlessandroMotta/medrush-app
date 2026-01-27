@@ -76,7 +76,7 @@ class PedidoFactory extends Factory
       'estado_region_entrega' => 'Lima',
       'codigo_postal_entrega' => $faker->numberBetween(1, 51),
       'ubicacion_recojo' => $farmacia->ubicacion,
-      'ubicacion_entrega' => AsPoint::pointFromArray($randomLocation),
+      'ubicacion_entrega' => AsPoint::fromArray($randomLocation, \MatanYadaev\EloquentSpatial\Enums\Srid::WGS84),
       'codigo_acceso_edificio' => $faker->optional(0.3)->numerify('######'),
       'tipo_pedido' => $tipoPedido,
       'medicamentos' => $medicamentos,

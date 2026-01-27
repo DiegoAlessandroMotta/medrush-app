@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -18,7 +19,11 @@ import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/validators.dart';
 import 'package:medrush/widgets/mapa_widget.dart';
+
+// Ancho máximo del bottom sheet en desktop para mejorar legibilidad
+const double _kMaxDesktopSheetWidth = 980;
 
 class EntregasForm extends StatefulWidget {
   final void Function(Pedido pedido) onSave;
@@ -265,39 +270,6 @@ class _EntregasFormState extends State<EntregasForm> {
     }
   }
 
-  /// Formatea un número de teléfono al formato E.164 (multi-regional)
-  /// Reglas:
-  /// - Si empieza con '+', se respeta tal cual (ya está en E.164)
-  /// - Si tiene 10 dígitos (NANP), se antepone +1
-  /// - Si tiene 11 dígitos y empieza con '1', se antepone '+'
-  /// - En otros casos, se devuelve sin cambios
-  String _formatPhoneToE164(String phone) {
-    if (phone.isEmpty) {
-      return phone;
-    }
-
-    // Remover espacios, guiones y paréntesis
-    final String cleaned = phone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
-
-    // Ya en E.164
-    if (cleaned.startsWith('+')) {
-      return cleaned;
-    }
-
-    // NANP: 10 dígitos -> +1
-    if (RegExp(r'^\d{10}$').hasMatch(cleaned)) {
-      return '+1$cleaned';
-    }
-
-    // NANP: 11 dígitos empezando en 1 -> +<numero>
-    if (RegExp(r'^1\d{10}$').hasMatch(cleaned)) {
-      return '+$cleaned';
-    }
-
-    // Otros casos, no tocar
-    return phone;
-  }
-
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -329,7 +301,7 @@ class _EntregasFormState extends State<EntregasForm> {
         'farmacia_id': _farmaciaSeleccionada!.id,
         'paciente_nombre': _clienteController.text.trim(),
         'paciente_telefono':
-            _formatPhoneToE164(_telefonoController.text.trim()),
+            Validators.formatPhoneToE164(_telefonoController.text.trim()),
         'direccion_entrega_linea_1': _direccionLinea1Controller.text.trim(),
         'ciudad_entrega': _distritoController.text.trim(),
         'ubicacion_entrega': {
@@ -435,164 +407,176 @@ class _EntregasFormState extends State<EntregasForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Header con drag handle y botón de cerrar
-            Container(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              decoration: const BoxDecoration(
-                color: MedRushTheme.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Column(
-                children: [
-                  // Drag handle
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: MedRushTheme.textSecondary.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _kMaxDesktopSheetWidth),
+        child: Material(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header con drag handle y botón de cerrar
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  decoration: const BoxDecoration(
+                    color: MedRushTheme.surface,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                  const SizedBox(height: 16),
-                  // Header con título y botón de cerrar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.initialData != null
-                                  ? 'Editar Entrega'
-                                  : 'Nueva Entrega',
-                              style: const TextStyle(
-                                fontSize: MedRushTheme.fontSizeTitleLarge,
-                                fontWeight: MedRushTheme.fontWeightBold,
-                                color: MedRushTheme.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.initialData != null
-                                  ? 'Modificando pedido #${widget.initialData!.id}'
-                                  : 'Creando nueva entrega',
-                              style: const TextStyle(
-                                fontSize: MedRushTheme.fontSizeBodySmall,
-                                color: MedRushTheme.textSecondary,
-                              ),
-                            ),
-                          ],
+                      // Drag handle
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color:
+                              MedRushTheme.textSecondary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
-                          LucideIcons.x,
-                          color: MedRushTheme.textSecondary,
-                          size: 24,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: MedRushTheme.backgroundSecondary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 16),
+                      // Header con título y botón de cerrar
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.initialData != null
+                                      ? 'Editar Entrega'
+                                      : 'Nueva Entrega',
+                                  style: const TextStyle(
+                                    fontSize: MedRushTheme.fontSizeTitleLarge,
+                                    fontWeight: MedRushTheme.fontWeightBold,
+                                    color: MedRushTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.initialData != null
+                                      ? 'Pedido #${widget.initialData!.id}'
+                                      : 'Creando nueva entrega',
+                                  style: const TextStyle(
+                                    fontSize: MedRushTheme.fontSizeBodySmall,
+                                    color: MedRushTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(
+                              LucideIcons.x,
+                              color: MedRushTheme.textSecondary,
+                              size: 24,
+                            ),
+                            style: IconButton.styleFrom(
+                              backgroundColor: MedRushTheme.backgroundSecondary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                ),
+                // Contenido del formulario
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Form(
+                      key: _formKey,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isDesktop = constraints.maxWidth > 768;
 
-            // Contenido del formulario
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: Form(
-                  key: _formKey,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isDesktop = constraints.maxWidth > 768;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: MedRushTheme.spacingMd),
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: MedRushTheme.spacingMd),
+                              // Campos en layout responsivo
+                              if (isDesktop) ...[
+                                // Layout de 2 columnas para desktop
+                                _buildDesktopLayout(),
+                              ] else ...[
+                                // Layout de 1 columna para móvil
+                                _buildMobileLayout(),
+                              ],
 
-                          // Campos en layout responsivo
-                          if (isDesktop) ...[
-                            // Layout de 2 columnas para desktop
-                            _buildDesktopLayout(),
-                          ] else ...[
-                            // Layout de 1 columna para móvil
-                            _buildMobileLayout(),
-                          ],
+                              const SizedBox(height: MedRushTheme.spacingLg),
 
-                          const SizedBox(height: MedRushTheme.spacingLg),
+                              // Sección de dirección (siempre en columna completa)
+                              _buildDireccionSection(),
 
-                          // Sección de dirección (siempre en columna completa)
-                          _buildDireccionSection(),
+                              const SizedBox(height: MedRushTheme.spacingLg),
 
-                          const SizedBox(height: MedRushTheme.spacingLg),
+                              // Sección de medicamentos
+                              _buildMedicamentosSection(),
 
-                          // Sección de medicamentos
-                          _buildMedicamentosSection(),
+                              const SizedBox(height: MedRushTheme.spacingMd),
 
-                          const SizedBox(height: MedRushTheme.spacingMd),
+                              // Requiere Firma Especial
+                              _buildFirmaEspecialSection(),
 
-                          // Requiere Firma Especial
-                          _buildFirmaEspecialSection(),
+                              const SizedBox(height: MedRushTheme.spacingMd),
 
-                          const SizedBox(height: MedRushTheme.spacingMd),
+                              // Observaciones (opcional)
+                              TextFormField(
+                                controller: _observacionesController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Observaciones (opcional)',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(LucideIcons.fileText),
+                                ),
+                                minLines: 1,
+                                maxLines: 3,
+                              ),
+                              const SizedBox(height: MedRushTheme.spacingLg),
 
-                          // Observaciones (opcional)
-                          TextFormField(
-                            controller: _observacionesController,
-                            decoration: const InputDecoration(
-                              labelText: 'Observaciones (opcional)',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.fileText),
-                            ),
-                            maxLines: 3,
-                          ),
-                          const SizedBox(height: MedRushTheme.spacingLg),
+                              // Botón de guardar
+                              ElevatedButton.icon(
+                                onPressed: _isLoading ? null : _handleSave,
+                                icon: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : const Icon(LucideIcons.save),
+                                label: Text(_isLoading
+                                    ? 'Guardando...'
+                                    : 'Guardar Entrega'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: MedRushTheme.primaryGreen,
+                                  foregroundColor: MedRushTheme.textInverse,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                ),
+                              ),
 
-                          // Botón de guardar
-                          ElevatedButton.icon(
-                            onPressed: _isLoading ? null : _handleSave,
-                            icon: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
-                                  )
-                                : const Icon(LucideIcons.save),
-                            label: Text(_isLoading
-                                ? 'Guardando...'
-                                : 'Guardar Entrega'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: MedRushTheme.primaryGreen,
-                              foregroundColor: MedRushTheme.textInverse,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                          ),
-
-                          // Espacio extra al final para evitar que el contenido se corte
-                          const SizedBox(height: MedRushTheme.spacingXl),
-                        ],
-                      );
-                    },
+                              // Espacio extra al final para evitar que el contenido se corte
+                              const SizedBox(height: MedRushTheme.spacingXl),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -621,6 +605,38 @@ class _EntregasFormState extends State<EntregasForm> {
         logInfo('⚠️ Geocoding falló para "$value": $e');
       }
     });
+  }
+
+  Widget _buildTelefonoField() {
+    return TextFormField(
+      controller: _telefonoController,
+      decoration: const InputDecoration(
+        labelText: 'Teléfono *',
+        hintText: '5551234567',
+        helperText: '10 dígitos',
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(LucideIcons.phone),
+        prefixText: '+1 ',
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(15),
+      ],
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'El teléfono es requerido';
+        }
+
+        final soloNumeros = Validators.removeNonDigits(value);
+        if (soloNumeros.length < 10 || soloNumeros.length > 12) {
+          return 'El teléfono debe tener entre 10 y 12 dígitos';
+        }
+
+        return null;
+      },
+      onChanged: (_) => setState(() {}),
+    );
   }
 
   Future<void> _reverseGeocodeAndFill(LatLng pos) async {
@@ -706,10 +722,16 @@ class _EntregasFormState extends State<EntregasForm> {
       if (_repartidorSeleccionado == null) {
         // Si se desasignó el repartidor, usar endpoint de retirar
         result = await _pedidoRepository.retirarRepartidor(pedido.id);
+        if (!mounted) {
+          return;
+        }
         if (result.success) {
           logInfo('✅ Repartidor retirado exitosamente');
         } else {
           logError('❌ Error al retirar repartidor: ${result.error}');
+          if (!mounted) {
+            return;
+          }
           NotificationService.showError(
             'Error al retirar repartidor: ${result.error ?? 'Error desconocido'}',
             context: context,
@@ -722,10 +744,16 @@ class _EntregasFormState extends State<EntregasForm> {
           pedido.id,
           _repartidorSeleccionado!.id,
         );
+        if (!mounted) {
+          return;
+        }
         if (result.success) {
           logInfo('✅ Repartidor asignado exitosamente');
         } else {
           logError('❌ Error al asignar repartidor: ${result.error}');
+          if (!mounted) {
+            return;
+          }
           NotificationService.showError(
             'Error al asignar repartidor: ${result.error ?? 'Error desconocido'}',
             context: context,
@@ -738,6 +766,9 @@ class _EntregasFormState extends State<EntregasForm> {
       await _refreshPedidoData(pedido.id);
     } catch (e) {
       logError('❌ Error al cambiar repartidor', e);
+      if (!mounted) {
+        return;
+      }
       NotificationService.showError(
         'Error al cambiar repartidor: $e',
         context: context,
@@ -751,6 +782,9 @@ class _EntregasFormState extends State<EntregasForm> {
       logInfo('Obteniendo datos actualizados del pedido $pedidoId');
 
       final result = await _pedidoRepository.obtenerPorId(pedidoId);
+      if (!mounted) {
+        return;
+      }
 
       if (result.success && result.data != null) {
         final pedidoActualizado = result.data!;
@@ -784,6 +818,9 @@ class _EntregasFormState extends State<EntregasForm> {
         widget.onSave(pedidoActualizado);
       } else {
         logError('❌ Error al obtener datos actualizados: ${result.error}');
+        if (!mounted) {
+          return;
+        }
         NotificationService.showError(
           'Error al obtener datos actualizados: ${result.error ?? 'Error desconocido'}',
           context: context,
@@ -791,6 +828,9 @@ class _EntregasFormState extends State<EntregasForm> {
       }
     } catch (e) {
       logError('❌ Error al refrescar datos del pedido', e);
+      if (!mounted) {
+        return;
+      }
       NotificationService.showError(
         'Error al refrescar datos: $e',
         context: context,
@@ -812,6 +852,45 @@ class _EntregasFormState extends State<EntregasForm> {
         ),
         const SizedBox(height: MedRushTheme.spacingSm),
 
+        // Estado (State)
+        TextFormField(
+          controller: _estadoRegionController,
+          decoration: const InputDecoration(
+            labelText: 'Estado (opcional)',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(LucideIcons.mapPin),
+          ),
+        ),
+        const SizedBox(height: MedRushTheme.spacingMd),
+
+        // Distrito (City)
+        TextFormField(
+          controller: _distritoController,
+          decoration: const InputDecoration(
+            labelText: 'Distrito *',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(LucideIcons.mapPin),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'El distrito es requerido';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: MedRushTheme.spacingMd),
+
+        // Código Postal (ZIP Code)
+        TextFormField(
+          controller: _codigoPostalController,
+          decoration: const InputDecoration(
+            labelText: 'Código Postal (opcional)',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(LucideIcons.mail),
+          ),
+        ),
+        const SizedBox(height: MedRushTheme.spacingMd),
+
         // Dirección Línea 1
         TextFormField(
           controller: _direccionLinea1Controller,
@@ -821,6 +900,7 @@ class _EntregasFormState extends State<EntregasForm> {
             border: OutlineInputBorder(),
             prefixIcon: Icon(LucideIcons.mapPin),
           ),
+          minLines: 1,
           maxLines: 2,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -841,6 +921,7 @@ class _EntregasFormState extends State<EntregasForm> {
             border: OutlineInputBorder(),
             prefixIcon: Icon(LucideIcons.mapPin),
           ),
+          minLines: 1,
           maxLines: 2,
         ),
         const SizedBox(height: MedRushTheme.spacingMd),
@@ -867,40 +948,6 @@ class _EntregasFormState extends State<EntregasForm> {
                 ),
               ],
             ),
-            const SizedBox(height: MedRushTheme.spacingSm),
-            if (_latLng == null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(MedRushTheme.spacingSm),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusSm),
-                  border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      LucideIcons.info,
-                      size: 16,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(width: MedRushTheme.spacingSm),
-                    Expanded(
-                      child: Text(
-                        'Toque en el mapa para seleccionar la ubicación de entrega',
-                        style: TextStyle(
-                          fontSize: MedRushTheme.fontSizeBodySmall,
-                          color: Colors.orange.shade700,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             const SizedBox(height: MedRushTheme.spacingSm),
             Stack(
               children: [
@@ -942,13 +989,14 @@ class _EntregasFormState extends State<EntregasForm> {
 
   Widget _buildEstadoSoloLecturaSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
-        color: StatusHelpers.estadoPedidoColor(_estadoSeleccionado)
-            .withValues(alpha: 0.1),
+        color: MedRushTheme.backgroundSecondary,
         border: Border.all(
-          color: StatusHelpers.estadoPedidoColor(_estadoSeleccionado)
-              .withValues(alpha: 0.3),
+          color: MedRushTheme.textSecondary.withValues(alpha: 0.2),
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -956,26 +1004,28 @@ class _EntregasFormState extends State<EntregasForm> {
         children: [
           Icon(
             StatusHelpers.estadoPedidoIcon(_estadoSeleccionado),
-            color: StatusHelpers.estadoPedidoColor(_estadoSeleccionado),
+            color: MedRushTheme.textSecondary,
             size: 20,
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: MedRushTheme.spacingSm,
+              runSpacing: 4,
               children: [
                 const Text(
                   'Estado del Pedido',
                   style: TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     fontWeight: MedRushTheme.fontWeightMedium,
-                    color: MedRushTheme.textPrimary,
+                    color: MedRushTheme.textSecondary,
                   ),
                 ),
                 Text(
                   StatusHelpers.estadoPedidoTexto(_estadoSeleccionado),
                   style: TextStyle(
-                    fontSize: MedRushTheme.fontSizeBodyLarge,
+                    fontSize: MedRushTheme.fontSizeBodyMedium,
                     fontWeight: MedRushTheme.fontWeightBold,
                     color: StatusHelpers.estadoPedidoColor(_estadoSeleccionado),
                   ),
@@ -1170,6 +1220,7 @@ class _EntregasFormState extends State<EntregasForm> {
     // Para listas pequeñas, usar dropdown normal
     return DropdownButtonFormField<Usuario>(
       initialValue: _repartidorSeleccionado,
+      isExpanded: true,
       decoration: const InputDecoration(
         labelText: 'Repartidor (opcional)',
         border: OutlineInputBorder(),
@@ -1177,10 +1228,10 @@ class _EntregasFormState extends State<EntregasForm> {
         helperText: 'Selecciona un repartidor para asignar al pedido',
       ),
       items: _isRepartidoresLoading
-          ? [
-              const DropdownMenuItem(
+          ? const [
+              DropdownMenuItem<Usuario>(
                 child: Text('Cargando repartidores...'),
-              )
+              ),
             ]
           : [
               const DropdownMenuItem<Usuario>(
@@ -1210,6 +1261,27 @@ class _EntregasFormState extends State<EntregasForm> {
                 );
               }),
             ],
+      selectedItemBuilder: (context) {
+        if (_isRepartidoresLoading) {
+          return const [Text('Cargando repartidores...')];
+        }
+
+        return [
+          const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text('Sin asignar'),
+          ),
+          ..._repartidores.map(
+            (repartidor) => Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                repartidor.nombre,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ];
+      },
       onChanged: _isRepartidoresLoading
           ? null
           : (Usuario? value) {
@@ -1318,24 +1390,10 @@ class _EntregasFormState extends State<EntregasForm> {
   Widget _buildDesktopLayout() {
     return Column(
       children: [
-        // Primera fila: Código de Barra y Farmacia
+        // Primera fila: Farmacia y Repartidor
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: TextFormField(
-                controller: _codigoBarraController,
-                readOnly: true,
-                enableInteractiveSelection: true,
-                decoration: const InputDecoration(
-                  labelText: 'Código de Barra (auto)',
-                  helperText: 'Se genera automáticamente',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.qrCode),
-                ),
-              ),
-            ),
-            const SizedBox(width: MedRushTheme.spacingMd),
             Expanded(
               child: DropdownButtonFormField<Farmacia>(
                 initialValue: _farmaciaSeleccionada,
@@ -1371,6 +1429,10 @@ class _EntregasFormState extends State<EntregasForm> {
                 },
               ),
             ),
+            const SizedBox(width: MedRushTheme.spacingMd),
+            Expanded(
+              child: _buildRepartidorDropdown(),
+            ),
           ],
         ),
         const SizedBox(height: MedRushTheme.spacingMd),
@@ -1396,115 +1458,34 @@ class _EntregasFormState extends State<EntregasForm> {
               ),
             ),
             const SizedBox(width: MedRushTheme.spacingMd),
-            Expanded(
-              child: TextFormField(
-                controller: _telefonoController,
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.phone),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El teléfono es requerido';
-                  }
-                  return null;
-                },
-              ),
-            ),
+            Expanded(child: _buildTelefonoField()),
           ],
         ),
 
         const SizedBox(height: MedRushTheme.spacingMd),
 
-        // Tercera fila: Email y Distrito
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mail),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-            ),
-            const SizedBox(width: MedRushTheme.spacingMd),
-            Expanded(
-              child: TextFormField(
-                controller: _distritoController,
-                decoration: const InputDecoration(
-                  labelText: 'Distrito *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El distrito es requerido';
-                  }
-                  return null;
-                },
-              ),
-            ),
-          ],
+        // Tercera fila: Email
+        TextFormField(
+          controller: _emailController,
+          decoration: const InputDecoration(
+            labelText: 'Email (opcional)',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(LucideIcons.mail),
+          ),
+          keyboardType: TextInputType.emailAddress,
         ),
 
         const SizedBox(height: MedRushTheme.spacingMd),
 
-        // Cuarta fila: Estado/Región y Código Postal
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _estadoRegionController,
-                decoration: const InputDecoration(
-                  labelText: 'Estado/Región (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
-                ),
-              ),
-            ),
-            const SizedBox(width: MedRushTheme.spacingMd),
-            Expanded(
-              child: TextFormField(
-                controller: _codigoPostalController,
-                decoration: const InputDecoration(
-                  labelText: 'Código Postal (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mail),
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: MedRushTheme.spacingMd),
-
-        // Quinta fila: Código de Acceso y Repartidor
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _codigoAccesoController,
-                decoration: const InputDecoration(
-                  labelText: 'Código de Acceso al Edificio (opcional)',
-                  helperText: 'Código para acceder al edificio o condominio',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.key),
-                ),
-              ),
-            ),
-            const SizedBox(width: MedRushTheme.spacingMd),
-            Expanded(
-              child: _buildRepartidorDropdown(),
-            ),
-          ],
+        // Quinta fila: Código de Acceso
+        TextFormField(
+          controller: _codigoAccesoController,
+          decoration: const InputDecoration(
+            labelText: 'Código de Acceso al Edificio (opcional)',
+            helperText: 'Código para acceder al edificio o condominio',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(LucideIcons.key),
+          ),
         ),
 
         const SizedBox(height: MedRushTheme.spacingMd),
@@ -1550,20 +1531,6 @@ class _EntregasFormState extends State<EntregasForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Código de barra
-        TextFormField(
-          controller: _codigoBarraController,
-          readOnly: true,
-          enableInteractiveSelection: true,
-          decoration: const InputDecoration(
-            labelText: 'Código de Barra (auto)',
-            helperText: 'Se genera automáticamente',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.qrCode),
-          ),
-        ),
-        const SizedBox(height: MedRushTheme.spacingMd),
-
         // Farmacia (Dropdown)
         DropdownButtonFormField<Farmacia>(
           initialValue: _farmaciaSeleccionada,
@@ -1600,6 +1567,10 @@ class _EntregasFormState extends State<EntregasForm> {
         ),
         const SizedBox(height: MedRushTheme.spacingMd),
 
+        // Repartidor (Dropdown - opcional)
+        _buildRepartidorDropdown(),
+        const SizedBox(height: MedRushTheme.spacingMd),
+
         // Cliente
         TextFormField(
           controller: _clienteController,
@@ -1618,21 +1589,7 @@ class _EntregasFormState extends State<EntregasForm> {
         const SizedBox(height: MedRushTheme.spacingMd),
 
         // Teléfono
-        TextFormField(
-          controller: _telefonoController,
-          decoration: const InputDecoration(
-            labelText: 'Teléfono *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.phone),
-          ),
-          keyboardType: TextInputType.phone,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'El teléfono es requerido';
-            }
-            return null;
-          },
-        ),
+        _buildTelefonoField(),
         const SizedBox(height: MedRushTheme.spacingMd),
 
         // Email (opcional)
@@ -1647,45 +1604,6 @@ class _EntregasFormState extends State<EntregasForm> {
         ),
         const SizedBox(height: MedRushTheme.spacingMd),
 
-        // Distrito
-        TextFormField(
-          controller: _distritoController,
-          decoration: const InputDecoration(
-            labelText: 'Distrito *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'El distrito es requerido';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: MedRushTheme.spacingMd),
-
-        // Estado/Región
-        TextFormField(
-          controller: _estadoRegionController,
-          decoration: const InputDecoration(
-            labelText: 'Estado/Región (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
-          ),
-        ),
-        const SizedBox(height: MedRushTheme.spacingMd),
-
-        // Código Postal
-        TextFormField(
-          controller: _codigoPostalController,
-          decoration: const InputDecoration(
-            labelText: 'Código Postal (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mail),
-          ),
-        ),
-        const SizedBox(height: MedRushTheme.spacingMd),
-
         // Código de Acceso
         TextFormField(
           controller: _codigoAccesoController,
@@ -1696,10 +1614,6 @@ class _EntregasFormState extends State<EntregasForm> {
             prefixIcon: Icon(LucideIcons.key),
           ),
         ),
-        const SizedBox(height: MedRushTheme.spacingMd),
-
-        // Repartidor (Dropdown - opcional)
-        _buildRepartidorDropdown(),
         const SizedBox(height: MedRushTheme.spacingMd),
 
         // Estado (Solo lectura)

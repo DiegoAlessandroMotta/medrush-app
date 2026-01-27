@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:medrush/utils/validators.dart';
 
 /// Resultado de una operación del repositorio
 class RepositoryResult<T> {
@@ -148,8 +149,7 @@ abstract class BaseRepository {
       throw ArgumentError('Email no puede estar vacío');
     }
 
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
+    if (!Validators.isValidEmailStrict(email)) {
       throw ArgumentError('Email no tiene un formato válido');
     }
 
@@ -175,7 +175,6 @@ abstract class BaseRepository {
   }
 }
 
-// FIX: Sistema de caché eliminado completamente - CacheableRepository removida
 
 /// Interface para repositorios paginables
 abstract class PaginatedRepository<T> extends BaseRepository {

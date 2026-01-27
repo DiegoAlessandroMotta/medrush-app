@@ -645,159 +645,126 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               const SizedBox(height: MedRushTheme.spacingLg),
 
                               // Productos
-                              _buildInfoSection('Productos', [
-                                if (_pedido!.medicamentos.isNotEmpty) ...[
-                                  ..._pedido!.medicamentos.map((medicamento) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 8),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: MedRushTheme.primaryGreen
-                                            .withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                            color: MedRushTheme.primaryGreen
-                                                .withValues(alpha: 0.3)),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(LucideIcons.pill,
-                                              size: 22,
-                                              color: MedRushTheme.primaryGreen),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  medicamento['nombre'] ??
-                                                      'Sin nombre',
-                                                  style: const TextStyle(
-                                                    fontWeight: MedRushTheme
-                                                        .fontWeightMedium,
-                                                    color: MedRushTheme
-                                                        .textPrimary,
-                                                  ),
-                                                ),
-                                                if (medicamento['cantidad'] !=
-                                                    null)
-                                                  Text(
-                                                    'Cantidad: ${medicamento['cantidad']}',
-                                                    style: const TextStyle(
-                                                      fontSize: MedRushTheme
-                                                          .fontSizeBodyMedium,
-                                                      color: MedRushTheme
-                                                          .textSecondary,
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                                ] else ...[
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: MedRushTheme.textSecondary
-                                          .withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(8),
+                              _buildInfoSection('Tipo de Pedido', [
+                                Container(
+                                  padding: const EdgeInsets.all(
+                                    MedRushTheme.spacingMd,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: MedRushTheme.backgroundPrimary,
+                                    borderRadius: BorderRadius.circular(
+                                      MedRushTheme.borderRadiusMd,
                                     ),
-                                    child: const Text(
-                                      'No hay productos especificados',
-                                      style: TextStyle(
-                                        color: MedRushTheme.textSecondary,
-                                        fontStyle: FontStyle.italic,
-                                      ),
+                                    border: Border.all(
+                                      color: MedRushTheme.borderLight,
                                     ),
                                   ),
-                                ],
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'Tipo de Pedido:',
-                                      style: TextStyle(
-                                        fontSize:
-                                            MedRushTheme.fontSizeBodyMedium,
-                                        fontWeight:
-                                            MedRushTheme.fontWeightMedium,
-                                        color: MedRushTheme.textPrimary,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: _pedido!.tipoPedido ==
-                                                TipoPedido
-                                                    .medicamentosControlados
-                                            ? Colors.red.withValues(alpha: 0.1)
-                                            : MedRushTheme.primaryGreen
-                                                .withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: _pedido!.tipoPedido ==
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: MedRushTheme.primaryGreen
+                                              .withValues(alpha: 0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Icon(
+                                          _pedido!.tipoPedido ==
                                                   TipoPedido
                                                       .medicamentosControlados
-                                              ? Colors.red
-                                                  .withValues(alpha: 0.3)
-                                              : MedRushTheme.primaryGreen
-                                                  .withValues(alpha: 0.3),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        StatusHelpers.tipoPedidoTexto(
-                                            _pedido!.tipoPedido),
-                                        style: TextStyle(
+                                              ? LucideIcons.shieldAlert
+                                              : LucideIcons.clipboardList,
+                                          size: 22,
                                           color: _pedido!.tipoPedido ==
                                                   TipoPedido
                                                       .medicamentosControlados
                                               ? Colors.red
                                               : MedRushTheme.primaryGreen,
-                                          fontWeight:
-                                              MedRushTheme.fontWeightBold,
-                                          fontSize:
-                                              MedRushTheme.fontSizeLabelSmall,
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(
+                                        width: MedRushTheme.spacingMd,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Tipo de pedido',
+                                              style: TextStyle(
+                                                fontSize: MedRushTheme
+                                                    .fontSizeTitleMedium,
+                                                fontWeight: MedRushTheme
+                                                    .fontWeightSemiBold,
+                                                color: MedRushTheme.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: MedRushTheme.spacingXs,
+                                            ),
+                                            Text(
+                                              StatusHelpers.tipoPedidoTexto(
+                                                  _pedido!.tipoPedido),
+                                              style: TextStyle(
+                                                fontSize: MedRushTheme
+                                                    .fontSizeBodyLarge,
+                                                fontWeight:
+                                                    MedRushTheme.fontWeightBold,
+                                                color: _pedido!.tipoPedido ==
+                                                        TipoPedido
+                                                            .medicamentosControlados
+                                                    ? Colors.red
+                                                    : MedRushTheme.primaryGreen,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 if (_pedido!.requiereFirmaEspecial) ...[
-                                  const SizedBox(height: 8),
+                                  const SizedBox(
+                                      height: MedRushTheme.spacingMd),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
+                                      horizontal: MedRushTheme.spacingMd,
+                                      vertical: MedRushTheme.spacingSm,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: MedRushTheme.specialSignature
-                                          .withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
-                                          color: MedRushTheme.specialSignature
-                                              .withValues(alpha: 0.3)),
+                                        color: MedRushTheme.specialSignature
+                                            .withValues(alpha: 0.3),
+                                      ),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(LucideIcons.pencil,
-                                            size: 16,
-                                            color:
-                                                MedRushTheme.specialSignature),
-                                        SizedBox(width: 4),
+                                        Icon(
+                                          LucideIcons.pencil,
+                                          size: 18,
+                                          color: MedRushTheme.specialSignature,
+                                        ),
+                                        SizedBox(
+                                          width: MedRushTheme.spacingSm,
+                                        ),
                                         Text(
                                           'Requiere Firma Especial',
                                           style: TextStyle(
                                             color:
                                                 MedRushTheme.specialSignature,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight:
+                                                MedRushTheme.fontWeightBold,
                                             fontSize:
-                                                MedRushTheme.fontSizeLabelSmall,
+                                                MedRushTheme.fontSizeBodyMedium,
                                           ),
                                         ),
                                       ],

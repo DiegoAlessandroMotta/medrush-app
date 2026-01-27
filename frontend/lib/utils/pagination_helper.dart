@@ -33,7 +33,6 @@ class PaginationHelper<T> {
 
   /// Actualiza el estado con datos de la primera página
   void updateFirstPage(PaginatedResponse<T> paginatedData) {
-    // FIX: Verificar duplicados en la primera página también
     final uniqueItems = <T>[];
     final seenIds = <String>{};
 
@@ -64,7 +63,6 @@ class PaginationHelper<T> {
 
   /// Actualiza el estado con datos de páginas adicionales
   void updateAdditionalPage(PaginatedResponse<T> paginatedData) {
-    // FIX: Verificar duplicados antes de agregar
     final existingIds = _items.map(_getItemId).toSet();
     final newItems = paginatedData.items
         .where((item) => !existingIds.contains(_getItemId(item)))
@@ -76,7 +74,6 @@ class PaginationHelper<T> {
     }
 
     _items.addAll(newItems);
-    // FIX: Incrementar _currentPage correctamente
     _currentPage = _currentPage + 1;
     _totalPages = paginatedData.pagination.lastPage;
     _totalItems = paginatedData.pagination.total;
@@ -87,13 +84,13 @@ class PaginationHelper<T> {
         '✅ Página adicional cargada: ${newItems.length} items únicos (total: ${_items.length}/$_totalItems) - Página $_currentPage/$_totalPages');
   }
 
-  /// FIX: Método para corregir el currentPage después del auto-skip
+  /// Método para corregir el currentPage después del auto-skip
   void setCurrentPage(int page) {
     _currentPage = page;
     logInfo('🔧 [PAGINATION] currentPage actualizado a $page');
   }
 
-  /// FIX: Método para actualizar página con auto-skip (para historial)
+  /// Método para actualizar página con auto-skip (para historial)
   void updatePageWithAutoSkip(
       PaginatedResponse<T> paginatedData, int actualPage) {
     // Verificar duplicados
@@ -228,17 +225,14 @@ class PaginationHelper<T> {
 
   /// Obtiene el ID único de un item (para verificar duplicados)
   String _getItemId(T item) {
-    // FIX: Usar reflexión para obtener el campo 'id' del item
     if (item is Map<String, dynamic>) {
       return (item['id'] ?? '').toString();
     }
 
-    // FIX: Para objetos Pedido, usar el campo id directamente
     try {
       final dynamic id = (item as dynamic).id;
       return id?.toString() ?? '';
     } catch (e) {
-      // FIX: Fallback - usar toString() como ID único
       return item.toString();
     }
   }

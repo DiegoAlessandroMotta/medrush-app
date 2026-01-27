@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -66,7 +65,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
 
   // Configuración del mapa
   static const CameraPosition _initialPosition = CameraPosition(
-    target: LatLng(-12.0464, -77.0428), // Lima, Perú
+    target: LatLng(26.037737, -80.179550), // EEUU
     zoom: 12.0,
   );
 
@@ -205,11 +204,12 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
 
   /// Crea marcadores rápidos (sin distinguir polylines) para mejorar TTI
   Future<void> _crearMarcadoresIniciales() async {
-    _isLoadingMarkers = true;
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _isLoadingMarkers = true;
+        _markers.clear();
+      });
     }
-    _markers.clear();
 
     // Marcador de ubicación actual si existe
     if (_currentPosition != null) {
@@ -247,8 +247,9 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     if (mounted) {
-      _isLoadingMarkers = false;
-      setState(() {});
+      setState(() {
+        _isLoadingMarkers = false;
+      });
     }
   }
 
@@ -625,12 +626,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
   Future<void> _crearMarcadoresYPolylines() async {
     _markers.clear();
 
-    // Debug: verificar estado de polylines
-    logInfo('Creando marcadores - Fuente: servidor');
-    logInfo(
-        'Pedidos con polyline: ${_pedidosConPolyline.length}/${_rutaOptimizada.length}');
-    logInfo('IDs con polyline: ${_pedidosConPolyline.toList()}');
-
     // Marcador de ubicación actual
     if (_currentPosition != null) {
       _markers.add(
@@ -713,28 +708,12 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       // Usar el orden optimizado del backend, o fallback a índice + 1
       final orden = pedido.ordenOptimizado ?? (i + 1);
 
-      // Debug: verificar el orden
-      if (kDebugMode) {
-        debugPrint(
-            '[Map] Pedido ${i + 1}: ${pedido.pacienteNombre} - ordenOptimizado: ${pedido.ordenOptimizado} - usando orden: $orden - estado: ${pedido.estado}');
-      }
-
       // Marcador de entrega
       final latLngEntrega =
           LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
 
       // Determinar color del icono según el estado
       final iconEntrega = await _getNumberedIconWithState(orden, pedido.estado);
-      final colorEstado = _getColorForEstado(pedido.estado);
-      logInfo(
-          'Marcador $colorEstado para pedido $orden (${pedido.pacienteNombre}) - estado: ${pedido.estado}');
-
-      // Debug: verificar icono de entrega
-      if (kDebugMode) {
-        final tienePolyline = _pedidosConPolyline.contains(pedido.id);
-        debugPrint(
-            '[Map] Creando marcador de entrega $orden para ${pedido.pacienteNombre} - tienePolyline: $tienePolyline - estado: ${pedido.estado}');
-      }
 
       _markers.add(
         Marker(
@@ -750,19 +729,9 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     if (mounted) {
-      _isLoadingMarkers = false;
-      setState(() {});
-    }
-    if (kDebugMode) {
-      debugPrint(
-          '[Map] markers=${_markers.length} polylines=${_polylines.length} rutaOptimizada=${_rutaOptimizada.length}');
-
-      // Debug detallado de polylines en el mapa
-      for (int i = 0; i < _polylines.length; i++) {
-        final polyline = _polylines.elementAt(i);
-        debugPrint(
-            '[Map] Polyline $i: ${polyline.polylineId.value} - ${polyline.points.length} puntos');
-      }
+      setState(() {
+        _isLoadingMarkers = false;
+      });
     }
   }
 
@@ -773,9 +742,10 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     try {
-      _isLoadingPolylines = true;
       if (mounted) {
-        setState(() {});
+        setState(() {
+          _isLoadingPolylines = true;
+        });
       }
       logInfo('Dibujando polylines desde el servidor...');
 
@@ -786,14 +756,16 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       await _crearPolylinesDesdeServidor();
 
       if (mounted) {
-        _isLoadingPolylines = false;
-        setState(() {});
+        setState(() {
+          _isLoadingPolylines = false;
+        });
       }
     } catch (e) {
       logError('Error al dibujar polylines desde el servidor', e);
       if (mounted) {
-        _isLoadingPolylines = false;
-        setState(() {});
+        setState(() {
+          _isLoadingPolylines = false;
+        });
       }
     }
   }
@@ -1270,12 +1242,8 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         );
 
         _legInfoByPedidoId[pedido.id] = legInfo;
-        logInfo(
-            'Leg info para pedido ${pedido.id}: ${legInfo.distanceText}, ${legInfo.durationText}, ${legInfo.cumulativeDurationSeconds}s');
       }
     }
-
-    logInfo('Leg info poblada para ${_legInfoByPedidoId.length} pedidos');
   }
 
   /// Cambia el orden personalizado de un pedido
@@ -1389,8 +1357,6 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     try {
-      logInfo('📐 Decodificando polyline del servidor...');
-
       // Limpiar pedidos con polyline para recalcular
       _pedidosConPolyline.clear();
 
@@ -1406,12 +1372,15 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         logInfo(
             'Polyline del servidor creada con ${polylinePoints.length} puntos');
 
+        // Forzar actualización inmediata para Web
+        if (mounted) {
+          setState(() {});
+        }
+
         // Marcar TODOS los pedidos como que tienen polyline (servidor incluye todos)
         for (final pedido in _rutaOptimizada) {
           _pedidosConPolyline.add(pedido.id);
         }
-        logInfo(
-            'Todos los ${_rutaOptimizada.length} pedidos marcados como con polyline (servidor)');
 
         // Poblar información de leg para todos los pedidos
         _poblarLegInfoParaPedidos();

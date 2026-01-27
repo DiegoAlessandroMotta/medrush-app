@@ -3,8 +3,6 @@ import 'package:medrush/utils/loggers.dart';
 
 /// Helper centralizado para operaciones comunes de API
 class ApiHelper {
-  // FIX: Funciones de configuración duplicadas eliminadas
-
   /// Procesa respuestas estándar del backend Laravel
   static List<T> processListResponse<T>(
     Map<String, dynamic>? responseData,

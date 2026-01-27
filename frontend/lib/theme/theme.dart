@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Tema profesional para MedRush - Delivery de Medicamentos
 /// Paleta inspirada en la industria farmacéutica y de delivery
@@ -129,11 +128,11 @@ class MedRushTheme {
   // CONFIGURACIÓN DE FUENTES
   // ========================================
 
-  // Familia de fuentes principal - Public Sans (moderna y legible)
-  static const String fontFamilyPrimary = 'Public Sans';
+  // Familia de fuentes principal - Inter (moderna y legible)
+  static const String fontFamilyPrimary = 'Inter';
 
-  // Familia de fuentes secundaria - Inter (fallback moderna)
-  static const String fontFamilySecondary = 'Inter';
+  // Familia de fuentes secundaria - Public Sans (fallback)
+  static const String fontFamilySecondary = 'PublicSans';
 
   // Tamaños de fuente
   static const double fontSizeDisplayLarge = 57.0;
@@ -236,15 +235,16 @@ class MedRushTheme {
         surfaceTint: primaryGreen,
       ),
 
-      // Configuración de fuentes (Public Sans)
+      // Configuración de fuentes (Inter)
       // Notas UX: jerarquía clara, buen contraste, y límites de legibilidad.
       // - Titulares: pesos 600–700 con tracking leve negativo en tamaños grandes
       // - Cuerpos: 400 y líneas 1.45–1.55
       // - Etiquetas/botones: 600 para mejor toque/escaneo
       fontFamily: fontFamilyPrimary,
-      textTheme: GoogleFonts.publicSansTextTheme().copyWith(
+      textTheme: const TextTheme(
         // Display grande: 57/64, Bold con tracking leve
-        displayLarge: GoogleFonts.publicSans(
+        displayLarge: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeDisplayLarge,
           height: 64 / fontSizeDisplayLarge,
           letterSpacing: -0.25,
@@ -252,7 +252,8 @@ class MedRushTheme {
           color: textPrimary,
         ),
         // Display mediano: 45/52, Semibold
-        displayMedium: GoogleFonts.publicSans(
+        displayMedium: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeDisplayMedium,
           height: 52 / fontSizeDisplayMedium,
           letterSpacing: -0.2,
@@ -260,7 +261,8 @@ class MedRushTheme {
           color: textPrimary,
         ),
         // Display pequeño: 36/44, Semibold
-        displaySmall: GoogleFonts.publicSans(
+        displaySmall: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeDisplaySmall,
           height: 44 / fontSizeDisplaySmall,
           letterSpacing: -0.1,
@@ -268,41 +270,47 @@ class MedRushTheme {
           color: textPrimary,
         ),
         // Headline grande: 32/40, Semibold
-        headlineLarge: GoogleFonts.publicSans(
+        headlineLarge: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeHeadlineLarge,
           height: 40 / fontSizeHeadlineLarge,
           fontWeight: fontWeightSemiBold,
           color: textPrimary,
         ),
         // Headline mediano: 28/36, Medium
-        headlineMedium: GoogleFonts.publicSans(
+        headlineMedium: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeHeadlineMedium,
           height: 36 / fontSizeHeadlineMedium,
           fontWeight: fontWeightMedium,
           color: textPrimary,
         ),
         // Headline pequeño: 24/32, Medium
-        headlineSmall: GoogleFonts.publicSans(
+        headlineSmall: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeHeadlineSmall,
           height: 32 / fontSizeHeadlineSmall,
           fontWeight: fontWeightMedium,
           color: textPrimary,
         ),
         // Títulos para pantallas y secciones
-        titleLarge: GoogleFonts.publicSans(
+        titleLarge: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeTitleLarge,
           height: 28 / fontSizeTitleLarge,
           fontWeight: fontWeightSemiBold,
           color: textPrimary,
         ),
-        titleMedium: GoogleFonts.publicSans(
+        titleMedium: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeTitleMedium,
           height: 22 / fontSizeTitleMedium,
           letterSpacing: 0.1,
           fontWeight: fontWeightMedium,
           color: textPrimary,
         ),
-        titleSmall: GoogleFonts.publicSans(
+        titleSmall: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeTitleSmall,
           height: 20 / fontSizeTitleSmall,
           letterSpacing: 0.1,
@@ -310,21 +318,24 @@ class MedRushTheme {
           color: textPrimary,
         ),
         // Cuerpo de texto
-        bodyLarge: GoogleFonts.publicSans(
+        bodyLarge: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeBodyLarge,
           height: 24 / fontSizeBodyLarge,
           letterSpacing: 0.15,
           fontWeight: fontWeightRegular,
           color: textPrimary,
         ),
-        bodyMedium: GoogleFonts.publicSans(
+        bodyMedium: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeBodyMedium,
           height: 20 / fontSizeBodyMedium,
           letterSpacing: 0.15,
           fontWeight: fontWeightRegular,
           color: textPrimary,
         ),
-        bodySmall: GoogleFonts.publicSans(
+        bodySmall: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeBodySmall,
           height: 18 / fontSizeBodySmall,
           letterSpacing: 0.2,
@@ -332,21 +343,24 @@ class MedRushTheme {
           color: textSecondary,
         ),
         // Etiquetas y botones
-        labelLarge: GoogleFonts.publicSans(
+        labelLarge: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeLabelLarge,
           height: 20 / fontSizeLabelLarge,
           letterSpacing: 0.1,
           fontWeight: fontWeightSemiBold,
           color: textPrimary,
         ),
-        labelMedium: GoogleFonts.publicSans(
+        labelMedium: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeLabelMedium,
           height: 16 / fontSizeLabelMedium,
           letterSpacing: 0.2,
           fontWeight: fontWeightMedium,
           color: textSecondary,
         ),
-        labelSmall: GoogleFonts.publicSans(
+        labelSmall: TextStyle(
+          fontFamily: fontFamilyPrimary,
           fontSize: fontSizeLabelSmall,
           height: 16 / fontSizeLabelSmall,
           letterSpacing: 0.3,

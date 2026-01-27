@@ -122,38 +122,19 @@ class AppRoutes {
     };
   }
 
-  // Función para navegar según el rol del usuario
-  static void navigateByRole(BuildContext context, String userRole) {
-    String route;
-
-    switch (userRole.toLowerCase()) {
-      case 'admin':
-      case 'administrador':
-        route = adminDashboard;
-      case 'repartidor':
-      case 'delivery':
-      case 'driver':
-        route = repartidorMain;
-      default:
-        // Ruta por defecto o mostrar error
-        route = login;
-    }
-
-    Navigator.of(context).pushReplacementNamed(route);
+  /// Obtiene la ruta principal según el rol del usuario
+  static String getMainRouteByRole(String userRole) {
+    return switch (userRole.toLowerCase()) {
+      'admin' || 'administrador' => adminDashboard,
+      'repartidor' || 'delivery' || 'driver' => repartidorMain,
+      _ => login,
+    };
   }
 
-  // Función para obtener la ruta principal según el rol
-  static String getMainRouteByRole(String userRole) {
-    switch (userRole.toLowerCase()) {
-      case 'admin':
-      case 'administrador':
-        return adminDashboard;
-      case 'repartidor':
-      case 'delivery':
-      case 'driver':
-        return repartidorMain;
-      default:
-        return login;
+  /// Navega según el rol del usuario
+  static void navigateByRole(BuildContext context, String userRole) {
+    if (context.mounted) {
+      Navigator.of(context).pushReplacementNamed(getMainRouteByRole(userRole));
     }
   }
 }
@@ -213,9 +194,7 @@ class AdminNavigationController extends ChangeNotifier {
   String get currentRoute => _currentRoute;
   int get previousIndex => _previousIndex;
 
-  // FIX: Eliminado sistema de transiciones para mejor rendimiento
-
-  // Cambiar a un índice específico (sin navegación)
+  /// Cambiar a un índice específico (sin navegación)
   void navigateTo(BuildContext context, int index) {
     if (_currentIndex == index) {
       return;
@@ -338,9 +317,7 @@ class RepartidorNavigationController extends ChangeNotifier {
   String get currentRoute => _currentRoute;
   int get previousIndex => _previousIndex;
 
-  // FIX: Eliminado sistema de transiciones para mejor rendimiento
-
-  // Cambiar a un índice específico (sin navegación)
+  /// Cambiar a un índice específico (sin navegación)
   void navigateTo(BuildContext context, int index) {
     if (_currentIndex == index) {
       return;

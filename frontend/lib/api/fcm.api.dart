@@ -5,6 +5,7 @@ import 'package:medrush/api/api_helper.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/validators.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class FcmApi {
@@ -114,9 +115,8 @@ class FcmApi {
       return false;
     }
 
-    // Verificar que solo contenga caracteres válidos
-    final validPattern = RegExp(r'^[a-zA-Z0-9:_-]+$');
-    return validPattern.hasMatch(token);
+    // Verificar que solo contenga caracteres válidos para tokens FCM
+    return Validators.isValidFcmToken(token);
   }
 
   /// Obtiene información del dispositivo para el registro

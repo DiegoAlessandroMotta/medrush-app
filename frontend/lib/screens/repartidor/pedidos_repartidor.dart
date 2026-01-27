@@ -10,6 +10,7 @@ import 'package:medrush/screens/repartidor/modules/pedidos/pedidos_detalle_repar
 import 'package:medrush/screens/repartidor/widgets/grid_pedidos_infinite.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/debug_helpers.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/pagination_helper.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -35,7 +36,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
   String? _error;
   EstadoPedido? _filtroEstado;
   final bool _mostrarSoloPrioritarios = false;
-  String _searchTerm = ''; // FIX: Agregar término de búsqueda
+  String _searchTerm = '';
 
   @override
   void initState() {
@@ -98,7 +99,6 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
       logInfo(
           '[LOAD_PEDIDOS] Cargando pedidos desde repositorio (página ${_paginationHelper.currentPage})');
 
-      // FIX: Por defecto, solo obtener pedidos activos (asignado, recogido, en ruta)
       final result = await _obtenerPedidosActivos();
 
       if (!mounted) {
@@ -109,8 +109,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
       if (result.success && result.data != null) {
         _paginationHelper.updateFirstPage(result.data!);
 
-        // FIX: Debug - verificar duplicados en la respuesta del backend
-        _debugDuplicates(result.data!.items, 'Primera página');
+        DebugHelpers.checkDuplicates(result.data!.items, 'DUPLICADOS');
 
         setState(() {
           _isLoading = false;
@@ -175,7 +174,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
 
       if (result.success && result.data != null) {
         // Verificar duplicados en la respuesta
-        _debugDuplicates(result.data!.items, 'Página $nextPage');
+        DebugHelpers.checkDuplicates(result.data!.items, 'DUPLICADOS');
 
         // Actualizar con la nueva página
         _paginationHelper.updateAdditionalPage(result.data!);
@@ -223,13 +222,10 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
         page: targetPage,
         perPage: 50, // 50 pedidos por página
         estado: _filtroEstado,
-        search: _searchTerm.isNotEmpty
-            ? _searchTerm
-            : null, // FIX: Incluir búsqueda
+        search: _searchTerm.isNotEmpty ? _searchTerm : null,
       );
     }
 
-    // FIX: Por defecto, obtener solo pedidos activos usando filtro del backend
     // El backend soporta múltiples estados con el parámetro "estados"
     logInfo(
         '[OBTENER_PEDIDOS] Sin filtro específico, obteniendo pedidos activos del backend');
@@ -241,21 +237,19 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
         EstadoPedido.asignado,
         EstadoPedido.recogido,
         EstadoPedido.enRuta,
-      ], // FIX: Usar filtro de múltiples estados del backend
+      ],
       search: _searchTerm.isNotEmpty ? _searchTerm : null,
     );
   }
 
-  /// FIX: Recarga los pedidos (cache deshabilitado)
+  /// Recarga los pedidos
   Future<void> _limpiarCacheYRecargar() async {
     try {
-      // FIX: Cache deshabilitado - solo recargar datos
       logInfo('Recargando pedidos...');
     } catch (e) {
       logError('Error al recargar pedidos', e);
     }
 
-    // FIX: Verificar si el widget está montado
     if (!mounted) {
       return;
     }
@@ -266,7 +260,6 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
   List<Pedido> get _pedidosFiltrados {
     var filtered = _paginationHelper.items;
 
-    // FIX: Ya no necesitamos filtrar por estado ni búsqueda localmente
     // El backend ahora maneja estos filtros
 
     // Filtrar prioritarios si está activado
@@ -308,7 +301,6 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                 setState(() {
                   _searchTerm = value;
                 });
-                // FIX: Recargar datos cuando cambie la búsqueda
                 await _limpiarCacheYRecargar();
               },
               decoration: const InputDecoration(
@@ -360,7 +352,6 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                   _filtroEstado = newValue;
                   // Actualizar el filtro de texto para mostrar
                 });
-                // FIX: Limpiar caché y recargar con el nuevo filtro
                 await _limpiarCacheYRecargar();
               },
             ),
@@ -686,29 +677,6 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
           context: context,
         );
       }
-    }
-  }
-
-  /// Método para verificar duplicados en las respuestas del backend
-  void _debugDuplicates(List<Pedido> pedidos, String context) {
-    final ids = pedidos.map((p) => p.id).toList();
-    final uniqueIds = ids.toSet();
-
-    // Solo logear si hay duplicados (problema)
-    if (ids.length != uniqueIds.length) {
-      final duplicateIds = <String>[];
-      final seenIds = <String>{};
-
-      for (final id in ids) {
-        if (seenIds.contains(id)) {
-          duplicateIds.add(id);
-        } else {
-          seenIds.add(id);
-        }
-      }
-
-      logWarning(
-          '[DUPLICADOS] $context: ${ids.length - uniqueIds.length} duplicados encontrados - IDs: ${duplicateIds.join(', ')}');
     }
   }
 

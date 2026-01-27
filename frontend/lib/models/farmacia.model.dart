@@ -182,7 +182,7 @@ class Farmacia {
       'ciudad': city,
       'estado_region': state,
       'codigo_postal': zipCode,
-      'codigo_iso_pais': codigoIsoPais ?? 'PER',
+      'codigo_iso_pais': codigoIsoPais ?? 'USA',
     };
   }
 

@@ -36,7 +36,7 @@ class GeocodingService {
           city: '',
           state: '',
           postalCode: '',
-          country: 'Perú',
+          country: 'United States',
           formattedAddress:
               'Coordenadas: ${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
         );

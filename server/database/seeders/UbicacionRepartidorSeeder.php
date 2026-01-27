@@ -7,6 +7,7 @@ use App\Models\UbicacionRepartidor;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use MatanYadaev\EloquentSpatial\Objects\Point;
+use MatanYadaev\EloquentSpatial\Enums\Srid;
 
 class UbicacionRepartidorSeeder extends Seeder
 {
@@ -27,7 +28,7 @@ class UbicacionRepartidorSeeder extends Seeder
       foreach ($points as $index => $point) {
         UbicacionRepartidor::create([
           'repartidor_id' => $repartidor->id,
-          'ubicacion' => new Point($point['latitude'], $point['longitude']),
+          'ubicacion' => new Point($point['latitude'], $point['longitude'], Srid::WGS84),
           'precision_m' => fake()->randomFloat(2, 5, 50),
           'velocidad_ms' => fake()->randomFloat(2, 0, 15),
           'direccion' => fake()->randomFloat(2, 0, 360),

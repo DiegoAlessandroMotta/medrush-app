@@ -24,28 +24,42 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Inicializar Firebase con mejor manejo de errores
+  await _initializeFirebase();
+
+  // Configurar Firebase Messaging
+  await _initializeFirebaseMessaging();
+
+  // Ejecutar la aplicación con manejo de errores global
+  FlutterError.onError = (details) {
+    logError('Error de Flutter', details.exception, details.stack);
+  };
+
+  runApp(const MedRushApp());
+}
+
+/// Inicializa Firebase con manejo de errores
+Future<void> _initializeFirebase() async {
   try {
-    // Inicializar Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     logInfo('Firebase inicializado correctamente');
-  } catch (e) {
-    logError('Error al inicializar Firebase', e);
+  } catch (e, stackTrace) {
+    logError('Error al inicializar Firebase', e, stackTrace);
     // Continuar sin Firebase si hay error
   }
+}
 
+/// Inicializa Firebase Messaging con manejo de errores
+Future<void> _initializeFirebaseMessaging() async {
   try {
-    // Configurar manejador de mensajes en segundo plano
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     logInfo('Firebase Messaging configurado');
-  } catch (e) {
-    logError('Error al configurar Firebase Messaging', e);
+  } catch (e, stackTrace) {
+    logError('Error al configurar Firebase Messaging', e, stackTrace);
     // Continuar sin Firebase Messaging si hay error
   }
-
-  // FIX: Cache deshabilitado - initCache eliminado
-  runApp(const MedRushApp());
 }
 
 class MedRushApp extends StatelessWidget {
@@ -110,10 +124,14 @@ class AuthWrapper extends StatelessWidget {
         }
 
         // Si está autenticado, navegar según el rol
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final userRole = authProvider.userRole;
-          AppRoutes.navigateByRole(context, userRole);
-        });
+        if (context.mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              final userRole = authProvider.userRole;
+              AppRoutes.navigateByRole(context, userRole);
+            }
+          });
+        }
 
         // Mostrar loading mientras se navega
         return const Scaffold(

@@ -192,6 +192,8 @@ class PedidosTableView extends StatelessWidget {
                   fontSize: MedRushTheme.fontSizeBodySmall,
                   fontWeight: MedRushTheme.fontWeightMedium,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             // Espacio entre N° PEDIDO y CLIENTE
@@ -233,8 +235,8 @@ class PedidosTableView extends StatelessWidget {
             // ESTADO
             SizedBox(
               width: 100,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 2),
+              child: Align(
+                alignment: Alignment.centerLeft,
                 child: _buildStatusBadge(pedido.estado),
               ),
             ),
@@ -489,7 +491,6 @@ class PedidosTableView extends StatelessWidget {
   }
 
   Widget _buildRepartidorCell(Pedido pedido) {
-    // FIX: Mostrar nombre del repartidor con icono de verificado si aplica
     if (pedido.repartidor != null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -870,6 +871,9 @@ class PedidosTableView extends StatelessWidget {
       // Cargar repartidores activos
       final repartidorRepo = RepartidorRepository();
       final res = await repartidorRepo.getRepartidoresActivos();
+      if (!context.mounted) {
+        return;
+      }
       final List<Usuario> repartidores = res.data ?? [];
 
       Usuario? seleccionado;
@@ -925,6 +929,9 @@ class PedidosTableView extends StatelessWidget {
                   final repo = PedidoRepository();
                   final result =
                       await repo.asignarPedido(pedido.id, seleccionado!.id);
+                  if (!context.mounted) {
+                    return;
+                  }
                   if (context.mounted) {
                     Navigator.of(context).pop();
                   }
@@ -1203,7 +1210,7 @@ class PedidosTableView extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && context.mounted) {
       await _cancelarPedido(context, pedido);
     }
   }
@@ -1225,6 +1232,9 @@ class PedidosTableView extends StatelessWidget {
 
       // Cancelar pedido usando el repositorio
       final result = await repository.cancelarPedido(pedido.id);
+      if (!context.mounted) {
+        return;
+      }
 
       // Cerrar indicador de carga
       if (context.mounted) {
@@ -1255,6 +1265,10 @@ class PedidosTableView extends StatelessWidget {
       // Cerrar indicador de carga si está abierto
       if (context.mounted) {
         Navigator.of(context).pop();
+      }
+
+      if (!context.mounted) {
+        return;
       }
 
       // Mostrar mensaje de error
@@ -1399,7 +1413,7 @@ class PedidosTableView extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true && motivoSeleccionado != null) {
+    if (confirmed == true && motivoSeleccionado != null && context.mounted) {
       await _marcarPedidoFallido(
         context,
         pedido,
@@ -1428,8 +1442,8 @@ class PedidosTableView extends StatelessWidget {
 
       // Obtener ubicación actual (simulada por ahora)
       // TODO: Implementar obtención real de ubicación GPS
-      const double latitud = -12.0464; // Lima, Perú
-      const double longitud = -77.0428;
+      const double latitud = 26.037737; // EEUU
+      const double longitud = -80.179550;
 
       // Crear repositorio
       final repository = PedidoRepository();
@@ -1442,6 +1456,10 @@ class PedidosTableView extends StatelessWidget {
         latitud: latitud,
         longitud: longitud,
       );
+
+      if (!context.mounted) {
+        return;
+      }
 
       // Cerrar indicador de carga
       if (context.mounted) {
@@ -1472,6 +1490,10 @@ class PedidosTableView extends StatelessWidget {
       // Cerrar indicador de carga si está abierto
       if (context.mounted) {
         Navigator.of(context).pop();
+      }
+
+      if (!context.mounted) {
+        return;
       }
 
       // Mostrar mensaje de error

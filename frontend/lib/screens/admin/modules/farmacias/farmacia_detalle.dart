@@ -6,7 +6,6 @@ import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
 import 'package:medrush/widgets/mapa_widget.dart';
-import 'package:share_plus/share_plus.dart';
 
 // Ancho máximo del bottom sheet en desktop para mejorar legibilidad
 const double _kMaxDesktopSheetWidth = 980;
@@ -93,28 +92,6 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          PopupMenuButton<String>(
-                            tooltip: 'Más',
-                            onSelected: (value) async {
-                              if (value == 'export') {
-                                final contenido = _toPrettyString(farmacia);
-                                await SharePlus.instance.share(
-                                  ShareParams(
-                                    text: contenido,
-                                    subject: 'Detalle de farmacia',
-                                  ),
-                                );
-                              }
-                            },
-                            itemBuilder: (context) => const [
-                              PopupMenuItem(
-                                  value: 'export',
-                                  child: Text('Compartir/Exportar')),
-                            ],
-                            icon: const Icon(LucideIcons.ellipsis,
-                                color: MedRushTheme.textSecondary),
                           ),
                         ],
                       ),
@@ -355,10 +332,6 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return StatusHelpers.formatearFechaCompletaConCeros(date);
-  }
-
-  String _toPrettyString(Farmacia f) {
-    return 'Farmacia: ${f.nombre}\nRUC: ${f.ruc}\nDirección: ${f.direccion}\nCiudad: ${f.city}${f.state != null ? ', ${f.state!}' : ''}${f.zipCode != null ? ' ${f.zipCode!}' : ''}\nTeléfono: ${f.telefono}\nEmail: ${f.email ?? '-'}\nLat: ${f.latitud}, Lng: ${f.longitud}\nEstado: ${f.estado.name}\nCadena: ${f.cadena}';
   }
 
   @override

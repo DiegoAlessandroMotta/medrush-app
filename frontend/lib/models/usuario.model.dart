@@ -33,6 +33,7 @@ class Usuario {
   final String? vehiculoPlaca;
   final String? vehiculoMarca;
   final String? vehiculoModelo;
+  final String? vehiculoCodigoRegistro;
   final EstadoRepartidor? estadoRepartidor;
   final String? codigoIsoPais;
   final bool? verificado;
@@ -66,6 +67,7 @@ class Usuario {
     this.vehiculoPlaca,
     this.vehiculoMarca,
     this.vehiculoModelo,
+    this.vehiculoCodigoRegistro,
     this.estadoRepartidor,
     this.codigoIsoPais,
     this.verificado,
@@ -117,6 +119,9 @@ class Usuario {
           json['vehiculo_marca'] as String?,
       vehiculoModelo: perfilRepartidor?['vehiculo_modelo'] as String? ??
           json['vehiculo_modelo'] as String?,
+      vehiculoCodigoRegistro:
+          perfilRepartidor?['vehiculo_codigo_registro'] as String? ??
+              json['vehiculo_codigo_registro'] as String?,
       estadoRepartidor:
           (perfilRepartidor?['estado'] ?? json['estado_repartidor']) != null
               ? _estadoRepartidorFromSnakeCase((perfilRepartidor?['estado'] ??
@@ -187,6 +192,7 @@ class Usuario {
       'vehiculo_placa': vehiculoPlaca,
       'vehiculo_marca': vehiculoMarca,
       'vehiculo_modelo': vehiculoModelo,
+      'vehiculo_codigo_registro': vehiculoCodigoRegistro,
       'estado_repartidor': estadoRepartidor != null
           ? _estadoRepartidorToSnakeCase(estadoRepartidor!)
           : null,
@@ -252,6 +258,7 @@ class Usuario {
     String? vehiculoPlaca,
     String? vehiculoMarca,
     String? vehiculoModelo,
+    String? vehiculoCodigoRegistro,
     EstadoRepartidor? estadoRepartidor,
     String? codigoIsoPais,
     bool? verificado,
@@ -278,6 +285,8 @@ class Usuario {
       vehiculoPlaca: vehiculoPlaca ?? this.vehiculoPlaca,
       vehiculoMarca: vehiculoMarca ?? this.vehiculoMarca,
       vehiculoModelo: vehiculoModelo ?? this.vehiculoModelo,
+      vehiculoCodigoRegistro:
+          vehiculoCodigoRegistro ?? this.vehiculoCodigoRegistro,
       estadoRepartidor: estadoRepartidor ?? this.estadoRepartidor,
       codigoIsoPais: codigoIsoPais ?? this.codigoIsoPais,
       verificado: verificado ?? this.verificado,

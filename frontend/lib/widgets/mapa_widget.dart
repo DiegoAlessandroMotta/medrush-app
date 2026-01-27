@@ -1,14 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/models/geocoding_result.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/services/geocoding_service.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
 
-class MapaWidget extends StatelessWidget {
+class MapaWidget extends StatefulWidget {
   final List<Pedido> pedidos;
   final double? latitudActual;
   final double? longitudActual;
@@ -35,27 +37,122 @@ class MapaWidget extends StatelessWidget {
   });
 
   @override
+  State<MapaWidget> createState() => _MapaWidgetState();
+}
+
+class _MapaWidgetState extends State<MapaWidget> {
+  GoogleMapController? _mapController;
+  LatLng?
+      _currentLocation; // Nullable porque puede no inicializarse si no hay permisos
+  bool _locationLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Intentar obtener ubicación actual solo si no hay punto seleccionado
+    if (widget.puntoSeleccionado == null && !widget.readOnly) {
+      _getCurrentLocation();
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    if (_locationLoading) {
+      return;
+    }
+
+    setState(() {
+      _locationLoading = true;
+    });
+
+    try {
+      // Verificar permisos
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        logInfo('Servicios de ubicación deshabilitados');
+        setState(() {
+          _locationLoading = false;
+        });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          logWarning('Permisos de ubicación denegados');
+          setState(() {
+            _locationLoading = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        logWarning('Permisos de ubicación denegados permanentemente');
+        setState(() {
+          _locationLoading = false;
+        });
+        return;
+      }
+
+      // Obtener ubicación actual
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+        _locationLoading = false;
+      });
+
+      // Centrar mapa en ubicación actual
+      if (_currentLocation != null && mounted) {
+        _mapController?.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: _currentLocation!,
+              zoom: 14,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      logError('Error al obtener ubicación actual', e);
+      if (mounted) {
+        setState(() {
+          _locationLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final markers = <Marker>{};
 
     // Agregar marcador del punto seleccionado
-    if (puntoSeleccionado != null) {
+    if (widget.puntoSeleccionado != null) {
       markers.add(Marker(
         markerId: const MarkerId('punto'),
-        position: puntoSeleccionado!,
+        position: widget.puntoSeleccionado!,
         infoWindow: InfoWindow(
-          title: markerTitle ?? 'Ubicación',
-          snippet: markerSnippet,
+          title: widget.markerTitle ?? 'Ubicación',
+          snippet: widget.markerSnippet,
         ),
-        icon: readOnly
+        icon: widget.readOnly
             ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
             : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ));
     }
 
     // Agregar marcadores de pedidos (solo si no es modo de solo lectura)
-    if (!readOnly) {
-      for (final p in pedidos.take(20)) {
+    if (!widget.readOnly) {
+      for (final p in widget.pedidos.take(20)) {
         // Solo agregar marcador si las coordenadas están disponibles
         if (p.latitudEntrega != null && p.longitudEntrega != null) {
           markers.add(Marker(
@@ -68,28 +165,34 @@ class MapaWidget extends StatelessWidget {
       }
     }
 
-    final initialTarget = puntoSeleccionado ??
-        (pedidos.isNotEmpty &&
-                pedidos.first.latitudEntrega != null &&
-                pedidos.first.longitudEntrega != null
-            ? LatLng(
-                pedidos.first.latitudEntrega!, pedidos.first.longitudEntrega!)
-            : const LatLng(-12.0464, -77.0428));
+    final initialTarget = widget.puntoSeleccionado ??
+        (widget.pedidos.isNotEmpty &&
+                widget.pedidos.first.latitudEntrega != null &&
+                widget.pedidos.first.longitudEntrega != null
+            ? LatLng(widget.pedidos.first.latitudEntrega!,
+                widget.pedidos.first.longitudEntrega!)
+            : const LatLng(26.038113, -80.179776));
 
     return SizedBox(
-      height: height,
+      height: widget.height,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: GoogleMap(
-          initialCameraPosition:
-              CameraPosition(target: initialTarget, zoom: readOnly ? 15 : 14),
+          initialCameraPosition: CameraPosition(
+              target: initialTarget, zoom: widget.readOnly ? 15 : 14),
           markers: markers,
           myLocationEnabled:
-              !readOnly, // Solo mostrar ubicación en modo edición
+              !widget.readOnly, // Solo mostrar ubicación en modo edición
+          myLocationButtonEnabled:
+              false, // Deshabilitar botón de ubicación por defecto
           zoomControlsEnabled:
               false, // Ocultar controles +/-, usamos gestos o botones propios
-          onTap:
-              readOnly ? null : onTapMapa, // Solo permitir tap en modo edición
+          onMapCreated: (controller) {
+            _mapController = controller;
+          },
+          onTap: widget.readOnly
+              ? null
+              : widget.onTapMapa, // Solo permitir tap en modo edición
         ),
       ),
     );
@@ -99,19 +202,19 @@ class MapaWidget extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(IterableProperty<Pedido>('pedidos', pedidos))
-      ..add(DoubleProperty('latitudActual', latitudActual))
-      ..add(DoubleProperty('longitudActual', longitudActual))
+      ..add(IterableProperty<Pedido>('pedidos', widget.pedidos))
+      ..add(DoubleProperty('latitudActual', widget.latitudActual))
+      ..add(DoubleProperty('longitudActual', widget.longitudActual))
       ..add(ObjectFlagProperty<Function(Pedido p1)?>.has(
-          'onPedidoTap', onPedidoTap))
-      ..add(
-          DiagnosticsProperty<LatLng?>('puntoSeleccionado', puntoSeleccionado))
+          'onPedidoTap', widget.onPedidoTap))
+      ..add(DiagnosticsProperty<LatLng?>(
+          'puntoSeleccionado', widget.puntoSeleccionado))
       ..add(ObjectFlagProperty<void Function(LatLng p1)?>.has(
-          'onTapMapa', onTapMapa))
-      ..add(DoubleProperty('height', height))
-      ..add(DiagnosticsProperty<bool>('readOnly', readOnly))
-      ..add(StringProperty('markerTitle', markerTitle))
-      ..add(StringProperty('markerSnippet', markerSnippet));
+          'onTapMapa', widget.onTapMapa))
+      ..add(DoubleProperty('height', widget.height))
+      ..add(DiagnosticsProperty<bool>('readOnly', widget.readOnly))
+      ..add(StringProperty('markerTitle', widget.markerTitle))
+      ..add(StringProperty('markerSnippet', widget.markerSnippet));
   }
 }
 
@@ -341,7 +444,8 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
           Expanded(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: _puntoSeleccionado ?? const LatLng(-12.0464, -77.0428),
+                target:
+                    _puntoSeleccionado ?? const LatLng(26.038113, -80.179776),
                 zoom: 15,
               ),
               markers: _puntoSeleccionado != null
@@ -376,7 +480,7 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                         CameraUpdate.newCameraPosition(
                           CameraPosition(
                             target: _puntoSeleccionado ??
-                                const LatLng(-12.0464, -77.0428),
+                                const LatLng(26.038113, -80.179776),
                             zoom: 15,
                           ),
                         ),

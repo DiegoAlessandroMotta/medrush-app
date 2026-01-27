@@ -261,7 +261,7 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
           try {
             await context.read<AuthProvider>().logout();
           } catch (_) {}
-          if (!mounted) {
+          if (!mounted || !context.mounted) {
             return;
           }
           Navigator.of(context).pushNamedAndRemoveUntil(

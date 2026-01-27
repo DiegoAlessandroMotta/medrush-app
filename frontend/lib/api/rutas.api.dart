@@ -388,7 +388,6 @@ class RutasOptimizadasApi {
     );
   }
 
-  /// Obtiene la ruta actual del repartidor autenticado
   /// Solo funciona para usuarios con rol repartidor
   static Future<Map<String, dynamic>?> getRutaActual({
     String? estado,

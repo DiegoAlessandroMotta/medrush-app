@@ -97,6 +97,13 @@ class OptimizeEntregasPedidos implements ShouldQueue
     $globalStartTime = new DateTimeImmutable($this->inicioJornada);
     $globalEndTime = new DateTimeImmutable(Carbon::parse($this->finJornada)->addHours(2)->toISOString());
 
+    $credentialsPath = base_path(config('services.google.route_optimization.credentials'));
+
+    if (!file_exists($credentialsPath)) {
+      Log::error("Archivo de credenciales de Google no encontrado en: {$credentialsPath}.");
+      throw new \Exception("Falta configurar las credenciales de Google Route Optimization API. Verifica que el archivo service-account.json exista en {$credentialsPath} y la variable GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS en el .env sea correcta.");
+    }
+
     $routeOptimizationService = new RouteOptimizationService();
 
     try {
@@ -246,4 +253,6 @@ class OptimizeEntregasPedidos implements ShouldQueue
 
     return $repartidoresNecesarios;
   }
+
+
 }

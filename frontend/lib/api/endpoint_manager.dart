@@ -3,12 +3,26 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class EndpointManager {
   // ===== CONFIGURACIÓN DE RED =====
 
-  // URLs del servidor de producción
-  static const String serverDomain = 'medrush.ksdemosapps.com';
-  static const String serverUrl = 'https://$serverDomain/api';
-  static const String serverWebSocketUrl = 'wss://$serverDomain/ws';
+  // Detectar entorno local (simple flag para desarrollo)
+  static const bool _isLocal = true;
 
-  // Configuración de URLs - siempre usar el servidor de producción
+  // URLs del servidor de producción
+  static const String _prodDomain = 'medrush.ksdemosapps.com';
+  
+  static String get serverDomain {
+    if (_isLocal) {
+      if (kIsWeb) {
+        return 'localhost:4000';
+      }
+      return '10.0.2.2:4000'; 
+    }
+    return _prodDomain;
+  }
+
+  static String get serverUrl => _isLocal ? 'http://$serverDomain/api' : 'https://$serverDomain/api';
+  static String get serverWebSocketUrl => _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
+
+  // Configuración de URLs
   static String get baseUrl => serverUrl;
 
   static const int connectTimeout = 30000; // 30 segundos
@@ -73,6 +87,7 @@ class EndpointManager {
 
   // Endpoints de usuario
   static String userFoto(String userId) => '$user/$userId/foto';
+  static String userActivo(String userId) => '$user/$userId/activo';
   static const String userNotifications = '$user/notificaciones';
 
   // Endpoints de farmacias

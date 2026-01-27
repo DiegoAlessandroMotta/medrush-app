@@ -4,6 +4,7 @@ import 'package:medrush/api/farmacias.api.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pagination.model.dart' as pagination;
 import 'package:medrush/repositories/base.repository.dart';
+import 'package:medrush/utils/validators.dart';
 
 /// Repositorio para la gestión de farmacias
 /// Proporciona una capa de abstracción entre los providers y la API de farmacias
@@ -15,7 +16,6 @@ class FarmaciaRepository extends BaseRepository {
     return execute(() async {
       validateId(id, 'ID de farmacia');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final farmacia = await FarmaciasApi.getFarmaciaById(id);
 
       return farmacia;
@@ -25,7 +25,6 @@ class FarmaciaRepository extends BaseRepository {
   /// Obtiene todas las farmacias
   Future<RepositoryResult<List<Farmacia>>> obtenerTodas() {
     return execute(() async {
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final farmacias = await FarmaciasApi.getAllFarmacias();
 
       return farmacias;
@@ -35,7 +34,6 @@ class FarmaciaRepository extends BaseRepository {
   /// Obtiene farmacias activas
   Future<RepositoryResult<List<Farmacia>>> obtenerActivas() {
     return execute(() async {
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final todasFarmacias = await FarmaciasApi.getAllFarmaciasCompletas();
       final farmaciasActivas = todasFarmacias
           .where((f) => f.estado == EstadoFarmacia.activa)
@@ -50,7 +48,6 @@ class FarmaciaRepository extends BaseRepository {
     return execute(() async {
       validateNotEmpty(nombre, 'Nombre de farmacia');
 
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final farmacias = await FarmaciasApi.searchFarmacias(nombre);
 
       return farmacias;
@@ -112,8 +109,6 @@ class FarmaciaRepository extends BaseRepository {
       validateNotEmpty(farmacia.nombre, 'Nombre de farmacia');
       validateNotEmpty(farmacia.direccion, 'Dirección');
       validateNotEmpty(farmacia.telefono, 'Teléfono');
-
-      // FIX: Cache deshabilitado - crear directamente en la API
       final farmaciaCreada = await FarmaciasApi.createFarmacia(farmacia);
 
       return farmaciaCreada;
@@ -128,8 +123,6 @@ class FarmaciaRepository extends BaseRepository {
       validateNotEmpty(farmacia.nombre, 'Nombre de farmacia');
       validateNotEmpty(farmacia.direccion, 'Dirección');
       validateNotEmpty(farmacia.telefono, 'Teléfono');
-
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final farmaciaActualizada = await FarmaciasApi.updateFarmacia(farmacia);
 
       return farmaciaActualizada;
@@ -164,7 +157,6 @@ class FarmaciaRepository extends BaseRepository {
     return execute(() async {
       validateId(farmaciaId, 'ID de farmacia');
 
-      // FIX: Cache deshabilitado - eliminar directamente de la API
       final resultado = await FarmaciasApi.deleteFarmacia(farmaciaId);
 
       return resultado;
@@ -174,7 +166,6 @@ class FarmaciaRepository extends BaseRepository {
   /// Obtiene estadísticas de farmacias
   Future<RepositoryResult<Map<String, dynamic>>> obtenerEstadisticas() {
     return execute(() async {
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final todasFarmacias = await FarmaciasApi.getAllFarmaciasCompletas();
       final farmaciasActivas = todasFarmacias
           .where((f) => f.estado == EstadoFarmacia.activa)
@@ -299,7 +290,7 @@ class FarmaciaRepository extends BaseRepository {
       // Validar teléfono solo si no es null
       if (farmacia.telefono != null && farmacia.telefono!.isNotEmpty) {
         // Validar formato de teléfono
-        if (!RegExp(r'^\+?[\d\s\-\(\)]{8,15}$').hasMatch(farmacia.telefono!)) {
+        if (!Validators.isValidPhoneFormat(farmacia.telefono!)) {
           throw ArgumentError('Formato de teléfono no válido');
         }
       }
@@ -322,8 +313,6 @@ class FarmaciaRepository extends BaseRepository {
       return false;
     }
   }
-
-  // FIX: Métodos de caché eliminados completamente
 
   /// Helper estático para cargar farmacias con manejo de estado consistente
   /// Retorna un Map con 'farmacias', 'isLoading', 'error' y 'success'

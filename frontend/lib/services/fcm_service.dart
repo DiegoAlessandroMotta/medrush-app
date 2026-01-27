@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:medrush/api/fcm.api.dart';
+import 'package:medrush/firebase_options.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -38,7 +39,9 @@ class FcmService {
         logInfo('Firebase ya está inicializado');
       } catch (e) {
         logInfo('Firebase no está inicializado, inicializando...');
-        await Firebase.initializeApp();
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
       }
 
       _messaging = FirebaseMessaging.instance;
@@ -311,7 +314,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     Firebase.app(); // Verificar si ya está inicializado
   } catch (e) {
-    await Firebase.initializeApp(); // Solo inicializar si no está inicializado
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ); // Solo inicializar si no está inicializado
   }
   logInfo('Mensaje en segundo plano: ${message.messageId}');
   logInfo('   Título: ${message.notification?.title}');

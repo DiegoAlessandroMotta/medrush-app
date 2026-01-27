@@ -4,23 +4,17 @@ import 'package:medrush/api/repartidores.api.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/base.repository.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/validators.dart';
 
 /// Repository para gestionar la lógica de negocio de repartidores
 /// Proporciona una capa de abstracción entre la UI y la API
 class RepartidorRepository extends BaseRepository {
-  // FIX: Sistema de caché eliminado completamente
-
   RepartidorRepository();
 
   /// Obtiene todos los repartidores del sistema
-  /// FIX: Cache deshabilitado - obtener directamente de la API
-  Future<RepositoryResult<List<Usuario>>> getAllRepartidores({
-    bool forceRefresh = false,
-  }) {
+  Future<RepositoryResult<List<Usuario>>> getAllRepartidores() {
     return execute<List<Usuario>>(() async {
       logInfo('Obteniendo todos los repartidores');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final repartidores = await RepartidoresApi.getAllRepartidores();
 
       logInfo('${repartidores.length} repartidores obtenidos exitosamente');
@@ -33,8 +27,6 @@ class RepartidorRepository extends BaseRepository {
     return execute<Usuario?>(() async {
       validateId(id, 'ID de repartidor');
       logInfo('Obteniendo repartidor con ID: $id');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final repartidor = await RepartidoresApi.getRepartidorById(id);
 
       if (repartidor != null) {
@@ -57,8 +49,6 @@ class RepartidorRepository extends BaseRepository {
       validateNotEmpty(nuevoEstado, 'Estado del repartidor');
 
       logInfo('Actualizando estado del repartidor $id a: $nuevoEstado');
-
-      // FIX: Cache deshabilitado - actualizar directamente en la API
       final resultado =
           await RepartidoresApi.updateEstadoRepartidor(id, nuevoEstado);
 
@@ -78,8 +68,6 @@ class RepartidorRepository extends BaseRepository {
     return execute<List<Usuario>>(() async {
       validateNotEmpty(estado, 'Estado del repartidor');
       logInfo('Obteniendo repartidores con estado: $estado');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final repartidores =
           await RepartidoresApi.getRepartidoresByEstado(estado);
 
@@ -93,8 +81,6 @@ class RepartidorRepository extends BaseRepository {
   Future<RepositoryResult<List<Usuario>>> getRepartidoresDisponibles() {
     return execute<List<Usuario>>(() async {
       logInfo('Obteniendo repartidores disponibles');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final repartidores = await RepartidoresApi.getRepartidoresDisponibles();
 
       logInfo('${repartidores.length} repartidores disponibles obtenidos');
@@ -106,8 +92,6 @@ class RepartidorRepository extends BaseRepository {
   Future<RepositoryResult<List<Usuario>>> getRepartidoresActivos() {
     return execute<List<Usuario>>(() async {
       logInfo('Obteniendo repartidores activos');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final repartidores = await RepartidoresApi.getRepartidoresActivos();
 
       logInfo('${repartidores.length} repartidores activos obtenidos');
@@ -125,8 +109,6 @@ class RepartidorRepository extends BaseRepository {
       if (!validarDatosRepartidor(repartidor)) {
         throw ArgumentError('Datos del repartidor no válidos');
       }
-
-      // FIX: Cache deshabilitado - crear directamente en la API
       final nuevoRepartidor =
           await RepartidoresApi.createRepartidor(repartidor);
 
@@ -141,7 +123,8 @@ class RepartidorRepository extends BaseRepository {
   }
 
   /// Actualiza un repartidor existente
-  Future<RepositoryResult<Usuario?>> updateRepartidor(Usuario repartidor) {
+  Future<RepositoryResult<Usuario?>> updateRepartidor(Usuario repartidor,
+      {String? emailOriginal}) {
     return execute<Usuario?>(() async {
       validateNotNull(repartidor, 'Repartidor');
       validateId(repartidor.id, 'ID de repartidor');
@@ -152,10 +135,9 @@ class RepartidorRepository extends BaseRepository {
       if (!validarDatosRepartidor(repartidor)) {
         throw ArgumentError('Datos del repartidor no válidos');
       }
-
-      // FIX: Cache deshabilitado - actualizar directamente en la API
-      final repartidorActualizado =
-          await RepartidoresApi.updateRepartidor(repartidor);
+      final repartidorActualizado = await RepartidoresApi.updateRepartidor(
+          repartidor,
+          emailOriginal: emailOriginal);
 
       if (repartidorActualizado != null) {
         logInfo(
@@ -168,13 +150,30 @@ class RepartidorRepository extends BaseRepository {
     }, errorMessage: 'Error al actualizar repartidor');
   }
 
+  /// Cambia el estado activo/inactivo del usuario (is_active)
+  Future<RepositoryResult<bool>> setUsuarioActivo({
+    required String userId,
+    required bool isActive,
+  }) {
+    return execute<bool>(() async {
+      validateId(userId, 'ID de usuario');
+      logInfo('Actualizando is_active de usuario $userId a: $isActive');
+      final ok = await RepartidoresApi.setUsuarioActivo(
+        userId: userId,
+        isActive: isActive,
+      );
+      if (!ok) {
+        logError('Error al actualizar is_active');
+      }
+      return ok;
+    }, errorMessage: 'Error al actualizar estado activo del usuario');
+  }
+
   /// Elimina un repartidor
   Future<RepositoryResult<bool>> deleteRepartidor(String id) {
     return execute<bool>(() async {
       validateId(id, 'ID de repartidor');
       logInfo('Eliminando repartidor con ID: $id');
-
-      // FIX: Cache deshabilitado - eliminar directamente de la API
       final resultado = await RepartidoresApi.deleteRepartidor(id);
 
       if (resultado) {
@@ -196,8 +195,7 @@ class RepartidorRepository extends BaseRepository {
 
       // Validar teléfono si existe
       if (repartidor.telefono != null && repartidor.telefono!.isNotEmpty) {
-        if (!RegExp(r'^\+?[\d\s\-\(\)]{8,15}$')
-            .hasMatch(repartidor.telefono!)) {
+        if (!Validators.isValidPhoneFormat(repartidor.telefono!)) {
           throw ArgumentError('Formato de teléfono no válido');
         }
       }
@@ -213,8 +211,6 @@ class RepartidorRepository extends BaseRepository {
   Future<RepositoryResult<Map<String, dynamic>>> getEstadisticasRepartidores() {
     return execute<Map<String, dynamic>>(() async {
       logInfo('Obteniendo estadísticas de repartidores');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final todosRepartidores =
           await RepartidoresApi.getAllRepartidoresCompletos();
       final repartidoresActivos =
@@ -244,8 +240,6 @@ class RepartidorRepository extends BaseRepository {
     return execute<List<Usuario>>(() async {
       validateNotEmpty(query, 'Consulta de búsqueda');
       logInfo('Buscando repartidores con: $query');
-
-      // FIX: Cache deshabilitado - obtener directamente de la API
       final todosRepartidores = await RepartidoresApi.getAllRepartidores();
 
       final repartidoresFiltrados = todosRepartidores.where((repartidor) {
@@ -377,6 +371,4 @@ class RepartidorRepository extends BaseRepository {
       return resultado;
     }, errorMessage: 'Error al cambiar contraseña del repartidor');
   }
-
-  // FIX: Métodos de caché eliminados completamente
 }

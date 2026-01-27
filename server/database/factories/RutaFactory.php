@@ -7,6 +7,7 @@ use App\Helpers\GeoHelper;
 use App\Models\PerfilRepartidor;
 use App\Models\Ruta;
 use Faker\Factory as FakerFactory;
+use MatanYadaev\EloquentSpatial\Enums\Srid;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -29,8 +30,8 @@ class RutaFactory extends Factory
     return [
       'repartidor_id' => $repartidor->id,
       'nombre' => 'Ruta ' . $faker->city . ' - ' . $faker->dayOfWeek,
-      'punto_inicio' => AsPoint::pointFromArray($startLocation),
-      'punto_final' => AsPoint::pointFromArray($endLocation),
+      'punto_inicio' => AsPoint::fromArray($startLocation, Srid::WGS84),
+      'punto_final' => AsPoint::fromArray($endLocation, Srid::WGS84),
       'polyline_encoded' => null,
       'distancia_total_estimada' => $faker->numberBetween(12000, 30000),
       'tiempo_total_estimado' => $faker->numberBetween(3600 * 2, 3600 * 6),

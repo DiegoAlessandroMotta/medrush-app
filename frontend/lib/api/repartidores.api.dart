@@ -4,6 +4,7 @@ import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/validators.dart';
 
 class RepartidoresApi extends BaseApi {
   /// Obtiene todos los repartidores desde el endpoint /api/user/repartidores
@@ -96,36 +97,15 @@ class RepartidoresApi extends BaseApi {
   static Future<Usuario?> createRepartidor(Usuario repartidor) {
     return ApiHelper.executeWithLogging(
       () async {
-        // Logs detallados de los datos del repartidor
-        logInfo('🔍 DATOS DEL REPARTIDOR RECIBIDOS:');
-        logInfo('🔍 - ID: ${repartidor.id}');
-        logInfo('🔍 - Nombre: ${repartidor.nombre}');
-        logInfo('🔍 - Email: ${repartidor.email}');
-        logInfo(
-            '🔍 - Password: ${repartidor.password?.isNotEmpty == true ? "***${repartidor.password!.substring(repartidor.password!.length - 2)}" : "null"}');
-        logInfo('🔍 - Teléfono original: ${repartidor.telefono}');
-        logInfo('🔍 - DNI ID: ${repartidor.dniIdNumero}');
-        logInfo('🔍 - Licencia número: ${repartidor.licenciaNumero}');
-        logInfo('🔍 - Licencia vencimiento: ${repartidor.licenciaVencimiento}');
-        logInfo('🔍 - Vehículo placa: ${repartidor.vehiculoPlaca}');
-        logInfo('🔍 - Vehículo marca: ${repartidor.vehiculoMarca}');
-        logInfo('🔍 - Vehículo modelo: ${repartidor.vehiculoModelo}');
-        logInfo('🔍 - Farmacia ID: ${repartidor.farmaciaId}');
-
         // Procesar teléfono
         String? telefonoProcesado;
         if (repartidor.telefono != null && repartidor.telefono!.isNotEmpty) {
           if (repartidor.telefono!.startsWith('+')) {
             telefonoProcesado = repartidor.telefono;
-            logInfo('🔍 - Teléfono ya tiene formato E.164: $telefonoProcesado');
           } else {
             telefonoProcesado =
-                '+1${repartidor.telefono!.replaceAll(RegExp(r'[^\d]'), '')}';
-            logInfo('🔍 - Teléfono procesado a E.164: $telefonoProcesado');
+                Validators.formatPhoneToE164(repartidor.telefono!);
           }
-        } else {
-          telefonoProcesado = null;
-          logInfo('🔍 - Teléfono es null o vacío');
         }
 
         // Procesar fecha de licencia
@@ -133,11 +113,6 @@ class RepartidoresApi extends BaseApi {
         if (repartidor.licenciaVencimiento != null) {
           licenciaVencimientoProcesada =
               repartidor.licenciaVencimiento!.toIso8601String().split('T')[0];
-          logInfo(
-              '🔍 - Licencia vencimiento procesada: $licenciaVencimientoProcesada');
-        } else {
-          licenciaVencimientoProcesada = null;
-          logInfo('🔍 - Licencia vencimiento es null');
         }
 
         final requestData = {
@@ -157,6 +132,7 @@ class RepartidoresApi extends BaseApi {
           'vehiculo_placa': repartidor.vehiculoPlaca,
           'vehiculo_marca': repartidor.vehiculoMarca,
           'vehiculo_modelo': repartidor.vehiculoModelo,
+          'vehiculo_codigo_registro': repartidor.vehiculoCodigoRegistro,
 
           // Campos adicionales que el backend podría aceptar
           if (repartidor.farmaciaId != null)
@@ -178,13 +154,19 @@ class RepartidoresApi extends BaseApi {
 
         // Procesar respuesta específica para creación de repartidor
         final responseData = response.data as Map<String, dynamic>?;
-        if (responseData == null) return null;
+        if (responseData == null) {
+          return null;
+        }
 
         final data = responseData['data'] as Map<String, dynamic>?;
-        if (data == null) return null;
+        if (data == null) {
+          return null;
+        }
 
         final userData = data['user'] as Map<String, dynamic>?;
-        if (userData == null) return null;
+        if (userData == null) {
+          return null;
+        }
 
         return Usuario.fromJson(userData);
       },
@@ -193,37 +175,78 @@ class RepartidoresApi extends BaseApi {
   }
 
   /// Actualiza un repartidor existente
-  static Future<Usuario?> updateRepartidor(Usuario repartidor) {
+  static Future<Usuario?> updateRepartidor(Usuario repartidor,
+      {String? emailOriginal}) {
     return ApiHelper.executeWithLogging(
       () async {
+        // Procesar fecha de licencia: solo fecha (YYYY-MM-DD), no timestamp completo
+        String? licenciaVencimientoProcesada;
+        if (repartidor.licenciaVencimiento != null) {
+          licenciaVencimientoProcesada =
+              repartidor.licenciaVencimiento!.toIso8601String().split('T')[0];
+        }
+
+        // Solo enviar email si cambió (evitar error de unique validation)
+        final emailCambio =
+            emailOriginal != null && emailOriginal != repartidor.email;
+
         final response = await BaseApi.patch(
           EndpointManager.repartidorById(repartidor.id),
           data: {
             // Campos base del usuario (según UpdateBaseUserRequest)
             'name': repartidor.nombre,
-            'email': repartidor.email,
+            // Solo enviar email si cambió (backend tiene Rule::unique sin ignorar usuario actual)
+            if (emailCambio || emailOriginal == null) 'email': repartidor.email,
             if (repartidor.password?.isNotEmpty == true)
               'password': repartidor.password,
             if (repartidor.password?.isNotEmpty == true)
               'password_confirmation': repartidor.password,
 
             // Campos específicos del repartidor (según UpdateRepartidorUserRequest)
-            'farmacia_id': repartidor.farmaciaId,
+            // farmacia_id: solo enviar si no es null (backend requiere UUID válido si se envía)
+            if (repartidor.farmaciaId != null)
+              'farmacia_id': repartidor.farmaciaId,
             'codigo_iso_pais': 'USA', // Código ISO para Estados Unidos
-            'dni_id_numero': repartidor.dniIdNumero,
-            'telefono': repartidor.telefono,
-            'licencia_numero': repartidor.licenciaNumero,
-            'licencia_vencimiento':
-                repartidor.licenciaVencimiento?.toIso8601String(),
-            'vehiculo_placa': repartidor.vehiculoPlaca,
-            'vehiculo_marca': repartidor.vehiculoMarca,
-            'vehiculo_modelo': repartidor.vehiculoModelo,
+            // Campos opcionales: solo enviar si tienen valor
+            if (repartidor.dniIdNumero != null)
+              'dni_id_numero': repartidor.dniIdNumero,
+            if (repartidor.telefono != null) 'telefono': repartidor.telefono,
+            if (repartidor.licenciaNumero != null)
+              'licencia_numero': repartidor.licenciaNumero,
+            if (licenciaVencimientoProcesada != null)
+              'licencia_vencimiento': licenciaVencimientoProcesada,
+            if (repartidor.vehiculoPlaca != null)
+              'vehiculo_placa': repartidor.vehiculoPlaca,
+            if (repartidor.vehiculoMarca != null)
+              'vehiculo_marca': repartidor.vehiculoMarca,
+            if (repartidor.vehiculoModelo != null)
+              'vehiculo_modelo': repartidor.vehiculoModelo,
+            if (repartidor.vehiculoCodigoRegistro != null)
+              'vehiculo_codigo_registro': repartidor.vehiculoCodigoRegistro,
           },
         );
         return ApiHelper.processSingleResponse(response.data, Usuario.fromJson);
       },
       operationName:
           'Actualizando repartidor: ${repartidor.nombre} (ID: ${repartidor.id})',
+    );
+  }
+
+  /// Activa/desactiva la cuenta del usuario (is_active)
+  static Future<bool> setUsuarioActivo({
+    required String userId,
+    required bool isActive,
+  }) {
+    return ApiHelper.executeWithLogging(
+      () async {
+        final resp = await BaseApi.patch<Map<String, dynamic>>(
+          EndpointManager.userActivo(userId),
+          data: {'is_active': isActive},
+        );
+        return resp.data?['status'] == 'success';
+      },
+      operationName:
+          'Actualizando is_active para usuario: $userId -> $isActive',
     );
   }
 

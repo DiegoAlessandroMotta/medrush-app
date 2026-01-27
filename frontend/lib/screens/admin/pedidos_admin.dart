@@ -2270,8 +2270,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
       // Obtener ubicación actual (simulada por ahora)
       // FIX: Implementar obtención real de ubicación GPS
-      const double latitud = -12.0464; // Lima, Perú
-      const double longitud = -77.0428;
+      const double latitud = 26.037737; // EEUU
+      const double longitud = -80.179550;
 
       // Marcar como fallido usando el repositorio
       final result = await _repository.marcarPedidoFallido(
