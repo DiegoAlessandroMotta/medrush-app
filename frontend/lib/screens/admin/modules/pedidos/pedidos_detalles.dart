@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
@@ -166,7 +167,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                   ),
                                   child: Text(
                                     StatusHelpers.estadoPedidoTexto(
-                                        pedido.estado),
+                                        pedido.estado, AppLocalizations.of(context)),
                                     style: const TextStyle(
                                       color: MedRushTheme.textInverse,
                                       fontSize: MedRushTheme.fontSizeLabelSmall,
@@ -186,7 +187,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                   color: MedRushTheme.primaryGreen,
                                   size: 24,
                                 ),
-                                tooltip: 'Código de barras',
+                                tooltip: AppLocalizations.of(context).barcodeTooltip,
                               ),
                               IconButton(
                                 onPressed: () => Navigator.of(context).pop(),
@@ -219,36 +220,36 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Información básica
-                        _buildInfoSection('Información Básica', [
+                        _buildInfoSection(AppLocalizations.of(context).basicInfo, [
                           _buildIconRow(
-                              'ID del Pedido', pedido.id, LucideIcons.hash),
-                          _buildIconRow('Código de Barra', pedido.codigoBarra,
+                              AppLocalizations.of(context).orderIdLabel.trimRight(), pedido.id, LucideIcons.hash),
+                          _buildIconRow(AppLocalizations.of(context).barcodeTitle, pedido.codigoBarra,
                               LucideIcons.barcode),
-                          _buildIconRow('Cliente', pedido.pacienteNombre,
+                          _buildIconRow(AppLocalizations.of(context).client, pedido.pacienteNombre,
                               LucideIcons.user),
-                          _buildIconRow('Teléfono', pedido.pacienteTelefono,
+                          _buildIconRow(AppLocalizations.of(context).phone, pedido.pacienteTelefono,
                               LucideIcons.phone),
                           if (pedido.pacienteEmail != null)
-                            _buildIconRow('Email', pedido.pacienteEmail!,
+                            _buildIconRow(AppLocalizations.of(context).email, pedido.pacienteEmail!,
                                 LucideIcons.mail),
                           _buildIconRow(
-                              'Tipo',
-                              StatusHelpers.tipoPedidoTexto(pedido.tipoPedido),
+                              AppLocalizations.of(context).type,
+                              StatusHelpers.tipoPedidoTexto(pedido.tipoPedido, AppLocalizations.of(context)),
                               LucideIcons.tag),
                           _buildIconRow(
-                              'Estado',
-                              StatusHelpers.estadoPedidoTexto(pedido.estado),
+                              AppLocalizations.of(context).status,
+                              StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
                               LucideIcons.info,
                               iconColor: StatusHelpers.estadoPedidoColor(
                                   pedido.estado)),
-                          _buildIconRow('Prioridad', '${pedido.prioridad}',
+                          _buildIconRow(AppLocalizations.of(context).priority, '${pedido.prioridad}',
                               LucideIcons.star),
                           if (pedido.requiereFirmaEspecial)
-                            _buildIconRow('Requiere Firma Especial', 'Sí',
+                            _buildIconRow(AppLocalizations.of(context).requiresSpecialSignature, AppLocalizations.of(context).yes,
                                 LucideIcons.penTool),
                           if (pedido.fechaAsignacion != null)
                             _buildIconRow(
-                                'Fecha de Asignación',
+                                AppLocalizations.of(context).assignmentDate,
                                 _formatDate(pedido.fechaAsignacion!),
                                 LucideIcons.calendar),
                         ]),
@@ -259,7 +260,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                         if (pedido.medicamentos.isNotEmpty)
                           Column(
                             children: [
-                              _buildInfoSection('Medicamentos', [
+                              _buildInfoSection(AppLocalizations.of(context).medications, [
                                 ...pedido.medicamentos
                                     .asMap()
                                     .entries
@@ -275,35 +276,35 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                           ),
 
                         // Información de entrega
-                        _buildInfoSection('Dirección de Entrega', [
-                          _buildIconRow('Dirección', pedido.direccionEntrega,
+                        _buildInfoSection(AppLocalizations.of(context).deliveryAddress, [
+                          _buildIconRow(AppLocalizations.of(context).address, pedido.direccionEntrega,
                               LucideIcons.mapPin),
                           if (pedido.direccionEntregaLinea2 != null)
                             _buildIconRow(
-                                'Dirección Línea 2',
+                                AppLocalizations.of(context).addressLine2,
                                 pedido.direccionEntregaLinea2!,
                                 LucideIcons.mapPin),
-                          _buildIconRow('Ciudad', pedido.distritoEntrega,
+                          _buildIconRow(AppLocalizations.of(context).city, pedido.distritoEntrega,
                               LucideIcons.building),
                           if (pedido.estadoRegionEntrega != null)
-                            _buildIconRow('Estado/Región',
+                            _buildIconRow(AppLocalizations.of(context).region,
                                 pedido.estadoRegionEntrega!, LucideIcons.map),
                           if (pedido.codigoPostalEntrega != null)
-                            _buildIconRow('Código Postal',
+                            _buildIconRow(AppLocalizations.of(context).postalCode,
                                 pedido.codigoPostalEntrega!, LucideIcons.mail),
                           if (pedido.direccionDetalle != null)
-                            _buildIconRow('Detalle', pedido.direccionDetalle!,
+                            _buildIconRow(AppLocalizations.of(context).detail, pedido.direccionDetalle!,
                                 LucideIcons.fileText),
                           if (pedido.codigoAcceso != null)
-                            _buildIconRow('Código de Acceso',
+                            _buildIconRow(AppLocalizations.of(context).accessCode,
                                 pedido.codigoAcceso!, LucideIcons.lock),
                           if (pedido.codigoAccesoEdificio != null)
                             _buildIconRow(
-                                'Código de Edificio',
+                                AppLocalizations.of(context).buildingCode,
                                 pedido.codigoAccesoEdificio!,
                                 LucideIcons.building2),
                           if (pedido.codigoIsoPaisEntrega != null)
-                            _buildIconRow('País', pedido.codigoIsoPaisEntrega!,
+                            _buildIconRow(AppLocalizations.of(context).country, pedido.codigoIsoPaisEntrega!,
                                 LucideIcons.flag),
                           const SizedBox(height: MedRushTheme.spacingMd),
                           SizedBox(
@@ -333,7 +334,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                             pedido.longitudEntrega!,
                                           ),
                                           infoWindow: InfoWindow(
-                                            title: 'Pedido #${pedido.id}',
+                                            title: '${AppLocalizations.of(context).orderIdShort}${pedido.id}',
                                             snippet: pedido.direccionEntrega,
                                           ),
                                         ),
@@ -353,11 +354,11 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                         if (_hasRecojoInfo())
                           Column(
                             children: [
-                              _buildInfoSection('Ubicación de Recogida', [
+                              _buildInfoSection(AppLocalizations.of(context).pickupLocation, [
                                 if (pedido.latitudRecojo != null &&
                                     pedido.longitudRecojo != null)
                                   _buildIconRow(
-                                      'Coordenadas',
+                                      AppLocalizations.of(context).coordinates,
                                       StatusHelpers
                                           .formatearCoordenadasAltaPrecision(
                                               pedido.latitudRecojo!,
@@ -365,7 +366,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                       LucideIcons.navigation),
                                 if (pedido.ubicacionRecojo != null)
                                   _buildIconRow(
-                                      'Ubicación Detallada',
+                                      AppLocalizations.of(context).detailedLocation,
                                       '${pedido.ubicacionRecojo}',
                                       LucideIcons.search),
                               ]),
@@ -382,22 +383,22 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                             ),
                           )
                         else ...[
-                          _buildInfoSection('Farmacia', [
+                          _buildInfoSection(AppLocalizations.of(context).pharmacy, [
                             _buildIconRow(
-                                'Nombre',
-                                _farmacia?.nombre ?? 'No encontrada',
+                                AppLocalizations.of(context).name,
+                                _farmacia?.nombre ?? AppLocalizations.of(context).notFound,
                                 LucideIcons.pill),
                             if (_farmacia != null) ...[
-                              _buildIconRow('Dirección', _farmacia!.direccion,
+                              _buildIconRow(AppLocalizations.of(context).address, _farmacia!.direccion,
                                   LucideIcons.mapPin),
                               if (_farmacia!.telefono != null)
-                                _buildIconRow('Teléfono', _farmacia!.telefono!,
+                                _buildIconRow(AppLocalizations.of(context).phone, _farmacia!.telefono!,
                                     LucideIcons.phone),
                             ],
                           ]),
                           const SizedBox(height: MedRushTheme.spacingLg),
                           if (_repartidor != null)
-                            _buildInfoSection('Repartidor', [
+                            _buildInfoSection(AppLocalizations.of(context).driver, [
                               Row(
                                 children: [
                                   _buildRepartidorAvatar(_repartidor!),
@@ -415,7 +416,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                                   color: MedRushTheme
                                                       .textSecondary)),
                                         Text(
-                                            'Estado: ${_repartidor!.estadoRepartidor?.name ?? '-'}',
+                                            '${AppLocalizations.of(context).statusLabel}${_repartidor!.estadoRepartidor?.name ?? '-'}',
                                             style: const TextStyle(
                                                 color: MedRushTheme
                                                     .textSecondary)),
@@ -426,10 +427,10 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                               ),
                             ])
                           else
-                            _buildInfoSection('Repartidor', [
-                              const Text(
-                                'Sin asignar',
-                                style: TextStyle(
+                            _buildInfoSection(AppLocalizations.of(context).driver, [
+                              Text(
+                                AppLocalizations.of(context).notAssigned,
+                                style: const TextStyle(
                                   fontStyle: FontStyle.italic,
                                   color: MedRushTheme.textSecondary,
                                 ),
@@ -448,12 +449,12 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                 LucideIcons.package),
                           if (pedido.fechaEntrega != null)
                             _buildIconRow(
-                                'Fecha de Entrega',
+                                AppLocalizations.of(context).deliveryDate,
                                 _formatDate(pedido.fechaEntrega!),
                                 LucideIcons.check),
                           if (pedido.createdAt != null)
                             _buildIconRow(
-                                'Creado',
+                                AppLocalizations.of(context).created,
                                 _formatDate(pedido.createdAt!),
                                 LucideIcons.calendar),
                           if (pedido.updatedAt != null &&
@@ -466,13 +467,13 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                           // Información de estimaciones
                           if (pedido.tiempoEntregaEstimado != null)
                             _buildIconRow(
-                                'Tiempo Estimado',
+                                AppLocalizations.of(context).estimatedTime,
                                 StatusHelpers.formatearTiempo(
                                     pedido.tiempoEntregaEstimado!),
                                 LucideIcons.clock),
                           if (pedido.distanciaEstimada != null)
                             _buildIconRow(
-                                'Distancia Estimada',
+                                AppLocalizations.of(context).estimatedDistance,
                                 StatusHelpers.formatearDistanciaKm(
                                     pedido.distanciaEstimada!),
                                 LucideIcons.ruler),
@@ -511,7 +512,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                 pedido.documentoConsentimientoUrl!
                                     .isNotEmpty)) ...[
                           const SizedBox(height: MedRushTheme.spacingLg),
-                          _buildInfoSection('Comprobantes de Entrega', [
+                          _buildInfoSection(AppLocalizations.of(context).deliveryProof, [
                             Wrap(
                               spacing: MedRushTheme.spacingMd,
                               runSpacing: MedRushTheme.spacingMd,
@@ -519,7 +520,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                 if (pedido.fotoEntregaUrl != null &&
                                     pedido.fotoEntregaUrl!.isNotEmpty)
                                   _buildMediaCard(
-                                    title: 'Foto de Entrega',
+                                    title: AppLocalizations.of(context).deliveryPhoto,
                                     url: BaseApi.getValidImageUrl(
                                         pedido.fotoEntregaUrl),
                                   ),
@@ -535,7 +536,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                       logInfo(
                                           '[FIRMA_DETALLES] Longitud de firma: ${pedido.firmaDigitalUrl!.length}');
                                       return _buildMediaCard(
-                                        title: 'Firma del Cliente',
+                                        title: AppLocalizations.of(context).clientSignature,
                                         url: pedido.firmaDigitalUrl!,
                                       );
                                     },
@@ -545,7 +546,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                                     pedido
                                         .documentoConsentimientoUrl!.isNotEmpty)
                                   _buildDocumentoButton(
-                                    'Documento de Consentimiento',
+                                    AppLocalizations.of(context).consentDocument,
                                     pedido.documentoConsentimientoUrl!,
                                   ),
                               ],
@@ -556,17 +557,17 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                         // Información de fallo si aplica
                         if (pedido.estado == EstadoPedido.fallido) ...[
                           const SizedBox(height: MedRushTheme.spacingLg),
-                          _buildInfoSection('Información de Fallo', [
+                          _buildInfoSection(AppLocalizations.of(context).failureInfo, [
                             if (pedido.motivoFallo != null)
                               _buildInfoRow(
-                                  'Motivo',
+                                  AppLocalizations.of(context).reason,
                                   pedido.motivoFallo!
                                       .toString()
                                       .split('.')
                                       .last),
                             if (pedido.observacionesFallo != null)
                               _buildInfoRow(
-                                  'Detalles', pedido.observacionesFallo!),
+                                  AppLocalizations.of(context).details, pedido.observacionesFallo!),
                           ]),
                         ],
 
@@ -716,7 +717,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cerrar'),
+                  child: Text(AppLocalizations.of(context).close),
                 ),
               ),
             ],
@@ -737,7 +738,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
             return;
           }
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No se pudo abrir el documento')),
+            SnackBar(content: Text(AppLocalizations.of(context).couldNotOpenDocument)),
           );
         }
       },
@@ -892,25 +893,26 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
   }
 
   void _mostrarCodigoBarrasDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.barcode,
               color: MedRushTheme.primaryGreen,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Código de Barras'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(l10n.barcodeTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Pedido #${pedido.id}',
+              '${l10n.orderIdShort}${pedido.id}',
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -981,7 +983,7 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context).close),
           ),
         ],
       ),

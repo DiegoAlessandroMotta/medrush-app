@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/routes/routes.dart';
 import 'package:medrush/theme/theme.dart';
@@ -53,9 +54,9 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(width: MedRushTheme.spacingMd),
-                      const Text(
-                        'Admin Panel',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context).adminPanel,
+                        style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeTitleMedium,
                           fontWeight: MedRushTheme.fontWeightBold,
                           color: MedRushTheme.textPrimary,
@@ -119,43 +120,48 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
 
                 // Menú de navegación
                 _buildSidebarMenuItem(
+                  context: context,
                   icon: LucideIcons.truck,
-                  label: 'Entregas',
+                  label: AppLocalizations.of(context).deliveriesTab,
                   index: AdminNavigationController.entregasIndex,
                   isSelected: _controller
                       .isCurrentIndex(AdminNavigationController.entregasIndex),
                 ),
                 _buildSidebarMenuItem(
+                  context: context,
                   icon: LucideIcons.building2,
-                  label: 'Farmacias',
+                  label: AppLocalizations.of(context).pharmaciesTab,
                   index: AdminNavigationController.farmaciasIndex,
                   isSelected: _controller
                       .isCurrentIndex(AdminNavigationController.farmaciasIndex),
                 ),
                 _buildSidebarMenuItem(
+                  context: context,
                   icon: LucideIcons.users,
-                  label: 'Repartidores',
+                  label: AppLocalizations.of(context).driversTab,
                   index: AdminNavigationController.personalIndex,
                   isSelected: _controller
                       .isCurrentIndex(AdminNavigationController.personalIndex),
                 ),
                 _buildSidebarMenuItem(
+                  context: context,
                   icon: LucideIcons.map,
-                  label: 'Rutas',
+                  label: AppLocalizations.of(context).routesTab,
                   index: AdminNavigationController.rutasIndex,
                   isSelected: _controller
                       .isCurrentIndex(AdminNavigationController.rutasIndex),
                 ),
                 _buildSidebarMenuItem(
+                  context: context,
                   icon: LucideIcons.settings,
-                  label: 'Configuración',
+                  label: AppLocalizations.of(context).configuration,
                   index: AdminNavigationController.configuracionIndex,
                   isSelected: _controller.isCurrentIndex(
                       AdminNavigationController.configuracionIndex),
                 ),
 
                 const Spacer(),
-                _buildLogoutItem(),
+                _buildLogoutItem(context),
               ],
             );
           },
@@ -201,6 +207,7 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
   }
 
   Widget _buildSidebarMenuItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required int index,
@@ -241,7 +248,7 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
     );
   }
 
-  Widget _buildLogoutItem() {
+  Widget _buildLogoutItem(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: MedRushTheme.spacingMd,
@@ -252,9 +259,9 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
           LucideIcons.logOut,
           color: MedRushTheme.error,
         ),
-        title: const Text(
-          'Cerrar sesión',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).logout,
+          style: const TextStyle(
             color: MedRushTheme.error,
             fontWeight: MedRushTheme.fontWeightMedium,
           ),

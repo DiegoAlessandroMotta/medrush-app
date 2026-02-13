@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:medrush/api/endpoint_manager.dart';
 import 'package:medrush/firebase_options.dart';
 import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/providers/auth.provider.dart';
@@ -25,6 +28,11 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Inicializar detección del emulador (para configuración de red correcta)
+  if (Platform.isAndroid) {
+    await EndpointManager.initializeEmulatorDetection();
+  }
 
   // Inicializar Firebase con mejor manejo de errores
   await _initializeFirebase();
@@ -75,10 +83,9 @@ class MedRushApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RutasProvider()),
       ],
       child: MaterialApp(
-        title: 'MedRush - Delivery de Medicamentos',
+        title: 'MedRush - Delivery',
         debugShowCheckedModeBanner: false,
         theme: MedRushTheme.lightTheme,
-        // darkTheme eliminado porque no existe tema oscuro
         // darkTheme eliminado porque no existe tema oscuro
         themeMode: ThemeMode.light, // Fuerza siempre el tema claro
         localizationsDelegates: const [

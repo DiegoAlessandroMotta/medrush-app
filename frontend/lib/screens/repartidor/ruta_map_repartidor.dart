@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/pedidos.api.dart';
 import 'package:medrush/api/rutas.api.dart';
 import 'package:medrush/api/ubicaciones_repartidor.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/leg_info.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/providers/auth.provider.dart';
@@ -212,38 +213,42 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     }
 
     // Marcador de ubicación actual si existe
-    if (_currentPosition != null) {
+    if (_currentPosition != null && mounted) {
+      final l10n = AppLocalizations.of(context);
       _markers.add(
         Marker(
           markerId: const MarkerId('current_location'),
           position:
               LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          infoWindow: const InfoWindow(
-              title: 'Mi Ubicación', snippet: 'Ubicación actual'),
+          infoWindow: InfoWindow(
+              title: l10n.myLocation, snippet: l10n.currentLocationLabel),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
       );
     }
 
-    for (int i = 0; i < _rutaOptimizada.length; i++) {
-      final pedido = _rutaOptimizada[i];
-      final orden = pedido.ordenOptimizado ?? (i + 1);
-      final latLngEntrega =
-          LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
+    if (mounted) {
+      final l10n = AppLocalizations.of(context);
+      for (int i = 0; i < _rutaOptimizada.length; i++) {
+        final pedido = _rutaOptimizada[i];
+        final orden = pedido.ordenOptimizado ?? (i + 1);
+        final latLngEntrega =
+            LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
 
-      final iconEntrega = await _getNumberedIcon(orden);
+        final iconEntrega = await _getNumberedIcon(orden);
 
-      _markers.add(
-        Marker(
-          markerId: MarkerId('entrega_fast_${pedido.id}'),
-          position: latLngEntrega,
-          infoWindow: InfoWindow(
-            title: '$orden) Entrega - ${pedido.pacienteNombre}',
-            snippet: pedido.direccionEntrega,
+        _markers.add(
+          Marker(
+            markerId: MarkerId('entrega_fast_${pedido.id}'),
+            position: latLngEntrega,
+            infoWindow: InfoWindow(
+              title: l10n.deliveryMarkerTitle(orden.toString(), pedido.pacienteNombre),
+              snippet: pedido.direccionEntrega,
+            ),
+            icon: iconEntrega,
           ),
-          icon: iconEntrega,
-        ),
-      );
+        );
+      }
     }
 
     if (mounted) {
@@ -627,15 +632,16 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     _markers.clear();
 
     // Marcador de ubicación actual
-    if (_currentPosition != null) {
+    if (_currentPosition != null && mounted) {
+      final l10n = AppLocalizations.of(context);
       _markers.add(
         Marker(
           markerId: const MarkerId('current_location'),
           position:
               LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          infoWindow: const InfoWindow(
-            title: 'Mi Ubicación',
-            snippet: 'Ubicación actual',
+          infoWindow: InfoWindow(
+            title: l10n.myLocation,
+            snippet: l10n.currentLocationLabel,
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
@@ -678,27 +684,30 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
           .map((p) => p.ordenOptimizado ?? (_rutaOptimizada.indexOf(p) + 1))
           .toList();
       final iconRecojo = await _getRecojoIconAgrupado(
-          numerosPendientes, pedidosRecogidos.length);
+          context, numerosPendientes, pedidosRecogidos.length);
 
       // Crear info window con información de estado
-      final titulo = numerosPendientes.length == 1
-          ? '${numerosPendientes.first}) Recogida - ${primerPedido.pacienteNombre}'
-          : 'Recogida (${numerosPendientes.length} pendientes)';
-      final snippet = numerosPendientes.length == 1
-          ? 'Punto de recogida'
-          : 'Pendientes: ${numerosPendientes.join(', ')}${pedidosRecogidos.isNotEmpty ? '\nRecogidos: ${pedidosRecogidos.length}' : ''}';
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final titulo = numerosPendientes.length == 1
+            ? l10n.pickupMarkerTitle(numerosPendientes.first.toString(), primerPedido.pacienteNombre)
+            : l10n.pickupMarkerTitleWithCount(numerosPendientes.length);
+        final snippet = numerosPendientes.length == 1
+            ? l10n.pickupPointLabel
+            : '${l10n.pendingLabel} ${numerosPendientes.join(', ')}${pedidosRecogidos.isNotEmpty ? '\n${l10n.pickedUpLabel} ${pedidosRecogidos.length}' : ''}';
 
-      _markers.add(
-        Marker(
-          markerId: MarkerId('recojo_${primerPedido.id}'),
-          position: latLngRecojo,
-          infoWindow: InfoWindow(
-            title: titulo,
-            snippet: snippet,
+        _markers.add(
+          Marker(
+            markerId: MarkerId('recojo_${primerPedido.id}'),
+            position: latLngRecojo,
+            infoWindow: InfoWindow(
+              title: titulo,
+              snippet: snippet,
+            ),
+            icon: iconRecojo,
           ),
-          icon: iconRecojo,
-        ),
-      );
+        );
+      }
     }
 
     // Marcadores de entrega individuales
@@ -709,23 +718,26 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       final orden = pedido.ordenOptimizado ?? (i + 1);
 
       // Marcador de entrega
-      final latLngEntrega =
-          LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final latLngEntrega =
+            LatLng(pedido.latitudEntrega ?? 0.0, pedido.longitudEntrega ?? 0.0);
 
-      // Determinar color del icono según el estado
-      final iconEntrega = await _getNumberedIconWithState(orden, pedido.estado);
+        // Determinar color del icono según el estado
+        final iconEntrega = await _getNumberedIconWithState(orden, pedido.estado);
 
-      _markers.add(
-        Marker(
-          markerId: MarkerId('entrega_${pedido.id}'),
-          position: latLngEntrega,
-          infoWindow: InfoWindow(
-            title: '$orden) Entrega - ${pedido.pacienteNombre}',
-            snippet: _buildSnippetForPedido(pedido),
+        _markers.add(
+          Marker(
+            markerId: MarkerId('entrega_${pedido.id}'),
+            position: latLngEntrega,
+            infoWindow: InfoWindow(
+              title: l10n.deliveryMarkerTitle(orden.toString(), pedido.pacienteNombre),
+              snippet: _buildSnippetForPedido(pedido),
+            ),
+            icon: iconEntrega,
           ),
-          icon: iconEntrega,
-        ),
-      );
+        );
+      }
     }
 
     if (mounted) {
@@ -870,7 +882,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
 
   /// Crea iconos para puntos de recogida agrupados (múltiples números)
   Future<BitmapDescriptor> _getRecojoIconAgrupado(
-      List<int> numbers, int recogidosCount) async {
+      BuildContext context, List<int> numbers, int recogidosCount) async {
     final String cacheKey =
         'recojo_agrupado_${numbers.join('_')}_recogidos_$recogidosCount';
     if (_numberIconCache.containsKey(cacheKey)) {
@@ -900,12 +912,13 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       ),
     )..pushStyle(ui.TextStyle(color: const Color(0xFFFFFFFF)));
 
+    final l10n = AppLocalizations.of(context);
     if (numbers.isEmpty) {
       // Todos recogidos
-      pb.addText('Recogido\n($recogidosCount)');
+      pb.addText('${l10n.pickedUpCount}\n($recogidosCount)');
     } else {
       // Hay pendientes
-      pb.addText('Recoger\n(${numbers.length})');
+      pb.addText('${l10n.pickUpCount}\n(${numbers.length})');
     }
 
     final ui.Paragraph paragraph = pb.build()
@@ -941,7 +954,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
                 'Navegando a punto de RECOGIDA: ${pedido.latitudRecojo}, ${pedido.longitudRecojo}');
           } else {
             logWarning('No hay coordenadas de recogida para pedido asignado');
-            _mostrarErrorNavegacion('No hay ubicación de recogida disponible');
+            _mostrarErrorNavegacion(AppLocalizations.of(context).noPickupLocationAvailable);
             return;
           }
 
@@ -955,7 +968,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
                 'Navegando a punto de ENTREGA: ${pedido.latitudEntrega}, ${pedido.longitudEntrega}');
           } else {
             logWarning('No hay coordenadas de entrega para pedido recogido');
-            _mostrarErrorNavegacion('No hay ubicación de entrega disponible');
+            _mostrarErrorNavegacion(AppLocalizations.of(context).noDeliveryLocationAvailable);
             return;
           }
 
@@ -974,7 +987,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
                 'Navegando a punto de ENTREGA (pendiente): ${pedido.latitudEntrega}, ${pedido.longitudEntrega}');
           } else {
             logWarning('No hay coordenadas válidas para pedido pendiente');
-            _mostrarErrorNavegacion('No hay ubicaciones válidas para navegar');
+            _mostrarErrorNavegacion(AppLocalizations.of(context).noValidLocationToNavigate);
             return;
           }
 
@@ -983,13 +996,13 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         case EstadoPedido.cancelado:
           logWarning(
               'No se puede navegar a pedido con estado: ${pedido.estado}');
-          _mostrarErrorNavegacion('Este pedido ya fue procesado');
+          _mostrarErrorNavegacion(AppLocalizations.of(context).orderProcessed);
           return;
       }
 
       if (destination.isEmpty) {
         logWarning('No se pudo determinar el destino de navegación');
-        _mostrarErrorNavegacion('No hay ubicación válida para navegar');
+        _mostrarErrorNavegacion(AppLocalizations.of(context).noValidLocationToNavigate);
         return;
       }
 
@@ -1290,11 +1303,11 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Cambiar orden - Pedido #${pedido.id}'),
+        title: Text(AppLocalizations.of(context).changeOrderTitle(pedido.id.toString())),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Paciente: ${pedido.pacienteNombre}'),
+            Text('${AppLocalizations.of(context).patientLabel} ${pedido.pacienteNombre}'),
             const SizedBox(height: 16),
             TextField(
               controller: controller,
@@ -1310,7 +1323,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1325,7 +1338,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
                 );
               }
             },
-            child: const Text('Actualizar'),
+            child: Text(AppLocalizations.of(context).updateLabel),
           ),
         ],
       ),
@@ -1425,9 +1438,9 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
             color: Colors.red,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar el mapa',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingMap,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -1435,7 +1448,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            _error ?? 'Error desconocido',
+            _error ?? AppLocalizations.of(context).unknownError,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
@@ -1446,7 +1459,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
           ElevatedButton.icon(
             onPressed: _initializeMap,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+                label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -1575,33 +1588,33 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
       },
       itemBuilder: (context) => [
         // Botón de recarga
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'reload',
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.rotateCcw,
                 color: MedRushTheme.primaryGreen,
                 size: 18,
               ),
-              SizedBox(width: 12),
-              Text('Recargar ruta'),
+              const SizedBox(width: 12),
+              Text(AppLocalizations.of(context).reloadRoute),
             ],
           ),
         ),
         // Botón de re-optimización (solo si hay ruta activa)
         if (_cachedRutaId != null)
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'reoptimize',
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.refreshCw,
                   color: MedRushTheme.primaryBlue,
                   size: 18,
                 ),
-                SizedBox(width: 12),
-                Text('Re-optimizar ruta'),
+                const SizedBox(width: 12),
+                Text(AppLocalizations.of(context).reoptimizeRoute),
               ],
             ),
           ),
@@ -1618,7 +1631,7 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
                   size: 18,
                 ),
                 const SizedBox(width: 12),
-                Text('Ver entregas (${_rutaOptimizada.length})'),
+                Text(AppLocalizations.of(context).viewDeliveriesCount(_rutaOptimizada.length)),
               ],
             ),
           ),
@@ -1808,18 +1821,23 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
     // Construir snippet con información esencial (InfoWindow tiene limitaciones)
     final List<String> parts = [];
 
+    if (!mounted) {
+      return '';
+    }
+    final l10n = AppLocalizations.of(context);
+    
     // Estado del pedido
-    final estadoTexto = StatusHelpers.estadoPedidoTexto(pedido.estado);
-    parts.add('Estado: $estadoTexto');
+    final estadoTexto = StatusHelpers.estadoPedidoTexto(pedido.estado, l10n);
+    parts.add('${l10n.statusLabel}$estadoTexto');
 
     // Dirección de entrega
     if (pedido.direccionEntrega.isNotEmpty) {
-      parts.add('Dirección: ${pedido.direccionEntrega}');
+      parts.add('${l10n.addressLabel} ${pedido.direccionEntrega}');
     }
 
     // Tipo de pedido
-    final tipoTexto = StatusHelpers.tipoPedidoTexto(pedido.tipoPedido);
-    parts.add('Tipo: $tipoTexto');
+    final tipoTexto = StatusHelpers.tipoPedidoTexto(pedido.tipoPedido, l10n);
+    parts.add('${l10n.typeLabel}: $tipoTexto');
 
     // Información de ruta (si está disponible)
     if (info != null) {

@@ -1,3 +1,5 @@
+import 'package:medrush/l10n/app_localizations.dart';
+
 /// Modelo para información de paginación del backend Laravel
 class PaginationInfo {
   final int currentPage;
@@ -86,19 +88,19 @@ class PaginationInfo {
   bool get hasData => total > 0;
 
   /// Rango de elementos mostrados (ej: "1-20 de 150")
-  String get rangeText {
+  String rangeText(AppLocalizations l10n) {
     if (!hasData) {
-      return 'Sin datos';
+      return l10n.noData;
     }
     return '$from-$to de $total';
   }
 
   /// Información de página (ej: "Página 1 de 5")
-  String get pageText {
+  String pageText(AppLocalizations l10n) {
     if (!hasData) {
-      return 'Sin páginas';
+      return l10n.noPages;
     }
-    return 'Página $currentPage de $lastPage';
+    return l10n.pageXOfY(currentPage, lastPage);
   }
 
   @override

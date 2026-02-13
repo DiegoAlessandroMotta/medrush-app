@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/pagination_helper.dart';
@@ -65,7 +66,7 @@ class GridPedidosInfinite extends StatelessWidget {
 
     // Estado vacío
     if (pedidos.isEmpty) {
-      return emptyWidget ?? _buildDefaultEmptyState();
+      return emptyWidget ?? _buildDefaultEmptyState(context);
     }
 
     // Lista con paginación infinita
@@ -83,7 +84,7 @@ class GridPedidosInfinite extends StatelessWidget {
         itemBuilder: (context, index) {
           // Mostrar indicador de carga al final
           if (index == pedidos.length) {
-            return _buildLoadMoreIndicator();
+            return _buildLoadMoreIndicator(context);
           }
 
           final pedido = pedidos[index];
@@ -139,7 +140,7 @@ class GridPedidosInfinite extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('Reintentar'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ],
@@ -148,29 +149,30 @@ class GridPedidosInfinite extends StatelessWidget {
   }
 
   /// Estado vacío por defecto
-  Widget _buildDefaultEmptyState() {
-    return const Center(
+  Widget _buildDefaultEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.inbox,
             size: 64,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'No hay pedidos',
-            style: TextStyle(
+            l10n.noActiveOrders,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               color: MedRushTheme.textPrimary,
               fontWeight: MedRushTheme.fontWeightBold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Los pedidos aparecerán aquí',
-            style: TextStyle(
+            l10n.activeOrdersDescription,
+            style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
             ),
@@ -181,7 +183,8 @@ class GridPedidosInfinite extends StatelessWidget {
   }
 
   /// Indicador de carga al final de la lista
-  Widget _buildLoadMoreIndicator() {
+  Widget _buildLoadMoreIndicator(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Si no hay más datos, mostrar mensaje de completado
     if (!paginationHelper.hasMoreData) {
       return Container(
@@ -195,9 +198,9 @@ class GridPedidosInfinite extends StatelessWidget {
                 size: 32,
               ),
               const SizedBox(height: MedRushTheme.spacingSm),
-              const Text(
-                'Todos los pedidos cargados',
-                style: TextStyle(
+              Text(
+                l10n.allOrdersLoaded,
+                style: const TextStyle(
                   color: MedRushTheme.textPrimary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   fontWeight: MedRushTheme.fontWeightMedium,
@@ -234,7 +237,9 @@ class GridPedidosInfinite extends StatelessWidget {
               ),
               const SizedBox(height: MedRushTheme.spacingMd),
               Text(
-                'Cargando página ${paginationHelper.currentPage + 1} de ${paginationHelper.totalPages}...',
+                l10n.loadingPage(
+                    paginationHelper.currentPage + 1,
+                    paginationHelper.totalPages),
                 style: const TextStyle(
                   color: MedRushTheme.textPrimary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,

@@ -2,6 +2,7 @@ import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
@@ -115,7 +116,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
         logInfo('${result.data!.items.length} pedidos cargados exitosamente');
       } else {
         setState(() {
-          _error = result.error ?? 'Error desconocido al cargar pedidos';
+          _error = result.error ??
+            AppLocalizations.of(context).errorLoadingOrdersUnknown;
           _isLoading = false;
         });
         logError('Error al cargar pedidos: ${result.error}');
@@ -128,7 +130,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       }
 
       setState(() {
-        _error = 'Error al cargar los pedidos: $e';
+        _error = AppLocalizations.of(context).errorLoadingOrdersWithError(e);
         _isLoading = false;
       });
     }
@@ -180,7 +182,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 heroTag: 'fab_print_barcodes',
                 onPressed: _mostrarPantallaImpresion,
                 backgroundColor: MedRushTheme.primaryBlue,
-                tooltip: 'Imprimir Etiquetas de Envío',
+                tooltip: AppLocalizations.of(context).printShippingLabelsTooltip,
                 child: const Icon(LucideIcons.printer),
               ),
             ),
@@ -193,7 +195,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 PedidosCsvScreen.show(context);
               },
               backgroundColor: MedRushTheme.neutralGrey700,
-              tooltip: 'Cargar CSV',
+              tooltip: AppLocalizations.of(context).uploadCsvTooltip,
               child: const Icon(LucideIcons.upload),
             ),
           ),
@@ -218,7 +220,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 );
               },
               backgroundColor: MedRushTheme.primaryGreen,
-              tooltip: 'Agregar Pedido',
+              tooltip: AppLocalizations.of(context).addOrderTooltip,
               child: const Icon(LucideIcons.plus),
             ),
           ),
@@ -348,20 +350,20 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 });
                 await _loadPedidos();
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar por cliente, código, teléfono...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchOrdersByClientCodePhone,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                   size: 20,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingSm,
                 ),
@@ -439,11 +441,13 @@ class _EntregasScreenState extends State<EntregasScreen> {
                             ),
                             const SizedBox(width: MedRushTheme.spacingXs),
                             Expanded(
-                              child: Text(
-                                StatusHelpers.estadoPedidoTexto(estado),
-                                style: const TextStyle(
-                                  fontSize: MedRushTheme.fontSizeBodyMedium,
-                                  color: MedRushTheme.textPrimary,
+                              child: Builder(
+                                builder: (context) => Text(
+                                  StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+                                  style: const TextStyle(
+                                    fontSize: MedRushTheme.fontSizeBodyMedium,
+                                    color: MedRushTheme.textPrimary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -458,19 +462,19 @@ class _EntregasScreenState extends State<EntregasScreen> {
                   value: 'actions',
                   child: Divider(),
                 ),
-                const DropdownMenuItem<String>(
+                DropdownMenuItem<String>(
                   value: 'select_all',
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.check,
                         color: MedRushTheme.primaryGreen,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingXs),
+                      const SizedBox(width: MedRushTheme.spacingXs),
                       Text(
-                        'Seleccionar Todos',
-                        style: TextStyle(
+                        AppLocalizations.of(context).selectAll,
+                        style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodyMedium,
                           color: MedRushTheme.textPrimary,
                         ),
@@ -478,19 +482,19 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     ],
                   ),
                 ),
-                const DropdownMenuItem<String>(
+                DropdownMenuItem<String>(
                   value: 'clear_all',
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.x,
                         color: MedRushTheme.textSecondary,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingXs),
+                      const SizedBox(width: MedRushTheme.spacingXs),
                       Text(
-                        'Limpiar Filtros',
-                        style: TextStyle(
+                        AppLocalizations.of(context).clearFilters,
+                        style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodyMedium,
                           color: MedRushTheme.textPrimary,
                         ),
@@ -602,7 +606,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
         });
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cargar la página';
+          _error = result.error ??
+              AppLocalizations.of(context).errorLoadingOrdersUnknown;
           _isLoading = false;
         });
       }
@@ -611,7 +616,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cargar la página: $e';
+        _error = AppLocalizations.of(context).errorLoadingOrdersWithError(e);
         _isLoading = false;
       });
     }
@@ -649,7 +654,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
         });
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cambiar items por página';
+          _error = result.error ??
+              AppLocalizations.of(context).errorLoadingOrdersUnknown;
           _isLoading = false;
         });
       }
@@ -658,7 +664,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cambiar items por página: $e';
+        _error = AppLocalizations.of(context).errorLoadingOrdersWithError(e);
         _isLoading = false;
       });
     }
@@ -685,19 +691,19 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 // FIX: Recargar datos cuando cambie la búsqueda
                 await _loadPedidos();
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar por cliente, código, teléfono...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchOrdersByClientCodePhone,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingMd,
                 ),
@@ -774,11 +780,13 @@ class _EntregasScreenState extends State<EntregasScreen> {
                               ),
                               const SizedBox(width: MedRushTheme.spacingXs),
                               Expanded(
-                                child: Text(
-                                  StatusHelpers.estadoPedidoTexto(estado),
-                                  style: const TextStyle(
-                                    fontSize: MedRushTheme.fontSizeBodyMedium,
-                                    color: MedRushTheme.textPrimary,
+                                child: Builder(
+                                  builder: (context) => Text(
+                                    StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+                                    style: const TextStyle(
+                                      fontSize: MedRushTheme.fontSizeBodyMedium,
+                                      color: MedRushTheme.textPrimary,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -793,19 +801,19 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     value: 'actions',
                     child: Divider(),
                   ),
-                  const DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     value: 'select_all',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           LucideIcons.check,
                           color: MedRushTheme.primaryGreen,
                           size: 16,
                         ),
-                        SizedBox(width: MedRushTheme.spacingXs),
+                        const SizedBox(width: MedRushTheme.spacingXs),
                         Text(
-                          'Seleccionar Todos',
-                          style: TextStyle(
+                          AppLocalizations.of(context).selectAll,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodyMedium,
                             color: MedRushTheme.textPrimary,
                           ),
@@ -813,19 +821,19 @@ class _EntregasScreenState extends State<EntregasScreen> {
                       ],
                     ),
                   ),
-                  const DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     value: 'clear_all',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           LucideIcons.x,
                           color: MedRushTheme.textSecondary,
                           size: 16,
                         ),
-                        SizedBox(width: MedRushTheme.spacingXs),
+                        const SizedBox(width: MedRushTheme.spacingXs),
                         Text(
-                          'Limpiar Filtros',
-                          style: TextStyle(
+                          AppLocalizations.of(context).clearFilters,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodyMedium,
                             color: MedRushTheme.textPrimary,
                           ),
@@ -973,8 +981,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                         size: 20,
                       ),
                       tooltip: pedido.estado == EstadoPedido.pendiente
-                          ? 'Asignar Repartidor'
-                          : 'Ver',
+                          ? AppLocalizations.of(context).assignDriver
+                          : AppLocalizations.of(context).view,
                       onPressed: () {
                         if (pedido.estado == EstadoPedido.pendiente) {
                           _showAsignarRepartidorDialog(pedido);
@@ -1000,7 +1008,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Código de barras',
+                      tooltip: AppLocalizations.of(context).barcodeTooltip,
                       onPressed: () => _showBarcodeDialog(pedido),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -1016,7 +1024,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                           color: MedRushTheme.textSecondary,
                           size: 20,
                         ),
-                        tooltip: 'Editar',
+                        tooltip: AppLocalizations.of(context).edit,
                         onPressed: () {
                           showMaterialModalBottomSheet(
                             context: context,
@@ -1045,7 +1053,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Más opciones',
+                      tooltip: AppLocalizations.of(context).moreOptions,
                       onSelected: (value) async {
                         switch (value) {
                           case 'editar':
@@ -1074,49 +1082,49 @@ class _EntregasScreenState extends State<EntregasScreen> {
                       },
                       itemBuilder: (context) => [
                         // Editar (siempre visible)
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'editar',
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 LucideIcons.pencil,
                                 color: MedRushTheme.textSecondary,
                                 size: 16,
                               ),
-                              SizedBox(width: 8),
-                              Text('Editar'),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context).edit),
                             ],
                           ),
                         ),
                         // Asignar Repartidor (solo para pendientes)
                         if (pedido.estado == EstadoPedido.pendiente)
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'asignar',
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   LucideIcons.userPlus,
                                   color: MedRushTheme.primaryGreen,
                                   size: 16,
                                 ),
-                                SizedBox(width: 8),
-                                Text('Asignar Repartidor'),
+                                const SizedBox(width: 8),
+                                Text(AppLocalizations.of(context).assignDriver),
                               ],
                             ),
                           ),
                         // Cancelar (solo si está asignado)
                         if (pedido.estado == EstadoPedido.asignado)
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'cancelar',
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   LucideIcons.x,
                                   color: Colors.orange,
                                   size: 16,
                                 ),
-                                SizedBox(width: 8),
-                                Text('Cancelar Pedido'),
+                                const SizedBox(width: 8),
+                                Text(AppLocalizations.of(context).cancelOrder),
                               ],
                             ),
                           ),
@@ -1127,47 +1135,47 @@ class _EntregasScreenState extends State<EntregasScreen> {
                             pedido.estado != EstadoPedido.fallido &&
                             pedido.estado != EstadoPedido.cancelado) ...[
                           const PopupMenuDivider(),
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'cancelar',
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   LucideIcons.x,
                                   color: Colors.orange,
                                   size: 16,
                                 ),
-                                SizedBox(width: 8),
-                                Text('Cancelar Pedido'),
+                                const SizedBox(width: 8),
+                                Text(AppLocalizations.of(context).cancelOrder),
                               ],
                             ),
                           ),
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'fallo',
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   LucideIcons.badgeAlert,
                                   color: Colors.red,
                                   size: 16,
                                 ),
-                                SizedBox(width: 8),
-                                Text('Marcar como Fallido'),
+                                const SizedBox(width: 8),
+                                Text(AppLocalizations.of(context).markAsFailed),
                               ],
                             ),
                           ),
                         ],
                         const PopupMenuDivider(),
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'eliminar',
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 LucideIcons.trash2,
                                 color: Colors.red,
                                 size: 16,
                               ),
-                              SizedBox(width: 8),
-                              Text('Eliminar'),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context).delete),
                             ],
                           ),
                         ),
@@ -1181,7 +1189,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
             // Código de barras
             Text(
-              'Código: ${pedido.codigoBarra}',
+              '${AppLocalizations.of(context).codeLabel}${pedido.codigoBarra}',
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodySmall,
                 color: MedRushTheme.textSecondary,
@@ -1214,8 +1222,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     pedido.repartidor != null
                         ? pedido.repartidor!.nombre
                         : pedido.repartidorId != null
-                            ? 'Asignado'
-                            : 'Sin asignar',
+                            ? AppLocalizations.of(context).assigned
+                            : AppLocalizations.of(context).notAssigned,
                     style: TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
@@ -1261,7 +1269,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoPedidoTexto(pedido.estado),
+                        StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -1284,7 +1292,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     const SizedBox(width: 4),
                     Text(
                       StatusHelpers
-                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido),
+                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido, AppLocalizations.of(context)),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -1317,9 +1325,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Ver Detalles',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context).viewDetails,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
                     ),
@@ -1365,9 +1373,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
             color: Colors.red,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar los pedidos',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingOrders,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -1375,7 +1383,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            _error ?? 'Error desconocido',
+            _error ?? AppLocalizations.of(context).errorUnknown,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
@@ -1386,7 +1394,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
           ElevatedButton.icon(
             onPressed: _loadPedidos,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -1398,28 +1406,28 @@ class _EntregasScreenState extends State<EntregasScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.truck,
             size: 64,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'No se encontraron entregas',
-            style: TextStyle(
+            AppLocalizations.of(context).noDeliveriesFound,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
             ),
           ),
-          SizedBox(height: MedRushTheme.spacingMd),
+          const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            'No hay pedidos que coincidan con los filtros aplicados',
-            style: TextStyle(
+            AppLocalizations.of(context).noOrdersMatchFilters,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
             ),
@@ -1446,7 +1454,10 @@ class _EntregasScreenState extends State<EntregasScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Mostrando ${_paginationHelper.items.length} de ${_paginationHelper.totalItems} pedidos',
+            AppLocalizations.of(context).showingXOfYOrders(
+              _paginationHelper.items.length,
+              _paginationHelper.totalItems,
+            ),
             style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodySmall,
@@ -1454,7 +1465,10 @@ class _EntregasScreenState extends State<EntregasScreen> {
           ),
           if (_paginationHelper.totalPages > 1)
             Text(
-              'Página ${_paginationHelper.currentPage} de ${_paginationHelper.totalPages}',
+              AppLocalizations.of(context).pageXOfY(
+                _paginationHelper.currentPage,
+                _paginationHelper.totalPages,
+              ),
               style: const TextStyle(
                 color: MedRushTheme.primaryGreen,
                 fontSize: MedRushTheme.fontSizeBodySmall,
@@ -1476,12 +1490,13 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
   String _getFiltroTexto() {
     final seleccionados = _getEstadosSeleccionados();
+    final l10n = AppLocalizations.of(context);
     if (seleccionados.isEmpty) {
-      return 'Todos los estados';
+      return l10n.allStatuses;
     } else if (seleccionados.length == 1) {
-      return StatusHelpers.estadoPedidoTexto(seleccionados.first);
+      return StatusHelpers.estadoPedidoTexto(seleccionados.first, l10n);
     } else {
-      return '${seleccionados.length} estados';
+      return l10n.statesCount(seleccionados.length);
     }
   }
 
@@ -1489,22 +1504,22 @@ class _EntregasScreenState extends State<EntregasScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.barcode,
               color: MedRushTheme.neutralGrey700,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Código de Barras'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).barcodeTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Pedido #${pedido.id}',
+              '${AppLocalizations.of(context).orderIdShort}${pedido.id}',
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -1560,9 +1575,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     ),
                   ),
                   const SizedBox(height: MedRushTheme.spacingSm),
-                  const Text(
-                    'Código de barras del pedido',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context).orderBarcodeCaption,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       color: MedRushTheme.textSecondary,
                     ),
@@ -1575,7 +1590,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context).close),
           ),
         ],
       ),
@@ -1621,15 +1636,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.triangleAlert,
               color: Colors.red,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Confirmar eliminación'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).confirmDeletion),
           ],
         ),
         content: Column(
@@ -1637,7 +1652,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas eliminar el pedido #${pedido.id}?',
+              AppLocalizations.of(context).confirmDeleteOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -1652,18 +1667,18 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.red,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción no se puede deshacer. El pedido será eliminado permanentemente.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).deleteOrderIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.red,
                       ),
@@ -1677,7 +1692,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1688,7 +1703,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -1718,7 +1733,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         // Mostrar mensaje de éxito
         if (mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} eliminado exitosamente',
+            AppLocalizations.of(context).orderDeletedSuccess(pedido.id),
             context: context,
           );
         }
@@ -1729,7 +1744,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         // Mostrar mensaje de error
         if (mounted) {
           NotificationService.showError(
-            'Error al eliminar pedido: ${result.error}',
+            AppLocalizations.of(context).errorDeleteOrder(result.error!),
             context: context,
           );
         }
@@ -1745,7 +1760,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       // Mostrar mensaje de error
       if (mounted) {
         NotificationService.showError(
-          'Error al eliminar pedido: $e',
+          AppLocalizations.of(context).errorDeleteOrder(e),
           context: context,
         );
       }
@@ -1754,14 +1769,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
   Future<void> _copiarInformacionCliente(Pedido pedido) async {
     try {
+      final l10n = AppLocalizations.of(context);
       final informacion =
-          'Cliente: ${pedido.pacienteNombre}\nID Pedido: ${pedido.id}';
+          '${l10n.clientLabel}${pedido.pacienteNombre}\n${l10n.orderIdLabel}${pedido.id}';
 
       await Clipboard.setData(ClipboardData(text: informacion));
 
       if (mounted) {
         NotificationService.showSuccess(
-          'Información copiada al portapapeles',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
@@ -1772,7 +1788,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       logError('Error al copiar información del cliente', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar información',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }
@@ -1791,7 +1807,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       if (!result.success || result.data == null) {
         if (mounted) {
           NotificationService.showError(
-            'Error al cargar repartidores: ${result.error}',
+            AppLocalizations.of(context).errorLoadingDrivers(result.error!),
             context: context,
           );
         }
@@ -1805,15 +1821,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
         context: context,
         builder: (context) => StatefulBuilder(
           builder: (context, setState) => AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.userPlus,
                   color: MedRushTheme.primaryGreen,
                   size: 24,
                 ),
-                SizedBox(width: 8),
-                Text('Asignar Repartidor'),
+                const SizedBox(width: 8),
+                Text(AppLocalizations.of(context).assignDriver),
               ],
             ),
             content: SizedBox(
@@ -1822,7 +1838,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Selecciona un repartidor para el pedido de ${pedido.pacienteNombre}',
+                    AppLocalizations.of(context).selectDriverForOrder(pedido.pacienteNombre),
                     style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodyMedium,
                       color: MedRushTheme.textSecondary,
@@ -1830,11 +1846,11 @@ class _EntregasScreenState extends State<EntregasScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (repartidores.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'No hay repartidores disponibles',
-                        style: TextStyle(
+                        AppLocalizations.of(context).noDriversAvailable,
+                        style: const TextStyle(
                           color: MedRushTheme.textSecondary,
                         ),
                       ),
@@ -1868,7 +1884,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               if (repartidores.isNotEmpty)
                 ElevatedButton(
@@ -1890,14 +1906,16 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
                             if (result.success) {
                               Navigator.of(dialogContext).pop();
+                              final l10n = AppLocalizations.of(dialogContext);
                               NotificationService.showSuccess(
-                                'Repartidor $repartidorNombre asignado exitosamente',
+                                l10n.driverAssignedSuccess(repartidorNombre),
                                 context: dialogContext,
                               );
                               await _loadPedidos();
                             } else {
+                              final l10n = AppLocalizations.of(dialogContext);
                               NotificationService.showError(
-                                'Error: ${result.error}',
+                                l10n.errorWithDetail(result.error ?? ''),
                                 context: dialogContext,
                               );
                             }
@@ -1905,8 +1923,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                             if (!mounted || !dialogContext.mounted) {
                               return;
                             }
+                            final l10n = AppLocalizations.of(dialogContext);
                             NotificationService.showError(
-                              'Error al asignar: $e',
+                              l10n.errorAssigningDriver(e.toString()),
                               context: dialogContext,
                             );
                           }
@@ -1916,7 +1935,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     backgroundColor: MedRushTheme.primaryGreen,
                     foregroundColor: MedRushTheme.textInverse,
                   ),
-                  child: const Text('Confirmar Asignación'),
+                  child: Text(AppLocalizations.of(context).confirmAssignment),
                 ),
             ],
           ),
@@ -1926,7 +1945,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       logError('Error al cargar repartidores', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al cargar repartidores: $e',
+          AppLocalizations.of(context).errorLoadingDrivers(e.toString()),
           context: context,
         );
       }
@@ -1981,15 +2000,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.x,
               color: Colors.orange,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Cancelar Pedido'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).cancelOrderTitle),
           ],
         ),
         content: Column(
@@ -1997,7 +2016,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas cancelar el pedido #${pedido.id}?',
+              AppLocalizations.of(context).confirmCancelOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -2012,18 +2031,18 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.orange,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción cambiará el estado del pedido a "Cancelado" y no se podrá revertir.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).cancelOrderIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.orange,
                       ),
@@ -2037,7 +2056,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -2045,7 +2064,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Confirmar Cancelación'),
+            child: Text(AppLocalizations.of(context).confirmCancellation),
           ),
         ],
       ),
@@ -2077,35 +2096,28 @@ class _EntregasScreenState extends State<EntregasScreen> {
       }
 
       if (result.success) {
-        // Mostrar mensaje de éxito
         if (mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} cancelado exitosamente',
+            AppLocalizations.of(context).orderCanceledSuccess(pedido.id.toString()),
             context: context,
           );
         }
-
-        // Recargar la lista
         await _loadPedidos();
       } else {
-        // Mostrar mensaje de error
         if (mounted) {
           NotificationService.showError(
-            'Error al cancelar pedido: ${result.error}',
+            AppLocalizations.of(context).errorCancelingOrder(result.error ?? ''),
             context: context,
           );
         }
       }
     } catch (e) {
-      // Cerrar indicador de carga si está abierto
       if (mounted) {
         Navigator.of(context).pop();
       }
-
-      // Mostrar mensaje de error
       if (mounted) {
         NotificationService.showError(
-          'Error al cancelar pedido: $e',
+          AppLocalizations.of(context).errorCancelingOrder(e.toString()),
           context: context,
         );
       }
@@ -2122,15 +2134,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.badgeAlert,
                 color: Colors.red,
                 size: 24,
               ),
-              SizedBox(width: MedRushTheme.spacingSm),
-              Text('Marcar como Fallido'),
+              const SizedBox(width: MedRushTheme.spacingSm),
+              Text(AppLocalizations.of(context).markAsFailedTitle),
             ],
           ),
           content: SizedBox(
@@ -2140,7 +2152,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Selecciona el motivo del fallo para el pedido #${pedido.id}',
+                  AppLocalizations.of(context).selectFailureReasonForOrder(pedido.id),
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     color: MedRushTheme.textPrimary,
@@ -2151,9 +2163,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 // Selector de motivo de fallo
                 DropdownButtonFormField<MotivoFalla>(
                   initialValue: motivoSeleccionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Motivo del fallo',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).failureReasonLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   items: StatusHelpers.obtenerMotivosFallo().map((motivo) {
                     return DropdownMenuItem<MotivoFalla>(
@@ -2166,7 +2178,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                             size: 16,
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
-                          Text(StatusHelpers.motivoFallaTexto(motivo)),
+                          Builder(
+                            builder: (context) => Text(StatusHelpers.motivoFallaTexto(motivo, AppLocalizations.of(context))),
+                          ),
                         ],
                       ),
                     );
@@ -2182,10 +2196,10 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 // Campo de observaciones
                 TextFormField(
                   controller: observacionesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Observaciones (opcional)',
-                    border: OutlineInputBorder(),
-                    hintText: 'Detalles adicionales sobre el fallo...',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).observationsOptionalLabel,
+                    border: const OutlineInputBorder(),
+                    hintText: AppLocalizations.of(context).failureDetailsHint,
                   ),
                   maxLines: 3,
                 ),
@@ -2200,18 +2214,18 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     border:
                         Border.all(color: Colors.red.withValues(alpha: 0.3)),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.info,
                         color: Colors.red,
                         size: 20,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
+                      const SizedBox(width: MedRushTheme.spacingSm),
                       Expanded(
                         child: Text(
-                          'Esta acción cambiará el estado del pedido a "Fallido" y registrará la ubicación actual.',
-                          style: TextStyle(
+                          AppLocalizations.of(context).markAsFailedIrreversible,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: Colors.red,
                           ),
@@ -2226,7 +2240,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: motivoSeleccionado != null
@@ -2236,7 +2250,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Confirmar Fallo'),
+              child: Text(AppLocalizations.of(context).confirmFailure),
             ),
           ],
         ),
@@ -2288,35 +2302,28 @@ class _EntregasScreenState extends State<EntregasScreen> {
       }
 
       if (result.success) {
-        // Mostrar mensaje de éxito
         if (mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} marcado como fallido',
+            AppLocalizations.of(context).orderMarkedFailedSuccess(pedido.id.toString()),
             context: context,
           );
         }
-
-        // Recargar la lista
         await _loadPedidos();
       } else {
-        // Mostrar mensaje de error
         if (mounted) {
           NotificationService.showError(
-            'Error al marcar pedido como fallido: ${result.error}',
+            AppLocalizations.of(context).errorMarkingOrderFailed(result.error ?? ''),
             context: context,
           );
         }
       }
     } catch (e) {
-      // Cerrar indicador de carga si está abierto
       if (mounted) {
         Navigator.of(context).pop();
       }
-
-      // Mostrar mensaje de error
       if (mounted) {
         NotificationService.showError(
-          'Error al marcar pedido como fallido: $e',
+          AppLocalizations.of(context).errorMarkingOrderFailed(e.toString()),
           context: context,
         );
       }

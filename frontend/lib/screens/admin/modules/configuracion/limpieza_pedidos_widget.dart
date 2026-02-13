@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
@@ -16,15 +17,15 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
   int _semanasSeleccionadas = 3;
   final PedidoRepository _pedidoRepository = PedidoRepository();
 
-  String _getMonthsReference(int weeks) {
+  String _getMonthsReference(BuildContext context, int weeks) {
     final months = (weeks / 4.33).round(); // 4.33 semanas promedio por mes
     if (months == 0) {
-      return 'menos de 1 mes';
+      return AppLocalizations.of(context).lessThanOneMonth;
     }
     if (months == 1) {
-      return '~1 mes';
+      return AppLocalizations.of(context).aboutOneMonth;
     }
-    return '~$months meses';
+    return AppLocalizations.of(context).aboutMonthsCount(months);
   }
 
   @override
@@ -62,9 +63,9 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Limpieza de Archivos de Pedidos Antiguos',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).oldOrdersCleanupTitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyLarge,
                   fontWeight: MedRushTheme.fontWeightSemiBold,
                   color: MedRushTheme.textPrimary,
@@ -75,9 +76,9 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
           const SizedBox(height: 16),
 
           // Descripción
-          const Text(
-            'Esta acción eliminará permanentemente solo los archivos multimedia (fotos de entrega y firmas digitales) de pedidos entregados hace más del tiempo seleccionado. Los datos del pedido se mantendrán intactos.',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).oldOrdersCleanupDescription,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodySmall,
               color: MedRushTheme.textSecondary,
             ),
@@ -96,12 +97,13 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
   }
 
   Widget _buildSemanasSelector() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Semanas hacia atrás',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).weeksBackLabel,
+          style: const TextStyle(
             fontSize: MedRushTheme.fontSizeBodySmall,
             fontWeight: MedRushTheme.fontWeightMedium,
             color: MedRushTheme.textPrimary,
@@ -128,7 +130,10 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$_semanasSeleccionadas ${_semanasSeleccionadas == 1 ? 'semana' : 'semanas'} hacia atrás',
+                      l10n.weeksBackDisplay(
+                        _semanasSeleccionadas,
+                        _semanasSeleccionadas == 1 ? l10n.weekLabel : l10n.weeksLabel,
+                      ),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textPrimary,
@@ -136,7 +141,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                       ),
                     ),
                     Text(
-                      _getMonthsReference(_semanasSeleccionadas),
+                      _getMonthsReference(context, _semanasSeleccionadas),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeLabelSmall,
                         color: MedRushTheme.textSecondary,
@@ -185,7 +190,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$semanas${semanas == 1 ? ' sem' : ' sem'}',
+                      '$semanas ${l10n.weekShortLabel}',
                       style: TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         fontWeight: isSelected
@@ -197,7 +202,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                       ),
                     ),
                     Text(
-                      _getMonthsReference(semanas),
+                      _getMonthsReference(context, semanas),
                       style: TextStyle(
                         fontSize: MedRushTheme.fontSizeLabelSmall,
                         fontWeight: MedRushTheme.fontWeightRegular,
@@ -231,7 +236,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                 ),
               )
             : const Icon(LucideIcons.x, color: Colors.white, size: 16),
-        label: Text(_isLoading ? 'Procesando...' : 'Guardar Configuración'),
+        label: Text(_isLoading ? AppLocalizations.of(context).processing : AppLocalizations.of(context).saveConfiguration),
         style: ElevatedButton.styleFrom(
           backgroundColor: MedRushTheme.warning,
           foregroundColor: MedRushTheme.textInverse,
@@ -249,11 +254,11 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(LucideIcons.info, color: MedRushTheme.warning),
-            SizedBox(width: 8),
-            Text('Confirmar Limpieza'),
+            const Icon(LucideIcons.info, color: MedRushTheme.warning),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).confirmCleanup),
           ],
         ),
         content: Column(
@@ -261,7 +266,12 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas eliminar solo los archivos multimedia (fotos y firmas) de pedidos entregados hace más de $_semanasSeleccionadas ${_semanasSeleccionadas == 1 ? 'semana' : 'semanas'}?',
+              AppLocalizations.of(context).confirmCleanupWeeksQuestion(
+                _semanasSeleccionadas,
+                _semanasSeleccionadas == 1
+                    ? AppLocalizations.of(context).weekLabel
+                    : AppLocalizations.of(context).weeksLabel,
+              ),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -278,18 +288,18 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
                   color: MedRushTheme.error.withValues(alpha: 0.3),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: MedRushTheme.error,
                     size: 16,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Esta acción eliminará permanentemente solo los archivos multimedia (fotos y firmas). Los datos del pedido se mantendrán intactos.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).confirmCleanupDescription,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.error,
                       ),
@@ -303,7 +313,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -314,7 +324,7 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
               backgroundColor: MedRushTheme.warning,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Confirmar'),
+            child: Text(AppLocalizations.of(context).confirm),
           ),
         ],
       ),
@@ -333,17 +343,17 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
       if (resultado.success && resultado.data == true) {
         if (mounted) {
           NotificationService.showSuccess(
-            'La limpieza de archivos multimedia de pedidos antiguos ha sido iniciada exitosamente',
+            AppLocalizations.of(context).cleanupStartedSuccess,
             context: context,
           );
         }
       } else {
-        throw Exception(resultado.error ?? 'Error desconocido');
+        throw Exception(resultado.error ?? AppLocalizations.of(context).unknownError);
       }
     } catch (e) {
       if (mounted) {
         NotificationService.showError(
-          'Error al iniciar la limpieza: ${e.toString()}',
+          '${AppLocalizations.of(context).errorStartingCleanup}: ${e.toString()}',
           context: context,
         );
       }

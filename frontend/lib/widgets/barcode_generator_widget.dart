@@ -2,6 +2,7 @@ import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/utils/status_helpers.dart';
 import 'package:medrush/utils/validators.dart';
 
@@ -62,9 +63,9 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
   void _copyToClipboard() {
     Clipboard.setData(ClipboardData(text: _currentBarcode));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Código copiado al portapapeles'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).barcodeCodeCopied),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -93,7 +94,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
           children: [
             // Título
             Text(
-              'Código de Barras',
+              AppLocalizations.of(context).barcodeTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -133,7 +134,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                           IconButton(
                             icon: const Icon(Icons.copy, size: 18),
                             onPressed: _copyToClipboard,
-                            tooltip: 'Copiar código',
+                            tooltip: AppLocalizations.of(context).copyCodeTooltip,
                           ),
                         ],
                       ),
@@ -145,7 +146,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Pedido ID:',
+                          AppLocalizations.of(context).orderIdShortLabel,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
@@ -164,7 +165,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Farmacia ID:',
+                          AppLocalizations.of(context).pharmacyIdLabel,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
@@ -205,7 +206,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                   color: Colors.red[100],
                   child: Center(
                     child: Text(
-                      'Error al generar\ncódigo de barras',
+                      AppLocalizations.of(context).errorGeneratingBarcode,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.red[800]),
                     ),
@@ -226,7 +227,7 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                   OutlinedButton.icon(
                     onPressed: _regenerateBarcode,
                     icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text('Regenerar'),
+                    label: Text(AppLocalizations.of(context).regenerateButton),
                   ),
                   OutlinedButton.icon(
                     onPressed: _toggleFormat,
@@ -238,14 +239,14 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
                     ),
                     label: Text(
                       _isNumericBarcode(_currentBarcode)
-                          ? 'Alfanumérico'
-                          : 'Numérico',
+                          ? AppLocalizations.of(context).alphanumericLabel
+                          : AppLocalizations.of(context).numericLabel,
                     ),
                   ),
                   ElevatedButton.icon(
                     onPressed: _copyToClipboard,
                     icon: const Icon(Icons.copy, size: 18),
-                    label: const Text('Copiar'),
+                    label: Text(AppLocalizations.of(context).copyButton),
                   ),
                 ],
               ),
@@ -255,8 +256,8 @@ class _BarcodeGeneratorWidgetState extends State<BarcodeGeneratorWidget> {
               // Información del formato
               Text(
                 _isNumericBarcode(_currentBarcode)
-                    ? 'Formato numérico (${_currentBarcode.length} dígitos)'
-                    : 'Formato alfanumérico (${_currentBarcode.length} caracteres)',
+                    ? AppLocalizations.of(context).formatNumericDigits(_currentBarcode.length)
+                    : AppLocalizations.of(context).formatAlphanumericChars(_currentBarcode.length),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -295,7 +296,7 @@ class SimpleBarcodeWidget extends StatelessWidget {
         color: Colors.red[100],
         child: Center(
           child: Text(
-            'Código inválido',
+            AppLocalizations.of(context).invalidCode,
             style: TextStyle(color: Colors.red[800]),
           ),
         ),
@@ -316,7 +317,7 @@ class SimpleBarcodeWidget extends StatelessWidget {
         color: Colors.red[100],
         child: Center(
           child: Text(
-            'Error',
+            AppLocalizations.of(context).errorLabel,
             style: TextStyle(color: Colors.red[800]),
           ),
         ),

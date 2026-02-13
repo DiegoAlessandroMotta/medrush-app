@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_table_view/material_table_view.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/repositories/farmacia.repository.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
@@ -83,7 +84,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
     try {
       final result = await FarmaciaRepository.loadFarmaciasWithState(
-        errorMessage: 'Error al cargar farmacias para exportar',
+        errorMessage: AppLocalizations.of(context).errorLoadingPharmaciesForExport,
       );
 
       setState(() {
@@ -166,14 +167,14 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
   Future<void> _uploadCsv() async {
     if (_selectedFarmacia == null) {
-      NotificationService.showError('Debes seleccionar una farmacia',
-          context: context);
+      NotificationService.showError(
+          AppLocalizations.of(context).selectPharmacyRequired, context: context);
       return;
     }
 
     if (_csvData.isEmpty) {
-      NotificationService.showError('No hay datos CSV para subir',
-          context: context);
+      NotificationService.showError(
+          AppLocalizations.of(context).noCsvDataToUpload, context: context);
       return;
     }
 
@@ -181,7 +182,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
     final validationResult = CsvService.validateCsvData(_csvData);
     if (!validationResult.isValid) {
       NotificationService.showError(
-        'Errores encontrados en el CSV:\n${validationResult.errors.join('\n')}',
+        '${AppLocalizations.of(context).csvValidationErrorsPrefix}\n${validationResult.errors.join('\n')}',
         context: context,
       );
       return;
@@ -208,7 +209,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       if (result.success) {
         if (mounted) {
           NotificationService.showSuccess(
-            'CSV subido exitosamente. Recibirás una notificación cuando termine el procesamiento.',
+            AppLocalizations.of(context).csvUploadSuccess,
             context: context,
           );
           Navigator.of(context).pop();
@@ -216,7 +217,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       } else {
         if (mounted) {
           NotificationService.showError(
-            'Error al subir CSV: ${result.error}',
+            '${AppLocalizations.of(context).errorUploadingCsv}: ${result.error}',
             context: context,
           );
         }
@@ -225,7 +226,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       logError('Error al subir CSV', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al subir CSV: $e',
+          '${AppLocalizations.of(context).errorUploadingCsv}: $e',
           context: context,
         );
       }
@@ -247,7 +248,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
       if (mounted) {
         NotificationService.showSuccess(
-          'Plantilla CSV generada y lista para descargar.',
+          AppLocalizations.of(context).csvTemplateReady,
           context: context,
         );
       }
@@ -255,7 +256,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       logError('Error al descargar plantilla', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al descargar plantilla: $e',
+          '${AppLocalizations.of(context).errorDownloadingTemplate}: $e',
           context: context,
         );
       }
@@ -267,14 +268,15 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   }
 
   void _showHelpDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(LucideIcons.info, color: MedRushTheme.primaryBlue),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Ayuda - Cargar CSV'),
+            const Icon(LucideIcons.info, color: MedRushTheme.primaryBlue),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(l10n.csvHelpTitle),
           ],
         ),
         content: SingleChildScrollView(
@@ -282,37 +284,37 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Cómo usar esta herramienta:',
-                style: TextStyle(
+              Text(
+                l10n.csvHelpHowToUse,
+                style: const TextStyle(
                   fontWeight: MedRushTheme.fontWeightBold,
                   fontSize: MedRushTheme.fontSizeBodyLarge,
                 ),
               ),
               const SizedBox(height: MedRushTheme.spacingMd),
               _buildHelpStep(
-                '1. Descargar plantilla',
-                'Haz clic en el ícono de descarga para obtener la plantilla CSV con las columnas necesarias.',
+                l10n.csvHelpStep1Title,
+                l10n.csvHelpStep1Description,
                 LucideIcons.download,
               ),
               _buildHelpStep(
-                '2. Llenar datos',
-                'Completa la plantilla con los datos de los pedidos. Las coordenadas deben estar en formato "latitud, longitud".',
+                l10n.csvHelpStep2Title,
+                l10n.csvHelpStep2Description,
                 LucideIcons.fileText,
               ),
               _buildHelpStep(
-                '3. Cargar archivo',
-                'Arrastra y suelta tu archivo CSV o haz clic para seleccionarlo.',
+                l10n.csvHelpStep3Title,
+                l10n.csvHelpStep3Description,
                 LucideIcons.upload,
               ),
               _buildHelpStep(
-                '4. Seleccionar farmacia',
-                'Elige la farmacia a la que se asignarán los pedidos.',
+                l10n.csvHelpStep4Title,
+                l10n.csvHelpStep4Description,
                 LucideIcons.building,
               ),
               _buildHelpStep(
-                '5. Procesar',
-                'Haz clic en "Procesar" para cargar los pedidos al sistema.',
+                l10n.csvHelpStep5Title,
+                l10n.csvHelpStep5Description,
                 LucideIcons.check,
               ),
               const SizedBox(height: MedRushTheme.spacingLg),
@@ -325,20 +327,20 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                   border: Border.all(
                       color: MedRushTheme.primaryBlue.withValues(alpha: 0.3)),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tip importante:',
-                      style: TextStyle(
+                      l10n.csvHelpTipTitle,
+                      style: const TextStyle(
                         fontWeight: MedRushTheme.fontWeightBold,
                         color: MedRushTheme.primaryBlue,
                       ),
                     ),
-                    SizedBox(height: MedRushTheme.spacingSm),
+                    const SizedBox(height: MedRushTheme.spacingSm),
                     Text(
-                      'Las coordenadas deben estar en formato decimal: "26.037737, -80.179550" para EEUU.',
-                      style: TextStyle(
+                      l10n.csvHelpTipCoordinates,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                       ),
                     ),
@@ -351,7 +353,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendido'),
+            child: Text(l10n.understood),
           ),
         ],
       ),
@@ -412,9 +414,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
         backgroundColor: MedRushTheme.surface,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Cargar Pedidos desde CSV',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).uploadOrdersFromCsvTitle,
+          style: const TextStyle(
             color: MedRushTheme.textPrimary,
             fontSize: MedRushTheme.fontSizeHeadlineSmall,
             fontWeight: MedRushTheme.fontWeightBold,
@@ -424,7 +426,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           icon: const Icon(LucideIcons.arrowLeft,
               color: MedRushTheme.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
-          tooltip: 'Volver',
+          tooltip: AppLocalizations.of(context).backTooltip,
         ),
         actions: [
           // Botón de descargar plantilla
@@ -442,14 +444,14 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                 : const Icon(LucideIcons.download,
                     color: MedRushTheme.primaryBlue),
             onPressed: _isDownloadingTemplate ? null : _downloadTemplate,
-            tooltip: 'Descargar plantilla CSV',
+            tooltip: AppLocalizations.of(context).downloadCsvTemplateTooltip,
           ),
           // Botón de ayuda/información
           IconButton(
             icon:
                 const Icon(LucideIcons.info, color: MedRushTheme.textSecondary),
             onPressed: _showHelpDialog,
-            tooltip: 'Ayuda',
+            tooltip: AppLocalizations.of(context).helpTooltip,
           ),
         ],
       ),
@@ -495,9 +497,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Progreso de Validación',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).validationProgressTitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyLarge,
                   fontWeight: MedRushTheme.fontWeightBold,
                   color: MedRushTheme.textPrimary,
@@ -514,7 +516,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                       BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 ),
                 child: Text(
-                  '$validRows/$totalRows válidos',
+                  AppLocalizations.of(context).recordsValidCount(totalRows, validRows),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: MedRushTheme.fontSizeBodySmall,
@@ -537,8 +539,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           const SizedBox(height: MedRushTheme.spacingSm),
           Text(
             validRows == totalRows
-                ? 'Todos los registros tienen coordenadas válidas'
-                : '${totalRows - validRows} registros necesitan coordenadas válidas',
+                ? AppLocalizations.of(context).allRecordsHaveValidCoordinates
+                : AppLocalizations.of(context).recordsNeedValidCoordinates(totalRows - validRows),
             style: TextStyle(
               fontSize: MedRushTheme.fontSizeBodySmall,
               color: validRows == totalRows
@@ -626,7 +628,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            _error ?? 'Error desconocido',
+            _error ?? AppLocalizations.of(context).unknownError,
             style: const TextStyle(
               color: MedRushTheme.textPrimary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -637,7 +639,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           ElevatedButton.icon(
             onPressed: _loadFarmacias,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -777,9 +779,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             const SizedBox(height: MedRushTheme.spacingXl),
 
             // Texto principal
-            const Text(
-              'Arrastra y suelta tu archivo CSV aquí',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).dragDropCsvHere,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeTitleLarge,
                 fontWeight: MedRushTheme.fontWeightBold,
                 color: MedRushTheme.textPrimary,
@@ -789,9 +791,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             const SizedBox(height: MedRushTheme.spacingMd),
 
             // Texto secundario en verde
-            const Text(
-              'o haz clic para seleccionar un archivo',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).orClickToSelectFile,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyLarge,
                 color: MedRushTheme.primaryGreen,
                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -809,20 +811,20 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: MedRushTheme.borderLight),
               ),
-              child: const Column(
+              child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.info,
                         size: 16,
                         color: MedRushTheme.textSecondary,
                       ),
-                      SizedBox(width: MedRushTheme.spacingXs),
+                      const SizedBox(width: MedRushTheme.spacingXs),
                       Text(
-                        'Información del archivo',
-                        style: TextStyle(
+                        AppLocalizations.of(context).fileInfoTitle,
+                        style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodyMedium,
                           fontWeight: MedRushTheme.fontWeightMedium,
                           color: MedRushTheme.textPrimary,
@@ -830,10 +832,10 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: MedRushTheme.spacingSm),
+                  const SizedBox(height: MedRushTheme.spacingSm),
                   Text(
-                    'Tamaño máximo: 10MB • Formato: CSV • Codificación: UTF-8',
-                    style: TextStyle(
+                    AppLocalizations.of(context).fileSizeFormatHint,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       color: MedRushTheme.textSecondary,
                     ),
@@ -869,7 +871,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           const SizedBox(width: MedRushTheme.spacingSm),
           Expanded(
             child: Text(
-              '${_fileName ?? 'Archivo CSV'} - ${_csvData.length} registros - Carga completa',
+              AppLocalizations.of(context).recordsLoadComplete(_csvData.length, _fileName ?? AppLocalizations.of(context).csvFileLabel),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodySmall,
                 fontWeight: MedRushTheme.fontWeightBold,
@@ -914,9 +916,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Título
-            const Text(
-              'Seleccionar Farmacia para asignar pedidos',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).selectPharmacyToAssignOrders,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyLarge,
                 fontWeight: MedRushTheme.fontWeightBold,
                 color: MedRushTheme.textPrimary,
@@ -981,28 +983,28 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
           border: Border.all(color: MedRushTheme.borderLight),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.fileText,
                 size: 64,
                 color: MedRushTheme.textSecondary,
               ),
-              SizedBox(height: MedRushTheme.spacingLg),
+              const SizedBox(height: MedRushTheme.spacingLg),
               Text(
-                'No hay datos para mostrar',
-                style: TextStyle(
+                AppLocalizations.of(context).noDataToShow,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeTitleMedium,
                   fontWeight: MedRushTheme.fontWeightBold,
                   color: MedRushTheme.textPrimary,
                 ),
               ),
-              SizedBox(height: MedRushTheme.spacingSm),
+              const SizedBox(height: MedRushTheme.spacingSm),
               Text(
-                'Selecciona un archivo CSV para ver una vista previa de los datos',
-                style: TextStyle(
+                AppLocalizations.of(context).selectCsvFileToPreview,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   color: MedRushTheme.textSecondary,
                 ),
@@ -1124,14 +1126,14 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
   /// Construye una celda con dropdown para tipo de pedido
   Widget _buildTipoPedidoCell(String value, int row, String header) {
-    // Obtener los tipos de pedido disponibles
+    final l10n = AppLocalizations.of(context);
     final tiposPedido = [
-      {'value': 'medicamentos', 'label': 'Medicamentos'},
-      {'value': 'insumos_medicos', 'label': 'Insumos Médicos'},
-      {'value': 'equipos_medicos', 'label': 'Equipos Médicos'},
+      {'value': 'medicamentos', 'label': l10n.medications},
+      {'value': 'insumos_medicos', 'label': l10n.orderTypeMedicalSupplies},
+      {'value': 'equipos_medicos', 'label': l10n.orderTypeMedicalEquipment},
       {
         'value': 'medicamentos_controlados',
-        'label': 'Medicamentos Controlados'
+        'label': l10n.orderTypeControlledMedications,
       },
     ];
 
@@ -1189,23 +1191,23 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   /// Construye una celda clickeable para ubicaciones
   Widget _buildLocationCell(String value, bool isEmpty) {
     if (isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(
+      return Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: 16.0,
           vertical: 12.0,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               LucideIcons.minus,
               color: MedRushTheme.textSecondary,
               size: 12,
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
-              'Sin ubicación',
-              style: TextStyle(
+              AppLocalizations.of(context).noLocation,
+              style: const TextStyle(
                 color: MedRushTheme.textSecondary,
                 fontSize: MedRushTheme.fontSizeBodySmall,
                 fontStyle: FontStyle.italic,
@@ -1264,7 +1266,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           vertical: 12.0,
         ),
         child: Tooltip(
-          message: 'Formato de coordenadas no válido. Use: "latitud, longitud"',
+          message: AppLocalizations.of(context).invalidCoordinatesFormat,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1429,7 +1431,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                   vertical: 12.0,
                 ),
                 child: Tooltip(
-                  message: isEmpty ? 'Campo vacío' : value,
+                  message: isEmpty ? AppLocalizations.of(context).emptyField : value,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1484,7 +1486,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             )
           : const Icon(LucideIcons.upload, size: 20),
       label: Text(
-        _isUploading ? 'Procesando...' : 'Procesar',
+        _isUploading ? AppLocalizations.of(context).processing : AppLocalizations.of(context).processButton,
         style: const TextStyle(
           fontSize: MedRushTheme.fontSizeBodyMedium,
           fontWeight: MedRushTheme.fontWeightBold,
@@ -1557,7 +1559,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             const SizedBox(width: 4),
           ],
           Text(
-            isFarmaciaRequired ? 'Selecciona una farmacia' : 'Farmacia Central',
+            isFarmaciaRequired
+                ? AppLocalizations.of(context).selectAPharmacy
+                : AppLocalizations.of(context).centralPharmacy,
             style: TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: isFarmaciaRequired
@@ -1588,7 +1592,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   /// Botón de limpiar CSV
   Widget _buildClearCsvButton() {
     return Tooltip(
-      message: 'Limpiar CSV',
+      message: AppLocalizations.of(context).clearCsv,
       child: GestureDetector(
         onTap: () {
           setState(() {

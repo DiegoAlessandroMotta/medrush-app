@@ -291,7 +291,8 @@ class CsvService {
       exampleRow,
     ];
 
-    return const ListToCsvConverter().convert(csvData);
+    // Usar la nueva API de csv 7.x
+    return csv.encode(csvData);
   }
 
   /// Obtiene los headers en español para la plantilla

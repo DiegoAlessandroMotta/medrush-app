@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
 import 'package:medrush/screens/repartidor/firma_screen.dart';
@@ -113,9 +114,9 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Detalles de la Entrega',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).deliveryDetails,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -318,7 +319,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _isProcessing ? null : _tomarFoto,
                     icon: const Icon(LucideIcons.camera, size: 16),
-                    label: const Text('Cambiar Foto'),
+                    label: Text(AppLocalizations.of(context).changePhoto),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: MedRushTheme.primaryGreen,
                       side: const BorderSide(color: MedRushTheme.primaryGreen),
@@ -330,7 +331,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _isProcessing ? null : _eliminarFoto,
                     icon: const Icon(LucideIcons.trash2, size: 16),
-                    label: const Text('Eliminar'),
+                    label: Text(AppLocalizations.of(context).delete),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
@@ -368,7 +369,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
                     ElevatedButton.icon(
                       onPressed: _isProcessing ? null : _tomarFoto,
                       icon: const Icon(LucideIcons.camera, size: 18),
-                      label: const Text('Tomar Foto'),
+                      label: Text(AppLocalizations.of(context).takePhoto),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: MedRushTheme.primaryGreen,
                         foregroundColor: MedRushTheme.textInverse,
@@ -398,7 +399,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
           child: OutlinedButton.icon(
             onPressed: _isProcessing ? null : _cancelarEntrega,
             icon: const Icon(LucideIcons.x, size: 18),
-            label: const Text('Cancelar'),
+            label: Text(AppLocalizations.of(context).cancel),
             style: OutlinedButton.styleFrom(
               foregroundColor: MedRushTheme.textSecondary,
               side: const BorderSide(color: MedRushTheme.borderLight),
@@ -413,7 +414,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
           child: ElevatedButton.icon(
             onPressed: _isProcessing ? null : _iniciarFirma,
             icon: const Icon(LucideIcons.penTool, size: 18),
-            label: const Text('Firmar y Entregar'),
+            label: Text(AppLocalizations.of(context).signAndDeliver),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -486,15 +487,15 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.packageOpen,
               color: MedRushTheme.primaryGreen,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Confirmar Entrega'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).confirmDelivery),
           ],
         ),
         content: Column(
@@ -542,7 +543,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -550,7 +551,7 @@ class _EntregarRepartidorScreenState extends State<EntregarRepartidorScreen> {
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
             ),
-            child: const Text('Confirmar'),
+            child: Text(AppLocalizations.of(context).confirm),
           ),
         ],
       ),

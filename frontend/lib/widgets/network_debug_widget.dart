@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medrush/api/endpoint_manager.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
 
@@ -29,17 +30,17 @@ class NetworkDebugWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.network_check,
                 color: MedRushTheme.primaryBlue,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'Configuración de Red',
-                style: TextStyle(
+                AppLocalizations.of(context).networkConfigTitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeTitleMedium,
                   fontWeight: MedRushTheme.fontWeightBold,
                   color: MedRushTheme.textPrimary,
@@ -84,7 +85,7 @@ class NetworkDebugWidget extends StatelessWidget {
               logInfo('🔍 Información de red: $debugInfo');
             },
             icon: const Icon(Icons.info_outline, size: 16),
-            label: const Text('Log Info'),
+            label: Text(AppLocalizations.of(context).logInfoButton),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryBlue,
               foregroundColor: MedRushTheme.textInverse,

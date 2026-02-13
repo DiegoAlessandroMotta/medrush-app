@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/repartidor.repository.dart';
 import 'package:medrush/services/notification_service.dart';
@@ -45,18 +46,17 @@ class RepartidoresTableView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header de la tabla
-          _buildTableHeader(),
-          // Contenido de la tabla
+          _buildTableHeader(context),
           Expanded(
-            child: _buildTableContent(),
+            child: _buildTableContent(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(MedRushTheme.spacingMd),
       decoration: const BoxDecoration(
@@ -68,37 +68,30 @@ class RepartidoresTableView extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // FOTO
           SizedBox(
             width: 80,
-            child: _buildCenteredHeaderCell('FOTO'),
+            child: _buildCenteredHeaderCell(l10n.tableHeaderPhoto),
           ),
-          // NOMBRE
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('NOMBRE'),
+            child: _buildHeaderCell(l10n.tableHeaderName),
           ),
-          // EMAIL
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('EMAIL'),
+            child: _buildHeaderCell(l10n.tableHeaderEmail),
           ),
-          // TELÉFONO
           Expanded(
-            child: _buildHeaderCell('TELÉFONO'),
+            child: _buildHeaderCell(l10n.tableHeaderPhone),
           ),
-          // VEHÍCULO
           Expanded(
-            child: _buildHeaderCell('VEHÍCULO'),
+            child: _buildHeaderCell(l10n.tableHeaderVehicle),
           ),
-          // ÚLTIMA ACTIVIDAD
           SizedBox(
             width: 140,
-            child: _buildHeaderCell('ÚLTIMA ACTIVIDAD'),
+            child: _buildHeaderCell(l10n.tableHeaderLastActivity),
           ),
-          // ACCIONES
           Expanded(
-            child: _buildCenteredHeaderCell('ACCIONES'),
+            child: _buildCenteredHeaderCell(l10n.actions),
           ),
         ],
       ),
@@ -129,18 +122,18 @@ class RepartidoresTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildTableContent() {
+  Widget _buildTableContent(BuildContext context) {
     if (isLoading) {
       return _buildShimmerLoading();
     }
 
     if (repartidores.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(MedRushTheme.spacingLg),
+          padding: const EdgeInsets.all(MedRushTheme.spacingLg),
           child: Text(
-            'No hay repartidores para mostrar',
-            style: TextStyle(
+            AppLocalizations.of(context).noDriversToShow,
+            style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
             ),
@@ -153,12 +146,12 @@ class RepartidoresTableView extends StatelessWidget {
       itemCount: repartidores.length,
       itemBuilder: (context, index) {
         final repartidor = repartidores[index];
-        return _buildTableRow(repartidor, index);
+        return _buildTableRow(context, repartidor, index);
       },
     );
   }
 
-  Widget _buildTableRow(Usuario repartidor, int index) {
+  Widget _buildTableRow(BuildContext context, Usuario repartidor, int index) {
     final isEven = index % 2 == 0;
 
     return DecoratedBox(
@@ -205,7 +198,7 @@ class RepartidoresTableView extends StatelessWidget {
                   // Estado debajo del nombre con altura fija
                   SizedBox(
                     height: 18, // Altura fija para el estado
-                    child: _buildStatusBadge(repartidor),
+                    child: _buildStatusBadge(context, repartidor),
                   ),
                 ],
               ),
@@ -225,7 +218,7 @@ class RepartidoresTableView extends StatelessWidget {
             // TELÉFONO
             Expanded(
               child: Text(
-                repartidor.telefono ?? 'No disponible',
+                repartidor.telefono ?? AppLocalizations.of(context).notAvailable,
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -236,7 +229,7 @@ class RepartidoresTableView extends StatelessWidget {
             // VEHÍCULO
             Expanded(
               child: Text(
-                repartidor.vehiculoPlaca ?? 'No asignado',
+                repartidor.vehiculoPlaca ?? AppLocalizations.of(context).notAssigned,
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -248,7 +241,7 @@ class RepartidoresTableView extends StatelessWidget {
             SizedBox(
               width: 140,
               child: Text(
-                _formatLastSeen(repartidor.updatedAt),
+                _formatLastSeen(context, repartidor.updatedAt),
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -266,10 +259,10 @@ class RepartidoresTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(Usuario repartidor) {
+  Widget _buildStatusBadge(BuildContext context, Usuario repartidor) {
     final estado = repartidor.estadoRepartidor ?? EstadoRepartidor.desconectado;
     final color = StatusHelpers.estadoRepartidorColor(estado);
-    final texto = StatusHelpers.estadoRepartidorTexto(estado);
+    final texto = StatusHelpers.estadoRepartidorTexto(estado, AppLocalizations.of(context));
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -318,7 +311,7 @@ class RepartidoresTableView extends StatelessWidget {
               size: 18,
             ),
             onPressed: () => onView(repartidor),
-            tooltip: 'Ver detalles',
+            tooltip: AppLocalizations.of(context).viewDetailsTooltip,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -333,7 +326,7 @@ class RepartidoresTableView extends StatelessWidget {
               size: 18,
             ),
             onPressed: () => onEdit(repartidor),
-            tooltip: 'Editar',
+            tooltip: AppLocalizations.of(context).edit,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -347,7 +340,7 @@ class RepartidoresTableView extends StatelessWidget {
               color: MedRushTheme.textSecondary,
               size: 18,
             ),
-            tooltip: 'Más opciones',
+            tooltip: AppLocalizations.of(context).moreOptions,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -366,45 +359,45 @@ class RepartidoresTableView extends StatelessWidget {
             itemBuilder: (BuildContext context) => [
               if (repartidor.telefono != null &&
                   repartidor.telefono!.isNotEmpty)
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'call',
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.phone,
                         color: MedRushTheme.neutralGrey700,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
-                      Text('Llamar'),
+                      const SizedBox(width: MedRushTheme.spacingSm),
+                      Text(AppLocalizations.of(context).call),
                     ],
                   ),
                 ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'copy_email',
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       LucideIcons.copy,
                       color: MedRushTheme.neutralGrey700,
                       size: 16,
                     ),
-                    SizedBox(width: MedRushTheme.spacingSm),
-                    Text('Copiar Email'),
+                    const SizedBox(width: MedRushTheme.spacingSm),
+                    Text(AppLocalizations.of(context).copyEmail),
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       LucideIcons.trash2,
                       color: Colors.red,
                       size: 16,
                     ),
-                    SizedBox(width: MedRushTheme.spacingSm),
-                    Text('Eliminar'),
+                    const SizedBox(width: MedRushTheme.spacingSm),
+                    Text(AppLocalizations.of(context).delete),
                   ],
                 ),
               ),
@@ -503,21 +496,22 @@ class RepartidoresTableView extends StatelessWidget {
     return name[0].toUpperCase();
   }
 
-  String _formatLastSeen(DateTime? last) {
+  String _formatLastSeen(BuildContext context, DateTime? last) {
+    final l10n = AppLocalizations.of(context);
     if (last == null) {
-      return 'sin actividad';
+      return l10n.lastActivityNoActivity;
     }
     final diff = DateTime.now().difference(last);
     if (diff.inMinutes < 1) {
-      return 'justo ahora';
+      return l10n.lastActivityJustNow;
     }
     if (diff.inMinutes < 60) {
-      return 'hace ${diff.inMinutes} min';
+      return l10n.lastActivityMinutesAgo(diff.inMinutes);
     }
     if (diff.inHours < 24) {
-      return 'hace ${diff.inHours} h';
+      return l10n.lastActivityHoursAgo(diff.inHours);
     }
-    return 'hace ${diff.inDays} d';
+    return l10n.lastActivityDaysAgo(diff.inDays);
   }
 
   Future<void> _makePhoneCall(BuildContext context, Usuario repartidor) async {
@@ -526,7 +520,7 @@ class RepartidoresTableView extends StatelessWidget {
       if (phoneNumber == null || phoneNumber.isEmpty) {
         if (context.mounted) {
           NotificationService.showWarning(
-            'No hay número de teléfono disponible',
+            AppLocalizations.of(context).driverPhoneNotAvailable,
             context: context,
           );
         }
@@ -541,7 +535,7 @@ class RepartidoresTableView extends StatelessWidget {
       } else {
         if (context.mounted) {
           NotificationService.showError(
-            'No se pudo abrir la aplicación de llamadas',
+            AppLocalizations.of(context).cannotOpenCallApp,
             context: context,
           );
         }
@@ -549,7 +543,7 @@ class RepartidoresTableView extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         NotificationService.showError(
-          'Error al realizar la llamada: $e',
+          AppLocalizations.of(context).errorMakingCallWithError(e),
           context: context,
         );
       }
@@ -563,7 +557,7 @@ class RepartidoresTableView extends StatelessWidget {
       if (email.isEmpty) {
         if (context.mounted) {
           NotificationService.showWarning(
-            'No hay email disponible',
+            AppLocalizations.of(context).noEmailAvailable,
             context: context,
           );
         }
@@ -576,7 +570,7 @@ class RepartidoresTableView extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         NotificationService.showError(
-          'Error al copiar el email: $e',
+          AppLocalizations.of(context).errorCopyingEmail(e),
           context: context,
         );
       }
@@ -587,15 +581,15 @@ class RepartidoresTableView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.triangleAlert,
               color: Colors.red,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Confirmar eliminación'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).confirmDeletion),
           ],
         ),
         content: Column(
@@ -603,7 +597,7 @@ class RepartidoresTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas eliminar al repartidor "${repartidor.nombre}"?',
+              AppLocalizations.of(context).confirmDeleteDriverQuestion(repartidor.nombre),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -618,18 +612,18 @@ class RepartidoresTableView extends StatelessWidget {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.red,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción no se puede deshacer. El repartidor será eliminado permanentemente.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).deleteDriverIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.red,
                       ),
@@ -643,7 +637,7 @@ class RepartidoresTableView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -654,7 +648,7 @@ class RepartidoresTableView extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -686,7 +680,7 @@ class RepartidoresTableView extends StatelessWidget {
         // Mostrar mensaje de éxito
         if (context.mounted) {
           NotificationService.showSuccess(
-            'Repartidor "${repartidor.nombre}" eliminado exitosamente',
+            AppLocalizations.of(context).driverDeletedSuccess(repartidor.nombre),
             context: context,
           );
         }
@@ -697,7 +691,7 @@ class RepartidoresTableView extends StatelessWidget {
         // Mostrar mensaje de error
         if (context.mounted) {
           NotificationService.showError(
-            'Error al eliminar repartidor: ${result.error}',
+            AppLocalizations.of(context).errorDeleteDriver(result.error!),
             context: context,
           );
         }
@@ -711,7 +705,7 @@ class RepartidoresTableView extends StatelessWidget {
       // Mostrar mensaje de error
       if (context.mounted) {
         NotificationService.showError(
-          'Error al eliminar repartidor: $e',
+          AppLocalizations.of(context).errorDeleteDriver(e),
           context: context,
         );
       }

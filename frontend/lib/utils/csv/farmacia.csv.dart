@@ -52,13 +52,17 @@ class FarmaciaCsv {
         farmacia.fechaUltimaActualizacion?.toIso8601String() ?? '',
       ]);
     }
-    return const ListToCsvConverter().convert(rows);
+    // Usar la nueva API de csv 7.x
+    return csv.encode(rows);
   }
 
   static List<Farmacia> fromCsv(String csvContent) {
-    final converter =
-        const CsvToListConverter(eol: '\n', shouldParseNumbers: false);
-    final List<List<dynamic>> data = converter.convert(csvContent);
+    // Usar la nueva API de csv 7.x
+    // Configurar para no parsear números automáticamente (como en la versión anterior)
+    final codec = CsvCodec(
+      lineDelimiter: '\n',
+    );
+    final List<List<dynamic>> data = codec.decode(csvContent);
 
     if (data.isEmpty) {
       return [];

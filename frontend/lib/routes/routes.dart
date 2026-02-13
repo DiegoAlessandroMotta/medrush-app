@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/screens/admin/admin_main.dart';
 import 'package:medrush/screens/admin/configuracion_admin.dart';
@@ -81,7 +82,7 @@ class AppRoutes {
         final farmacia = ModalRoute.of(context)!.settings.arguments as Farmacia;
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Detalles de Farmacia'),
+            title: Text(AppLocalizations.of(context).pharmacyDetailsTitle),
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
           ),

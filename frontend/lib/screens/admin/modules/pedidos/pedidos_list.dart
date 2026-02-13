@@ -1,6 +1,7 @@
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
@@ -46,18 +47,16 @@ class PedidosTableView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header de la tabla
-          _buildTableHeader(),
-          // Contenido de la tabla
+          _buildTableHeader(context),
           Expanded(
-            child: _buildTableContent(),
+            child: _buildTableContent(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(MedRushTheme.spacingMd),
       decoration: const BoxDecoration(
@@ -71,42 +70,34 @@ class PedidosTableView extends StatelessWidget {
         children: [
           // N° PEDIDO
           Expanded(
-            child: _buildHeaderCell('N° PEDIDO'),
+            child: _buildHeaderCell(AppLocalizations.of(context).orderNumber),
           ),
-          // Espacio entre N° PEDIDO y CLIENTE
           const SizedBox(width: MedRushTheme.spacingSm),
-          // CLIENTE
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('CLIENTE'),
+            child: _buildHeaderCell(AppLocalizations.of(context).client),
           ),
-          // DIRECCIÓN
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('DIRECCIÓN'),
+            child: _buildHeaderCell(AppLocalizations.of(context).address),
           ),
-          // REPARTIDOR
           Expanded(
-            child: _buildHeaderCell('REPARTIDOR'),
+            child: _buildHeaderCell(AppLocalizations.of(context).driver),
           ),
-          // UBICACIÓN
           SizedBox(
             width: 140,
-            child: _buildHeaderCell('UBICACIÓN'),
+            child: _buildHeaderCell(AppLocalizations.of(context).location),
           ),
-          // ESTADO
           SizedBox(
             width: 100,
-            child: _buildHeaderCell('ESTADO'),
+            child: _buildHeaderCell(AppLocalizations.of(context).status),
           ),
-          // FECHA
           SizedBox(
             width: 120,
-            child: _buildHeaderCell('FECHA'),
+            child: _buildHeaderCell(AppLocalizations.of(context).date),
           ),
-          // ACCIONES
           Expanded(
-            child: _buildCenteredHeaderCell('ACCIONES'),
+            child: _buildCenteredHeaderCell(AppLocalizations.of(context).actions),
           ),
         ],
       ),
@@ -137,18 +128,18 @@ class PedidosTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildTableContent() {
+  Widget _buildTableContent(BuildContext context) {
     if (isLoading) {
       return _buildShimmerLoading();
     }
 
     if (pedidos.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(MedRushTheme.spacingLg),
+          padding: const EdgeInsets.all(MedRushTheme.spacingLg),
           child: Text(
-            'No hay pedidos para mostrar',
-            style: TextStyle(
+            AppLocalizations.of(context).noOrdersToShow,
+            style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
             ),
@@ -161,12 +152,12 @@ class PedidosTableView extends StatelessWidget {
       itemCount: pedidos.length,
       itemBuilder: (context, index) {
         final pedido = pedidos[index];
-        return _buildTableRow(pedido, index);
+        return _buildTableRow(context, pedido, index);
       },
     );
   }
 
-  Widget _buildTableRow(Pedido pedido, int index) {
+  Widget _buildTableRow(BuildContext context, Pedido pedido, int index) {
     final isEven = index % 2 == 0;
 
     return DecoratedBox(
@@ -225,12 +216,12 @@ class PedidosTableView extends StatelessWidget {
             ),
             // REPARTIDOR
             Expanded(
-              child: _buildRepartidorCell(pedido),
+              child: _buildRepartidorCell(context, pedido),
             ),
             // UBICACIÓN
             SizedBox(
               width: 140,
-              child: _buildUbicacionCell(pedido),
+              child: _buildUbicacionCell(context, pedido),
             ),
             // ESTADO
             SizedBox(
@@ -243,7 +234,7 @@ class PedidosTableView extends StatelessWidget {
             // FECHA
             SizedBox(
               width: 120,
-              child: _buildFechaCell(pedido),
+              child: _buildFechaCell(context, pedido),
             ),
             // ACCIONES
             Expanded(
@@ -276,12 +267,14 @@ class PedidosTableView extends StatelessWidget {
           ),
           const SizedBox(width: MedRushTheme.spacingXs),
           // Texto del estado
-          Text(
-            StatusHelpers.estadoPedidoTexto(estado),
-            style: const TextStyle(
-              color: MedRushTheme.textInverse,
-              fontSize: MedRushTheme.fontSizeLabelSmall,
-              fontWeight: MedRushTheme.fontWeightMedium,
+          Builder(
+            builder: (context) => Text(
+              StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+              style: const TextStyle(
+                color: MedRushTheme.textInverse,
+                fontSize: MedRushTheme.fontSizeLabelSmall,
+                fontWeight: MedRushTheme.fontWeightMedium,
+              ),
             ),
           ),
         ],
@@ -310,7 +303,7 @@ class PedidosTableView extends StatelessWidget {
                 onView(pedido);
               }
             },
-            tooltip: esPendiente ? 'Asignar repartidor' : 'Ver detalles',
+            tooltip: esPendiente ? AppLocalizations.of(context).assignDriver : AppLocalizations.of(context).viewDetails,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -331,7 +324,7 @@ class PedidosTableView extends StatelessWidget {
                 onEdit(pedido);
               }
             },
-            tooltip: esPendiente ? 'Ver detalles' : 'Editar',
+            tooltip: esPendiente ? AppLocalizations.of(context).viewDetails : AppLocalizations.of(context).edit,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -345,7 +338,7 @@ class PedidosTableView extends StatelessWidget {
               color: MedRushTheme.textSecondary,
               size: 18,
             ),
-            tooltip: 'Más opciones',
+            tooltip: AppLocalizations.of(context).moreOptions,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -367,118 +360,118 @@ class PedidosTableView extends StatelessWidget {
                   _showDeleteConfirmation(context, pedido);
               }
             },
-            itemBuilder: (BuildContext context) => [
-              if (esPendiente)
-                const PopupMenuItem<String>(
-                  value: 'assign',
+            itemBuilder: (BuildContext context) {
+              final l10n = AppLocalizations.of(context);
+              return [
+                if (esPendiente)
+                  PopupMenuItem<String>(
+                    value: 'assign',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.userPlus,
+                          color: MedRushTheme.neutralGrey700,
+                          size: 16,
+                        ),
+                        const SizedBox(width: MedRushTheme.spacingSm),
+                        Text(l10n.assignDriver),
+                      ],
+                    ),
+                  ),
+                if (pedido.estado == EstadoPedido.asignado)
+                  PopupMenuItem<String>(
+                    value: 'cancelar',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.x,
+                          color: Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: MedRushTheme.spacingSm),
+                        Text(l10n.cancelOrder),
+                      ],
+                    ),
+                  ),
+                PopupMenuItem<String>(
+                  value: 'edit',
                   child: Row(
                     children: [
-                      Icon(
-                        LucideIcons.userPlus,
+                      const Icon(
+                        LucideIcons.pencil,
                         color: MedRushTheme.neutralGrey700,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
-                      Text('Asignar Repartidor'),
+                      const SizedBox(width: MedRushTheme.spacingSm),
+                      Text(l10n.edit),
                     ],
                   ),
                 ),
-              // Cancelar (solo si está asignado)
-              if (pedido.estado == EstadoPedido.asignado)
-                const PopupMenuItem<String>(
-                  value: 'cancelar',
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.x,
-                        color: Colors.orange,
-                        size: 16,
-                      ),
-                      SizedBox(width: MedRushTheme.spacingSm),
-                      Text('Cancelar Pedido'),
-                    ],
-                  ),
-                ),
-              // Editar (siempre visible)
-              const PopupMenuItem<String>(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.pencil,
-                      color: MedRushTheme.neutralGrey700,
-                      size: 16,
+                if ((pedido.estado == EstadoPedido.recogido ||
+                        pedido.estado == EstadoPedido.enRuta) &&
+                    pedido.estado != EstadoPedido.entregado &&
+                    pedido.estado != EstadoPedido.fallido &&
+                    pedido.estado != EstadoPedido.cancelado) ...[
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'cancelar',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.x,
+                          color: Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: MedRushTheme.spacingSm),
+                        Text(l10n.cancelOrder),
+                      ],
                     ),
-                    SizedBox(width: MedRushTheme.spacingSm),
-                    Text('Editar'),
-                  ],
-                ),
-              ),
-              // Opciones para pedidos recogidos y en ruta (pueden ser fallidos)
-              if ((pedido.estado == EstadoPedido.recogido ||
-                      pedido.estado == EstadoPedido.enRuta) &&
-                  pedido.estado != EstadoPedido.entregado &&
-                  pedido.estado != EstadoPedido.fallido &&
-                  pedido.estado != EstadoPedido.cancelado) ...[
-                const PopupMenuDivider(),
-                const PopupMenuItem<String>(
-                  value: 'cancelar',
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'fallo',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.badgeAlert,
+                          color: Colors.red,
+                          size: 16,
+                        ),
+                        const SizedBox(width: MedRushTheme.spacingSm),
+                        Text(l10n.markAsFailed),
+                      ],
+                    ),
+                  ),
+                ],
+                PopupMenuItem<String>(
+                  value: 'barcode',
                   child: Row(
                     children: [
-                      Icon(
-                        LucideIcons.x,
-                        color: Colors.orange,
+                      const Icon(
+                        LucideIcons.barcode,
+                        color: MedRushTheme.neutralGrey700,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
-                      Text('Cancelar Pedido'),
+                      const SizedBox(width: MedRushTheme.spacingSm),
+                      Text(l10n.generateBarcode),
                     ],
                   ),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'fallo',
+                PopupMenuItem<String>(
+                  value: 'delete',
                   child: Row(
                     children: [
-                      Icon(
-                        LucideIcons.badgeAlert,
+                      const Icon(
+                        LucideIcons.trash2,
                         color: Colors.red,
                         size: 16,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
-                      Text('Marcar como Fallido'),
+                      const SizedBox(width: MedRushTheme.spacingSm),
+                      Text(l10n.delete),
                     ],
                   ),
                 ),
-              ],
-              const PopupMenuItem<String>(
-                value: 'barcode',
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.barcode,
-                      color: MedRushTheme.neutralGrey700,
-                      size: 16,
-                    ),
-                    SizedBox(width: MedRushTheme.spacingSm),
-                    Text('Generar Código de Barras'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.trash2,
-                      color: Colors.red,
-                      size: 16,
-                    ),
-                    SizedBox(width: MedRushTheme.spacingSm),
-                    Text('Eliminar'),
-                  ],
-                ),
-              ),
-            ],
+              ];
+            },
           ),
         ],
       ),
@@ -490,7 +483,7 @@ class PedidosTableView extends StatelessWidget {
     return '${pedido.direccionEntrega}, ${pedido.distritoEntrega}';
   }
 
-  Widget _buildRepartidorCell(Pedido pedido) {
+  Widget _buildRepartidorCell(BuildContext context, Pedido pedido) {
     if (pedido.repartidor != null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -516,7 +509,9 @@ class PedidosTableView extends StatelessWidget {
       );
     }
     return Text(
-      pedido.repartidorId != null ? 'Asignado' : 'Sin asignar',
+      pedido.repartidorId != null
+          ? AppLocalizations.of(context).assigned
+          : AppLocalizations.of(context).notAssigned,
       style: const TextStyle(
         color: MedRushTheme.textSecondary,
         fontSize: MedRushTheme.fontSizeBodySmall,
@@ -526,27 +521,26 @@ class PedidosTableView extends StatelessWidget {
     );
   }
 
-  String _getUbicacionText(Pedido pedido) {
-    // Mostrar coordenadas si están disponibles
+  String _getUbicacionText(BuildContext context, Pedido pedido) {
     if (pedido.latitudEntrega != null && pedido.longitudEntrega != null) {
       return StatusHelpers.formatearCoordenadasEstandar(
           pedido.latitudEntrega!, pedido.longitudEntrega!);
     }
-    return 'No disponible';
+    return AppLocalizations.of(context).notAvailable;
   }
 
   /// Obtiene la fecha correspondiente según el estado del pedido
   /// Usa el sistema de prioridad centralizado de StatusHelpers
-  String _getFechaSegunEstado(Pedido pedido) {
-    return StatusHelpers.obtenerFechaSegunPrioridad(pedido);
+  String _getFechaSegunEstado(Pedido pedido, BuildContext context) {
+    return StatusHelpers.obtenerFechaSegunPrioridad(pedido, AppLocalizations.of(context));
   }
 
-  Widget _buildFechaCell(Pedido pedido) {
-    final fechaTexto = _getFechaSegunEstado(pedido);
-    final tipoFecha = StatusHelpers.obtenerTipoFechaMostrada(pedido);
+  Widget _buildFechaCell(BuildContext context, Pedido pedido) {
+    final fechaTexto = _getFechaSegunEstado(pedido, context);
+    final tipoFecha = StatusHelpers.obtenerTipoFechaMostrada(pedido, AppLocalizations.of(context));
 
     return Tooltip(
-      message: 'Fecha de $tipoFecha',
+      message: AppLocalizations.of(context).dateOfType(tipoFecha),
       decoration: BoxDecoration(
         color: MedRushTheme.backgroundSecondary,
         borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
@@ -569,12 +563,11 @@ class PedidosTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildUbicacionCell(Pedido pedido) {
-    // Si no hay coordenadas, mostrar texto simple
+  Widget _buildUbicacionCell(BuildContext context, Pedido pedido) {
     if (pedido.latitudEntrega == null || pedido.longitudEntrega == null) {
-      return const Text(
-        'No disponible',
-        style: TextStyle(
+      return Text(
+        AppLocalizations.of(context).notAvailable,
+        style: const TextStyle(
           color: MedRushTheme.textSecondary,
           fontSize: MedRushTheme.fontSizeBodySmall,
         ),
@@ -597,7 +590,7 @@ class PedidosTableView extends StatelessWidget {
           const SizedBox(width: 2),
           Flexible(
             child: Text(
-              _getUbicacionText(pedido),
+              _getUbicacionText(context, pedido),
               style: const TextStyle(
                 color: MedRushTheme.textSecondary,
                 fontSize: MedRushTheme.fontSizeBodySmall,
@@ -637,22 +630,22 @@ class PedidosTableView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.barcode,
               color: MedRushTheme.neutralGrey700,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Código de Barras'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).barcodeLabel),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Pedido #${pedido.id}',
+              '${AppLocalizations.of(context).orderIdShort}${pedido.id}',
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -709,9 +702,9 @@ class PedidosTableView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: MedRushTheme.spacingSm),
-                  const Text(
-                    'Código de barras del pedido',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context).barcodeOrderDescription,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       color: MedRushTheme.textSecondary,
                     ),
@@ -724,7 +717,7 @@ class PedidosTableView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context).close),
           ),
         ],
       ),
@@ -735,15 +728,15 @@ class PedidosTableView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.triangleAlert,
               color: Colors.red,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Confirmar eliminación'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).confirmDeletion),
           ],
         ),
         content: Column(
@@ -751,7 +744,7 @@ class PedidosTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas eliminar el pedido #${pedido.id}?',
+              AppLocalizations.of(context).confirmDeleteOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -766,18 +759,18 @@ class PedidosTableView extends StatelessWidget {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.red,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción no se puede deshacer. El pedido será eliminado permanentemente.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).deleteOrderIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.red,
                       ),
@@ -791,7 +784,7 @@ class PedidosTableView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -802,7 +795,7 @@ class PedidosTableView extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -833,7 +826,7 @@ class PedidosTableView extends StatelessWidget {
         // Mostrar mensaje de éxito
         if (context.mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} eliminado exitosamente',
+            AppLocalizations.of(context).orderDeletedSuccess(pedido.id),
             context: context,
           );
         }
@@ -844,21 +837,18 @@ class PedidosTableView extends StatelessWidget {
         // Mostrar mensaje de error
         if (context.mounted) {
           NotificationService.showError(
-            'Error al eliminar pedido: ${result.error}',
+            AppLocalizations.of(context).errorDeleteOrder(result.error ?? ''),
             context: context,
           );
         }
       }
     } catch (e) {
-      // Cerrar indicador de carga si está abierto
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-
-      // Mostrar mensaje de error
       if (context.mounted) {
         NotificationService.showError(
-          'Error al eliminar pedido: $e',
+          AppLocalizations.of(context).errorDeleteOrder(e.toString()),
           context: context,
         );
       }
@@ -882,7 +872,7 @@ class PedidosTableView extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Asignar Repartidor'),
+            title: Text(AppLocalizations.of(context).assignDriverTitle),
             content: SizedBox(
               width: 420,
               height: 380,
@@ -890,8 +880,8 @@ class PedidosTableView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: repartidores.isEmpty
-                        ? const Center(
-                            child: Text('No hay repartidores activos'))
+                        ? Center(
+                            child: Text(AppLocalizations.of(context).noActiveDrivers))
                         : ListView.builder(
                             itemCount: repartidores.length,
                             itemBuilder: (context, index) {
@@ -918,7 +908,7 @@ class PedidosTableView extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -937,13 +927,14 @@ class PedidosTableView extends StatelessWidget {
                   }
                   if (result.success && context.mounted) {
                     NotificationService.showSuccess(
-                      'Pedido asignado a ${seleccionado!.nombre}',
+                      AppLocalizations.of(context).orderAssignedToName(seleccionado!.nombre),
                       context: context,
                     );
                     onRefresh();
                   } else if (context.mounted) {
+                    final l10n = AppLocalizations.of(context);
                     NotificationService.showError(
-                      'Error al asignar: ${result.error ?? 'Error desconocido'}',
+                      '${l10n.errorAssigningOrder}: ${result.error ?? l10n.unknownError}',
                       context: context,
                     );
                   }
@@ -952,7 +943,7 @@ class PedidosTableView extends StatelessWidget {
                   backgroundColor: MedRushTheme.primaryGreen,
                   foregroundColor: MedRushTheme.textInverse,
                 ),
-                child: const Text('Confirmar Asignación'),
+                child: Text(AppLocalizations.of(context).confirmAssignment),
               ),
             ],
           );
@@ -961,7 +952,7 @@ class PedidosTableView extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         NotificationService.showError(
-          'Error al cargar repartidores: $e',
+          AppLocalizations.of(context).errorLoadingDrivers(e.toString()),
           context: context,
         );
       }
@@ -1140,15 +1131,15 @@ class PedidosTableView extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.x,
               color: Colors.orange,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Cancelar Pedido'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).cancelOrderTitle),
           ],
         ),
         content: Column(
@@ -1156,7 +1147,7 @@ class PedidosTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas cancelar el pedido #${pedido.id}?',
+              AppLocalizations.of(context).confirmCancelOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -1171,18 +1162,18 @@ class PedidosTableView extends StatelessWidget {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.orange,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción cambiará el estado del pedido a "Cancelado" y no se podrá revertir.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).cancelOrderIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.orange,
                       ),
@@ -1196,7 +1187,7 @@ class PedidosTableView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -1204,7 +1195,7 @@ class PedidosTableView extends StatelessWidget {
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Confirmar Cancelación'),
+            child: Text(AppLocalizations.of(context).confirmCancellation),
           ),
         ],
       ),
@@ -1245,7 +1236,7 @@ class PedidosTableView extends StatelessWidget {
         // Mostrar mensaje de éxito
         if (context.mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} cancelado exitosamente',
+            AppLocalizations.of(context).orderCancelledSuccess(pedido.id),
             context: context,
           );
         }
@@ -1256,25 +1247,21 @@ class PedidosTableView extends StatelessWidget {
         // Mostrar mensaje de error
         if (context.mounted) {
           NotificationService.showError(
-            'Error al cancelar pedido: ${result.error}',
+            AppLocalizations.of(context).errorCancelingOrder(result.error ?? ''),
             context: context,
           );
         }
       }
     } catch (e) {
-      // Cerrar indicador de carga si está abierto
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-
       if (!context.mounted) {
         return;
       }
-
-      // Mostrar mensaje de error
       if (context.mounted) {
         NotificationService.showError(
-          'Error al cancelar pedido: $e',
+          AppLocalizations.of(context).errorCancelingOrder(e.toString()),
           context: context,
         );
       }
@@ -1292,15 +1279,15 @@ class PedidosTableView extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.badgeAlert,
                 color: Colors.red,
                 size: 24,
               ),
-              SizedBox(width: MedRushTheme.spacingSm),
-              Text('Marcar como Fallido'),
+              const SizedBox(width: MedRushTheme.spacingSm),
+              Text(AppLocalizations.of(context).markAsFailedTitle),
             ],
           ),
           content: SizedBox(
@@ -1310,7 +1297,7 @@ class PedidosTableView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Selecciona el motivo del fallo para el pedido #${pedido.id}',
+                  AppLocalizations.of(context).selectFailureReasonForOrder(pedido.id),
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     color: MedRushTheme.textPrimary,
@@ -1321,9 +1308,9 @@ class PedidosTableView extends StatelessWidget {
                 // Selector de motivo de fallo
                 DropdownButtonFormField<MotivoFalla>(
                   initialValue: motivoSeleccionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Motivo del fallo',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).failureReasonLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   items: StatusHelpers.obtenerMotivosFallo().map((motivo) {
                     return DropdownMenuItem<MotivoFalla>(
@@ -1336,7 +1323,7 @@ class PedidosTableView extends StatelessWidget {
                             size: 16,
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
-                          Text(StatusHelpers.motivoFallaTexto(motivo)),
+                          Text(StatusHelpers.motivoFallaTexto(motivo, AppLocalizations.of(context))),
                         ],
                       ),
                     );
@@ -1352,10 +1339,10 @@ class PedidosTableView extends StatelessWidget {
                 // Campo de observaciones
                 TextFormField(
                   controller: observacionesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Observaciones (opcional)',
-                    border: OutlineInputBorder(),
-                    hintText: 'Detalles adicionales sobre el fallo...',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).observationsOptionalLabel,
+                    border: const OutlineInputBorder(),
+                    hintText: AppLocalizations.of(context).failureDetailsHint,
                   ),
                   maxLines: 3,
                 ),
@@ -1370,18 +1357,18 @@ class PedidosTableView extends StatelessWidget {
                     border:
                         Border.all(color: Colors.red.withValues(alpha: 0.3)),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.info,
                         color: Colors.red,
                         size: 20,
                       ),
-                      SizedBox(width: MedRushTheme.spacingSm),
+                      const SizedBox(width: MedRushTheme.spacingSm),
                       Expanded(
                         child: Text(
-                          'Esta acción cambiará el estado del pedido a "Fallido" y registrará la ubicación actual.',
-                          style: TextStyle(
+                          AppLocalizations.of(context).markAsFailedIrreversible,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: Colors.red,
                           ),
@@ -1396,7 +1383,7 @@ class PedidosTableView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: motivoSeleccionado != null
@@ -1406,7 +1393,7 @@ class PedidosTableView extends StatelessWidget {
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Confirmar Fallo'),
+              child: Text(AppLocalizations.of(context).confirmFailure),
             ),
           ],
         ),
@@ -1467,39 +1454,31 @@ class PedidosTableView extends StatelessWidget {
       }
 
       if (result.success) {
-        // Mostrar mensaje de éxito
         if (context.mounted) {
           NotificationService.showSuccess(
-            'Pedido #${pedido.id} marcado como fallido',
+            AppLocalizations.of(context).orderMarkedFailedSuccess(pedido.id.toString()),
             context: context,
           );
         }
-
-        // Recargar la lista
         onRefresh();
       } else {
-        // Mostrar mensaje de error
         if (context.mounted) {
           NotificationService.showError(
-            'Error al marcar pedido como fallido: ${result.error}',
+            AppLocalizations.of(context).errorMarkingOrderFailed(result.error ?? ''),
             context: context,
           );
         }
       }
     } catch (e) {
-      // Cerrar indicador de carga si está abierto
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-
       if (!context.mounted) {
         return;
       }
-
-      // Mostrar mensaje de error
       if (context.mounted) {
         NotificationService.showError(
-          'Error al marcar pedido como fallido: $e',
+          AppLocalizations.of(context).errorMarkingOrderFailed(e.toString()),
           context: context,
         );
       }

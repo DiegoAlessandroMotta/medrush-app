@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/ruta_optimizada.model.dart';
 import 'package:medrush/services/polyline_decoding.dart';
 import 'package:medrush/theme/theme.dart';
@@ -45,6 +46,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
 
   Future<void> _crearMarcadores() async {
     _markers.clear();
+    final l10n = AppLocalizations.of(context);
 
     logInfo('🗺️ Creando marcadores para ${widget.pedidos.length} pedidos');
 
@@ -57,9 +59,9 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
           Marker(
             markerId: const MarkerId('inicio'),
             position: LatLng(lat.toDouble(), lng.toDouble()),
-            infoWindow: const InfoWindow(
-              title: 'Punto de Inicio',
-              snippet: 'Inicio de la ruta',
+            infoWindow: InfoWindow(
+              title: l10n.startPoint,
+              snippet: l10n.routeStart,
             ),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueGreen),
@@ -77,9 +79,9 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
           Marker(
             markerId: const MarkerId('final'),
             position: LatLng(lat.toDouble(), lng.toDouble()),
-            infoWindow: const InfoWindow(
-              title: 'Punto Final',
-              snippet: 'Final de la ruta',
+            infoWindow: InfoWindow(
+              title: l10n.endPoint,
+              snippet: l10n.routeEnd,
             ),
             icon:
                 BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
@@ -95,9 +97,9 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
           markerId: const MarkerId('repartidor'),
           position: widget.ubicacionRepartidor!,
           infoWindow: InfoWindow(
-            title: 'Repartidor',
+            title: l10n.driver,
             snippet:
-                widget.ruta.repartidor?['nombre']?.toString() ?? 'Repartidor',
+                widget.ruta.repartidor?['nombre']?.toString() ?? l10n.driver,
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
@@ -129,8 +131,8 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
             markerId: MarkerId('pedido_${pedido['id']}'),
             position: LatLng(lat.toDouble(), lng.toDouble()),
             infoWindow: InfoWindow(
-              title: '$orden) ${pedido['paciente_nombre'] ?? 'Paciente'}',
-              snippet: 'Pedido #${pedido['id']}',
+              title: '$orden) ${pedido['paciente_nombre'] ?? l10n.patient}',
+              snippet: '${l10n.orderNumberPrefix}${pedido['id']}',
             ),
             icon: iconoNumerado,
           ),
@@ -341,14 +343,14 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mapa de Ruta: ${widget.ruta.nombre ?? 'Sin nombre'}'),
+        title: Text('${AppLocalizations.of(context).routeMapTitle} ${widget.ruta.nombre ?? AppLocalizations.of(context).noName}'),
         backgroundColor: MedRushTheme.primaryGreen,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.navigation),
             onPressed: _centrarMapa,
-            tooltip: 'Centrar mapa',
+            tooltip: AppLocalizations.of(context).centerMap,
           ),
         ],
       ),
@@ -376,7 +378,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
                     const SizedBox(width: MedRushTheme.spacingSm),
                     Expanded(
                       child: Text(
-                        'Repartidor: ${widget.ruta.repartidor?['nombre'] ?? 'No asignado'}',
+                        '${AppLocalizations.of(context).driver}: ${widget.ruta.repartidor?['nombre'] ?? AppLocalizations.of(context).notAssigned}',
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodyMedium,
                           fontWeight: MedRushTheme.fontWeightMedium,
@@ -396,7 +398,7 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
                     ),
                     const SizedBox(width: MedRushTheme.spacingXs),
                     Text(
-                      '${widget.pedidos.length} pedidos',
+                      '${widget.pedidos.length} ${AppLocalizations.of(context).orders.toLowerCase()}',
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -452,24 +454,29 @@ class _MapaRutaCompletaWidgetState extends State<MapaRutaCompletaWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Leyenda:',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).legend,
+                  style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     fontWeight: MedRushTheme.fontWeightMedium,
                     color: MedRushTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: MedRushTheme.spacingSm),
-                Wrap(
-                  spacing: MedRushTheme.spacingMd,
-                  runSpacing: MedRushTheme.spacingXs,
-                  children: [
-                    _buildLeyendaItem('Inicio', BitmapDescriptor.hueGreen),
-                    _buildLeyendaItem('Final', BitmapDescriptor.hueRed),
-                    _buildLeyendaItem('Repartidor', BitmapDescriptor.hueBlue),
-                    _buildLeyendaItem('Pedidos', MedRushTheme.primaryBlue),
-                  ],
+                Builder(
+                  builder: (context) {
+                    final l10n = AppLocalizations.of(context);
+                    return Wrap(
+                      spacing: MedRushTheme.spacingMd,
+                      runSpacing: MedRushTheme.spacingXs,
+                      children: [
+                        _buildLeyendaItem(l10n.start, BitmapDescriptor.hueGreen),
+                        _buildLeyendaItem(l10n.end, BitmapDescriptor.hueRed),
+                        _buildLeyendaItem(l10n.driver, BitmapDescriptor.hueBlue),
+                        _buildLeyendaItem(l10n.orders, MedRushTheme.primaryBlue),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

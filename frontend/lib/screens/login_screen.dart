@@ -101,8 +101,9 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isServerConnected = isConnected;
           _isCheckingConnection = false;
-          _connectionError =
-              isConnected ? null : 'No se pudo conectar al servidor';
+          _connectionError = isConnected
+              ? null
+              : AppLocalizations.of(context).serverConnectionError;
         });
       }
     } catch (e) {
@@ -110,7 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isServerConnected = false;
           _isCheckingConnection = false;
-          _connectionError = 'Error de conexión: $e';
+          _connectionError =
+              AppLocalizations.of(context).connectionError(e);
         });
       }
     }
@@ -140,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Mostrar indicador de carga
       if (mounted) {
         NotificationService.showInfo(
-          'Obteniendo enlace de descarga...',
+          AppLocalizations.of(context).obtainingDownloadLink,
           context: context,
         );
       }
@@ -151,7 +153,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!result.success) {
         if (mounted) {
           NotificationService.showError(
-            result.error ?? 'No se pudo obtener el enlace de descarga',
+            result.error ??
+                AppLocalizations.of(context).couldNotGetDownloadLink,
             context: context,
           );
         }
@@ -165,14 +168,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (mounted) {
           NotificationService.showSuccess(
-            'Descarga iniciada correctamente',
+            AppLocalizations.of(context).downloadStarted,
             context: context,
           );
         }
       } else {
         if (mounted) {
           NotificationService.showError(
-            'No se pudo abrir el enlace de descarga',
+            AppLocalizations.of(context).couldNotOpenDownloadLink,
             context: context,
           );
         }
@@ -180,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         NotificationService.showError(
-          'Error al descargar APK: $e',
+          AppLocalizations.of(context).errorDownloadingApk(e),
           context: context,
         );
       }
@@ -643,7 +646,8 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Conectado al servidor: ${EndpointManager.currentBaseUrl}',
+                AppLocalizations.of(context).connectedToServer(
+                    EndpointManager.currentBaseUrl),
                 style: TextStyle(
                   color: Colors.green.shade700,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -659,7 +663,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               onPressed: _checkServerConnection,
               visualDensity: VisualDensity.compact,
-              tooltip: 'Verificar conexión nuevamente',
+              tooltip: AppLocalizations.of(context).verifyConnectionAgain,
             ),
           ] else ...[
             Icon(
@@ -701,7 +705,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               onPressed: _checkServerConnection,
               visualDensity: VisualDensity.compact,
-              tooltip: 'Reintentar conexión',
+              tooltip: AppLocalizations.of(context).retryConnection,
             ),
           ],
         ],
@@ -709,7 +713,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Muestra el mensaje de error del auth; localiza los mensajes conocidos del provider.
+  String _localizedAuthError(String error, AppLocalizations l10n) {
+    if (error == 'Error en la respuesta del servidor') {
+      return l10n.serverResponseError;
+    }
+    if (error.startsWith('Error al cerrar sesión')) {
+      return l10n.errorLoggingOut;
+    }
+    if (error.startsWith('Error al actualizar perfil')) {
+      return l10n.errorUpdatingProfile;
+    }
+    return error;
+  }
+
   Widget _buildErrorMessage(AuthProvider authProvider) {
+    final l10n = AppLocalizations.of(context);
+    final displayError = _localizedAuthError(authProvider.error!, l10n);
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 300),
       tween: Tween<double>(begin: 0, end: 1),
@@ -730,7 +750,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    authProvider.error!,
+                    displayError,
                     style: TextStyle(
                       color: Colors.red.shade700,
                       fontWeight: MedRushTheme.fontWeightMedium,

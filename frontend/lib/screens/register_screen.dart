@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -52,8 +53,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Las contraseñas no coinciden'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).passwordsDoNotMatch),
           backgroundColor: Colors.red,
         ),
       );
@@ -79,8 +80,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cuenta creada exitosamente. Ahora inicia sesión.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).accountCreatedSuccess),
           backgroundColor: Colors.green,
         ),
       );
@@ -91,7 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al registrar: $e'),
+          content: Text(AppLocalizations.of(context).errorRegistering(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -111,9 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: MedRushTheme.surface,
         elevation: 0,
-        title: const Text(
-          'Registro de Repartidor',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).registerDriverTitle,
+          style: const TextStyle(
             color: MedRushTheme.textPrimary,
             fontWeight: MedRushTheme.fontWeightBold,
           ),

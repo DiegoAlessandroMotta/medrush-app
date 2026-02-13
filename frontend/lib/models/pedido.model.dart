@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:medrush/l10n/app_localizations.dart';
 
 // Estados de pedidos (alineados con EstadosPedidoEnum del backend)
 enum EstadoPedido {
@@ -521,25 +522,6 @@ class Pedido {
   bool get estaCompleto => estado == EstadoPedido.entregado;
   bool get haFallado => estado == EstadoPedido.fallido;
 
-  String get estadoTexto {
-    switch (estado) {
-      case EstadoPedido.pendiente:
-        return 'Pendiente';
-      case EstadoPedido.asignado:
-        return 'Asignado';
-      case EstadoPedido.recogido:
-        return 'Recogido';
-      case EstadoPedido.enRuta:
-        return 'En Ruta';
-      case EstadoPedido.entregado:
-        return 'Entregado';
-      case EstadoPedido.fallido:
-        return 'Fallido';
-      case EstadoPedido.cancelado:
-        return 'Cancelado';
-    }
-  }
-
   Pedido copyWith({
     String? id,
     String? codigoBarra,
@@ -633,57 +615,21 @@ class Pedido {
 }
 
 // Extensiones para los enums
-extension EstadoPedidoExtension on EstadoPedido {
-  String get texto {
-    switch (this) {
-      case EstadoPedido.pendiente:
-        return 'Pendiente';
-      case EstadoPedido.asignado:
-        return 'Asignado';
-      case EstadoPedido.recogido:
-        return 'Recogido';
-      case EstadoPedido.enRuta:
-        return 'En Ruta';
-      case EstadoPedido.entregado:
-        return 'Entregado';
-      case EstadoPedido.fallido:
-        return 'Fallido';
-      case EstadoPedido.cancelado:
-        return 'Cancelado';
-    }
-  }
-}
-
-extension TipoPedidoExtension on TipoPedido {
-  String get texto {
-    switch (this) {
-      case TipoPedido.medicamentos:
-        return 'Medicamentos';
-      case TipoPedido.insumosMedicos:
-        return 'Insumos Médicos';
-      case TipoPedido.equiposMedicos:
-        return 'Equipos Médicos';
-      case TipoPedido.medicamentosControlados:
-        return 'Medicamentos Controlados';
-    }
-  }
-}
-
 extension MotivoFallaExtension on MotivoFalla {
-  String get texto {
+  String texto(AppLocalizations l10n) {
     switch (this) {
       case MotivoFalla.noSeEncontraba:
-        return 'No se encontraba en el domicilio';
+        return l10n.failureReasonClientNotFound;
       case MotivoFalla.direccionIncorrecta:
-        return 'Dirección incorrecta';
+        return l10n.failureReasonWrongAddress;
       case MotivoFalla.noRecibioLlamadas:
-        return 'No recibió llamadas';
+        return l10n.failureReasonNoCalls;
       case MotivoFalla.rechazoEntrega:
-        return 'Rechazó la entrega';
+        return l10n.failureReasonDeliveryRejected;
       case MotivoFalla.accesoDenegado:
-        return 'Acceso denegado al edificio';
+        return l10n.failureReasonAccessDenied;
       case MotivoFalla.otro:
-        return 'Otro motivo';
+        return l10n.failureReasonOther;
     }
   }
 }

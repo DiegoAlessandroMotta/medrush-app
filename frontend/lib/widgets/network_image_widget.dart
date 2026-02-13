@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
 
@@ -324,7 +325,7 @@ class _NetworkImageWidgetState extends State<NetworkImageWidget> {
               TextButton.icon(
                 onPressed: _refreshImage,
                 icon: const Icon(Icons.refresh, size: 16),
-                label: const Text('Reintentar'),
+                label: Text(AppLocalizations.of(context).retry),
                 style: TextButton.styleFrom(
                   foregroundColor: MedRushTheme.primaryGreen,
                   padding:

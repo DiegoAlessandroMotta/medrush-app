@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/repositories/repartidor.repository.dart';
@@ -92,7 +93,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
         });
 
         if (mounted) {
-          NotificationService.showError('No hay usuario autenticado',
+          NotificationService.showError(
+              AppLocalizations.of(context).noUserAuthenticated,
               context: context);
         }
         return;
@@ -123,19 +125,21 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
       });
 
       if (mounted) {
-        NotificationService.showError('Error al cargar perfil',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorLoadingProfile,
             context: context);
       }
     }
   }
 
   void _inicializarControladores() {
-    if (_usuarioActual != null) {
+    if (_usuarioActual != null && mounted) {
+      final l10n = AppLocalizations.of(context);
       _nombreController.text = _usuarioActual!.nombre;
       _emailController.text = _usuarioActual!.email;
       _telefonoController.text = _usuarioActual!.telefono ?? '';
       _licenciaController.text = _usuarioActual!.licenciaNumero ?? '';
-      _vehiculoController.text = _usuarioActual!.vehiculoCompleto;
+      _vehiculoController.text = _usuarioActual!.vehiculoCompleto(l10n);
     }
   }
 
@@ -165,9 +169,9 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
                 ),
                 const SizedBox(height: MedRushTheme.spacingLg),
 
-                const Text(
-                  'Cambiar foto de perfil',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).changeProfilePhoto,
+                  style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeTitleMedium,
                     fontWeight: MedRushTheme.fontWeightBold,
                     color: MedRushTheme.textPrimary,
@@ -180,7 +184,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
                     Expanded(
                       child: _buildPhotoOption(
                         icon: LucideIcons.camera,
-                        label: 'Cámara',
+                        label: AppLocalizations.of(context).camera,
                         onTap: () {
                           Navigator.pop(context);
                           _seleccionarFoto(ImageSource.camera);
@@ -191,7 +195,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
                     Expanded(
                       child: _buildPhotoOption(
                         icon: LucideIcons.image,
-                        label: 'Galería',
+                        label: AppLocalizations.of(context).gallery,
                         onTap: () {
                           Navigator.pop(context);
                           _seleccionarFoto(ImageSource.gallery);
@@ -208,7 +212,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
                     width: double.infinity,
                     child: _buildPhotoOption(
                       icon: LucideIcons.trash2,
-                      label: 'Eliminar foto',
+                      label: AppLocalizations.of(context).deletePhoto,
                       onTap: () {
                         Navigator.pop(context);
                         _eliminarFoto();
@@ -286,7 +290,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     } catch (e) {
       logError('❌ Error al seleccionar foto', e);
       if (mounted) {
-        NotificationService.showError('Error al seleccionar la foto',
+        NotificationService.showError(
+            AppLocalizations.of(context).photoSelectError,
             context: context);
       }
     }
@@ -337,21 +342,22 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
         }
 
         if (mounted) {
-          NotificationService.showSuccess('Foto de perfil actualizada',
-              context: context);
+          NotificationService.showSuccess(
+              AppLocalizations.of(context).profilePhotoUpdated, context: context);
         }
       } else {
         logError('❌ Error al subir foto: ${result.error}');
         if (mounted) {
           NotificationService.showError(
-              result.error ?? 'Error al actualizar foto',
+              result.error ?? AppLocalizations.of(context).photoUpdateError,
               context: context);
         }
       }
     } catch (e) {
       logError('❌ Error al subir foto', e);
       if (mounted) {
-        NotificationService.showError('Error al actualizar la foto',
+        NotificationService.showError(
+            AppLocalizations.of(context).photoUpdateError,
             context: context);
       }
     } finally {
@@ -372,19 +378,19 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(LucideIcons.trash2, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Eliminar foto'),
+            const Icon(LucideIcons.trash2, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).deletePhoto),
           ],
         ),
-        content: const Text(
-            '¿Estás seguro de que deseas eliminar tu foto de perfil?'),
+        content: Text(
+            AppLocalizations.of(context).confirmDeleteProfilePhotoQuestion),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -392,7 +398,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -441,21 +447,23 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
         }
 
         if (mounted) {
-          NotificationService.showSuccess('Foto de perfil eliminada',
-              context: context);
+          NotificationService.showSuccess(
+              AppLocalizations.of(context).profilePhotoDeleted, context: context);
         }
       } else {
         logError('❌ Error al eliminar foto: ${result.error}');
         if (mounted) {
           NotificationService.showError(
-              result.error ?? 'Error al eliminar foto',
+              result.error ??
+                  AppLocalizations.of(context).errorDeletingPhoto,
               context: context);
         }
       }
     } catch (e) {
       logError('❌ Error al eliminar foto', e);
       if (mounted) {
-        NotificationService.showError('Error al eliminar la foto',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorDeletingPhoto,
             context: context);
       }
     } finally {
@@ -469,7 +477,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
   Widget _buildPasswordSection() {
     return _buildInfoCard(
-      title: 'Seguridad',
+      title: AppLocalizations.of(context).securitySectionTitle,
       icon: LucideIcons.lock,
       children: [
         SizedBox(
@@ -477,7 +485,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
           child: ElevatedButton.icon(
             onPressed: _mostrarDialogoCambioPassword,
             icon: const Icon(LucideIcons.key, size: 16),
-            label: const Text('Cambiar Contraseña'),
+            label: Text(AppLocalizations.of(context).changePassword),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: Colors.white,
@@ -502,59 +510,53 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(LucideIcons.key, color: MedRushTheme.primaryGreen),
-            SizedBox(width: 8),
-            Text('Cambiar Contraseña'),
+            const Icon(LucideIcons.key, color: MedRushTheme.primaryGreen),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).changePassword),
           ],
         ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Ingresa tu contraseña actual y la nueva contraseña:',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).changePasswordInstruction,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   color: MedRushTheme.textSecondary,
                 ),
               ),
               const SizedBox(height: MedRushTheme.spacingLg),
-
-              // Contraseña actual
               TextField(
                 controller: _passwordActualController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña Actual',
-                  prefixIcon: Icon(LucideIcons.lock),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).currentPassword,
+                  prefixIcon: const Icon(LucideIcons.lock),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: MedRushTheme.spacingMd),
-
-              // Nueva contraseña
               TextField(
                 controller: _passwordNuevaController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Nueva Contraseña',
-                  prefixIcon: Icon(LucideIcons.key),
-                  border: OutlineInputBorder(),
-                  helperText: 'Mínimo 8 caracteres',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).newPassword,
+                  prefixIcon: const Icon(LucideIcons.key),
+                  border: const OutlineInputBorder(),
+                  helperText: AppLocalizations.of(context).min8Characters,
                 ),
               ),
               const SizedBox(height: MedRushTheme.spacingMd),
-
-              // Confirmación de contraseña
               TextField(
                 controller: _passwordConfirmacionController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirmar Nueva Contraseña',
-                  prefixIcon: Icon(LucideIcons.key),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).confirmNewPassword,
+                  prefixIcon: const Icon(LucideIcons.key),
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -563,7 +565,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -575,7 +577,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Cambiar'),
+            child: Text(AppLocalizations.of(context).changeButton),
           ),
         ],
       ),
@@ -592,34 +594,32 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     final passwordConfirmacion = _passwordConfirmacionController.text.trim();
 
     if (passwordActual.isEmpty) {
-      NotificationService.showError('Ingresa tu contraseña actual',
-          context: context);
+      NotificationService.showError(
+          AppLocalizations.of(context).enterCurrentPassword, context: context);
       return false;
     }
 
     if (passwordNueva.isEmpty) {
-      NotificationService.showError('Ingresa la nueva contraseña',
-          context: context);
+      NotificationService.showError(
+          AppLocalizations.of(context).enterNewPassword, context: context);
       return false;
     }
 
     if (passwordNueva.length < 8) {
       NotificationService.showError(
-          'La nueva contraseña debe tener al menos 8 caracteres',
-          context: context);
+          AppLocalizations.of(context).newPasswordMin8Chars, context: context);
       return false;
     }
 
     if (passwordNueva != passwordConfirmacion) {
-      NotificationService.showError('Las contraseñas no coinciden',
-          context: context);
+      NotificationService.showError(
+          AppLocalizations.of(context).passwordsDoNotMatch, context: context);
       return false;
     }
 
     if (passwordActual == passwordNueva) {
       NotificationService.showError(
-          'La nueva contraseña debe ser diferente a la actual',
-          context: context);
+          AppLocalizations.of(context).passwordMustBeDifferent, context: context);
       return false;
     }
 
@@ -664,23 +664,24 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
           _passwordConfirmacionController.clear();
 
           NotificationService.showSuccess(
-            'Contraseña actualizada exitosamente',
+            AppLocalizations.of(context).passwordChangedSuccess,
             context: context,
           );
         } else {
           logError('❌ Error al cambiar contraseña: ${result.error}');
           NotificationService.showError(
-            result.error ?? 'Error al cambiar contraseña',
+            result.error ??
+                AppLocalizations.of(context).errorChangingPasswordShort,
             context: context,
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Cerrar loading
+        Navigator.pop(context);
         logError('❌ Error al cambiar contraseña', e);
         NotificationService.showError(
-          'Error al cambiar contraseña: ${e.toString()}',
+          AppLocalizations.of(context).errorChangingPassword(e.toString()),
           context: context,
         );
       }
@@ -696,7 +697,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'fab_sesiones_repartidor',
-        tooltip: 'Sesiones activas',
+        tooltip: AppLocalizations.of(context).activeSessions,
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -719,17 +720,17 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             color: MedRushTheme.primaryGreen,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'Cargando perfil...',
-            style: TextStyle(
+            AppLocalizations.of(context).loadingProfile,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
             ),
@@ -750,9 +751,9 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
             color: MedRushTheme.textSecondary,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar perfil',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingProfile,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -765,7 +766,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
             ),
-            child: const Text('Reintentar'),
+            child: Text(AppLocalizations.of(context).retry),
           ),
         ],
       ),
@@ -923,23 +924,23 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
   Widget _buildPersonalInfoSection() {
     return _buildInfoCard(
-      title: 'Información Personal',
+      title: AppLocalizations.of(context).personalInfo,
       icon: LucideIcons.user,
       children: [
         _buildInfoRow(
-          label: 'Nombre',
+          label: AppLocalizations.of(context).name,
           value: _nombreController.text,
           icon: LucideIcons.user,
           controller: _nombreController,
         ),
         _buildInfoRow(
-          label: 'Email',
+          label: AppLocalizations.of(context).email,
           value: _emailController.text,
           icon: LucideIcons.mail,
           controller: _emailController,
         ),
         _buildInfoRow(
-          label: 'Teléfono',
+          label: AppLocalizations.of(context).phone,
           value: _telefonoController.text,
           icon: LucideIcons.phone,
           controller: _telefonoController,
@@ -950,17 +951,17 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
   Widget _buildProfessionalInfoSection() {
     return _buildInfoCard(
-      title: 'Información Profesional',
+      title: AppLocalizations.of(context).professionalInfo,
       icon: LucideIcons.briefcase,
       children: [
         _buildInfoRow(
-          label: 'Licencia de Conducir',
+          label: AppLocalizations.of(context).drivingLicense,
           value: _licenciaController.text,
           icon: LucideIcons.car,
           controller: _licenciaController,
         ),
         _buildInfoRow(
-          label: 'Vehículo',
+          label: AppLocalizations.of(context).vehicle,
           value: _vehiculoController.text,
           icon: LucideIcons.truck,
           controller: _vehiculoController,
@@ -971,15 +972,15 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
   Widget _buildStatusSection() {
     return _buildInfoCard(
-      title: 'Estado del Sistema',
+      title: AppLocalizations.of(context).systemStatus,
       icon: LucideIcons.settings,
       children: [
         _buildStatusRow(
-          label: 'Estado del Repartidor',
+          label: AppLocalizations.of(context).driverStatus,
           value: _usuarioActual!.estadoRepartidor != null
               ? StatusHelpers.estadoRepartidorTexto(
-                  _usuarioActual!.estadoRepartidor!)
-              : 'No asignado',
+                  _usuarioActual!.estadoRepartidor!, AppLocalizations.of(context))
+              : AppLocalizations.of(context).notAssigned,
           icon: StatusHelpers.estadoRepartidorIcon(
               _usuarioActual!.estadoRepartidor),
           color: _usuarioActual!.estadoRepartidor != null
@@ -988,8 +989,10 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
               : MedRushTheme.textSecondary,
         ),
         _buildStatusRow(
-          label: 'Usuario Activo',
-          value: _usuarioActual!.activo ? 'Sí' : 'No',
+          label: AppLocalizations.of(context).activeUser,
+          value: _usuarioActual!.activo
+              ? AppLocalizations.of(context).yes
+              : AppLocalizations.of(context).no,
           icon: _usuarioActual!.activo ? LucideIcons.check : LucideIcons.x,
           color:
               _usuarioActual!.activo ? MedRushTheme.primaryGreen : Colors.red,
@@ -1094,7 +1097,9 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
                   )
                 else
                   Text(
-                    value.isEmpty ? 'No especificado' : value,
+                    value.isEmpty
+                        ? AppLocalizations.of(context).notSpecified
+                        : value,
                     style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodyMedium,
                       color: MedRushTheme.textPrimary,
@@ -1186,7 +1191,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
             width: double.infinity,
             child: ElevatedButton.icon(
               icon: const Icon(Icons.logout, color: Colors.white),
-              label: const Text('Cerrar sesión'),
+              label: Text(AppLocalizations.of(context).logout),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -1208,18 +1213,18 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.logout, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Cerrar Sesión'),
+            const Icon(Icons.logout, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).logout),
           ],
         ),
-        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        content: Text(AppLocalizations.of(context).logoutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1230,7 +1235,7 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Cerrar Sesión'),
+            child: Text(AppLocalizations.of(context).logout),
           ),
         ],
       ),
@@ -1251,8 +1256,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     } catch (e) {
       logError('❌ Error al cerrar sesión', e);
       if (mounted) {
-        NotificationService.showError('Error al cerrar sesión',
-            context: context);
+        NotificationService.showError(
+            AppLocalizations.of(context).errorLoggingOut, context: context);
       }
     }
   }

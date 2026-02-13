@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/auth.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
@@ -227,7 +228,7 @@ class _PerfilTokensScreenState extends State<PerfilTokensScreen> {
                                             },
                                       icon: const Icon(LucideIcons.circleX,
                                           size: 16),
-                                      label: const Text('Revocar'),
+                                      label: Text(AppLocalizations.of(context).revoke),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.red,
                                         foregroundColor: Colors.white,
@@ -350,10 +351,10 @@ class _PerfilTokensScreenState extends State<PerfilTokensScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar')),
+              child: Text(AppLocalizations.of(context).cancel)),
           ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Confirmar')),
+              child: Text(AppLocalizations.of(context).confirm)),
         ],
       ),
     );

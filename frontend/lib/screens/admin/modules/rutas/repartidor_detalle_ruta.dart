@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/ruta_optimizada.model.dart';
 import 'package:medrush/repositories/base.repository.dart';
 import 'package:medrush/repositories/ruta.repository.dart';
@@ -60,9 +61,9 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
             ),
             const SizedBox(height: MedRushTheme.spacingMd),
 
-            const Text(
-              'No hay información del repartidor disponible',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).noDriverInfoAvailable,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textSecondary,
               ),
@@ -78,7 +79,7 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
                   backgroundColor: MedRushTheme.primaryGreen,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Cerrar'),
+                child: Text(AppLocalizations.of(context).close),
               ),
             ),
           ],
@@ -164,13 +165,13 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
           );
         } else {
           _mostrarError(
-              context, 'No se pudieron cargar los detalles de la ruta');
+              context, AppLocalizations.of(context).errorLoadingRouteDetails);
         }
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context); // Cerrar loading
-        _mostrarError(context, 'Error al cargar detalles: ${e.toString()}');
+        _mostrarError(context, '${AppLocalizations.of(context).errorLoadingRouteDetailsWithError}: ${e.toString()}');
       }
     }
   }
@@ -223,15 +224,15 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
           ),
 
           // Header
-          const Padding(
-            padding: EdgeInsets.all(MedRushTheme.spacingLg),
+          Padding(
+            padding: const EdgeInsets.all(MedRushTheme.spacingLg),
             child: Row(
               children: [
-                Icon(LucideIcons.user, color: MedRushTheme.primaryGreen),
-                SizedBox(width: MedRushTheme.spacingSm),
+                const Icon(LucideIcons.user, color: MedRushTheme.primaryGreen),
+                const SizedBox(width: MedRushTheme.spacingSm),
                 Text(
-                  'Detalles del Repartidor',
-                  style: TextStyle(
+                  AppLocalizations.of(context).driverDetailsTitle,
+                  style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeTitleMedium,
                     fontWeight: MedRushTheme.fontWeightBold,
                     color: MedRushTheme.textPrimary,
@@ -256,21 +257,21 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
                   _buildRepartidorInfo(
                       'Email', repartidor['email']?.toString() ?? 'N/A'),
                   _buildRepartidorInfo(
-                      'Teléfono', repartidor['telefono']?.toString() ?? 'N/A'),
+                      AppLocalizations.of(context).phone, repartidor['telefono']?.toString() ?? 'N/A'),
                   if (repartidor['verificado'] != null)
-                    _buildRepartidorInfo('Verificado',
-                        repartidor['verificado'] == true ? 'Sí' : 'No'),
+                    _buildRepartidorInfo(AppLocalizations.of(context).verifiedLabel,
+                        repartidor['verificado'] == true ? AppLocalizations.of(context).yes : AppLocalizations.of(context).no),
                   if (repartidor['estado'] != null)
                     _buildRepartidorInfo(
                         'Estado', repartidor['estado']?.toString() ?? 'N/A'),
                   if (repartidor['fecha_registro'] != null)
                     _buildRepartidorInfo(
-                        'Fecha de Registro',
+                        AppLocalizations.of(context).registrationDateLabel,
                         StatusHelpers.formatearFechaCompleta(DateTime.parse(
                             repartidor['fecha_registro'].toString()))),
                   if (repartidor['ultima_actividad'] != null)
                     _buildRepartidorInfo(
-                        'Última Actividad',
+                        AppLocalizations.of(context).lastActivityLabel,
                         StatusHelpers.formatearFechaCompleta(DateTime.parse(
                             repartidor['ultima_actividad'].toString()))),
 
@@ -287,44 +288,44 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Ruta Actual',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context).currentRouteLabel,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodyMedium,
                             fontWeight: MedRushTheme.fontWeightBold,
                             color: MedRushTheme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: MedRushTheme.spacingSm),
-                        _buildRepartidorInfo('Ruta ID', ruta.id),
+                        _buildRepartidorInfo(AppLocalizations.of(context).routeIdLabel, ruta.id),
                         _buildRepartidorInfo(
-                            'Nombre de Ruta', ruta.nombre ?? 'Sin nombre'),
+                            AppLocalizations.of(context).routeNameLabel, ruta.nombre ?? AppLocalizations.of(context).noName),
                         if (ruta.distanciaTotalEstimada != null)
                           _buildRepartidorInfo(
-                              'Distancia Total',
+                              AppLocalizations.of(context).totalDistanceLabel,
                               StatusHelpers.formatearDistanciaKm(
                                   ruta.distanciaTotalEstimada!,
                                   decimales: 2)),
                         if (ruta.tiempoTotalEstimado != null)
                           _buildRepartidorInfo(
-                              'Tiempo Estimado',
+                              AppLocalizations.of(context).estimatedTimeLabel,
                               StatusHelpers.formatearTiempo(
                                   ruta.tiempoTotalEstimado!)),
-                        _buildRepartidorInfo('Pedidos Asignados',
+                        _buildRepartidorInfo(AppLocalizations.of(context).assignedOrdersLabel,
                             '${ruta.cantidadPedidos ?? 0} pedidos'),
                         if (ruta.fechaHoraCalculo != null)
                           _buildRepartidorInfo(
-                              'Fecha de Cálculo',
+                              AppLocalizations.of(context).calculationDateLabel,
                               StatusHelpers.formatearFechaCompleta(
                                   ruta.fechaHoraCalculo!)),
                         if (ruta.fechaInicio != null)
                           _buildRepartidorInfo(
-                              'Fecha de Inicio',
+                              AppLocalizations.of(context).startDateLabel,
                               StatusHelpers.formatearFechaCompleta(
                                   ruta.fechaInicio!)),
                         if (ruta.fechaCompletado != null)
                           _buildRepartidorInfo(
-                              'Fecha de Completado',
+                              AppLocalizations.of(context).completedDateLabel,
                               StatusHelpers.formatearFechaCompleta(
                                   ruta.fechaCompletado!)),
                       ],
@@ -345,7 +346,7 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
                 Expanded(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cerrar'),
+                    child: Text(AppLocalizations.of(context).close),
                   ),
                 ),
                 const SizedBox(width: MedRushTheme.spacingMd),
@@ -356,7 +357,7 @@ class RepartidorDetalleRutaModal extends StatelessWidget {
                       _mostrarDetallesRuta(context, ruta);
                     },
                     icon: const Icon(LucideIcons.eye, size: 16),
-                    label: const Text('Ver Ruta'),
+                    label: Text(AppLocalizations.of(context).viewRoute),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: MedRushTheme.primaryGreen,
                       foregroundColor: Colors.white,

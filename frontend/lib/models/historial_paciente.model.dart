@@ -1,3 +1,4 @@
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 
 /// Modelo para el historial de pacientes
@@ -433,29 +434,29 @@ enum TipoFirma {
 }
 
 extension TipoFirmaExtension on TipoFirma {
-  String get texto {
+  String texto(AppLocalizations l10n) {
     switch (this) {
       case TipoFirma.primeraVez:
-        return 'Primera Vez';
+        return l10n.signatureTypeFirstTime;
       case TipoFirma.recepcion:
-        return 'Recepción';
+        return l10n.signatureTypeReception;
       case TipoFirma.medicamentoControlado:
-        return 'Medicamento Controlado';
+        return l10n.signatureTypeControlledMedicine;
       case TipoFirma.autorizacion:
-        return 'Autorización';
+        return l10n.signatureTypeAuthorization;
     }
   }
 
-  String get descripcion {
+  String descripcion(AppLocalizations l10n) {
     switch (this) {
       case TipoFirma.primeraVez:
-        return 'Firma inicial del paciente para autorizar el servicio';
+        return l10n.signatureDescriptionFirstTime;
       case TipoFirma.recepcion:
-        return 'Firma de confirmación de recepción del pedido';
+        return l10n.signatureDescriptionReception;
       case TipoFirma.medicamentoControlado:
-        return 'Firma especial requerida para medicamentos controlados';
+        return l10n.signatureDescriptionControlledMedicine;
       case TipoFirma.autorizacion:
-        return 'Firma de autorización para el servicio de delivery';
+        return l10n.signatureDescriptionAuthorization;
     }
   }
 }

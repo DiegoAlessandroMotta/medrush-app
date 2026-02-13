@@ -56,8 +56,14 @@ abstract class BaseApi {
   /// Crea y configura la instancia de Dio
   static Dio _createDio() {
     final baseUrl = EndpointManager.currentBaseUrl;
+    final serverDomain = EndpointManager.serverDomain;
     logInfo(
         '${ConsoleColor.cyan}Configurando Dio con baseUrl: $baseUrl${ConsoleColor.reset}');
+    logInfo(
+        '${ConsoleColor.cyan}Server Domain: $serverDomain${ConsoleColor.reset}');
+    if (kDebugMode) {
+      logInfo('${ConsoleColor.cyan}Debug Info: ${EndpointManager.debugInfo}${ConsoleColor.reset}');
+    }
 
     final dio = Dio(BaseOptions(
       baseUrl: baseUrl,

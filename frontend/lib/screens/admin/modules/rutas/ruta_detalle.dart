@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/ruta_optimizada.model.dart';
 import 'package:medrush/repositories/ruta.repository.dart';
@@ -79,9 +80,9 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Detalles de la Ruta',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context).routeDetailsTitle,
+                        style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeTitleLarge,
                           fontWeight: MedRushTheme.fontWeightBold,
                           color: MedRushTheme.textPrimary,
@@ -135,8 +136,8 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                             Expanded(
                               child: _buildInfoCompacta(
                                 LucideIcons.route,
-                                'Nombre',
-                                widget.ruta.nombre ?? 'Sin nombre',
+                                AppLocalizations.of(context).name,
+                                widget.ruta.nombre ?? AppLocalizations.of(context).noName,
                               ),
                             ),
                             const SizedBox(width: MedRushTheme.spacingMd),
@@ -145,10 +146,10 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                 widget.ruta.fechaCompletado == null
                                     ? LucideIcons.truck
                                     : LucideIcons.check,
-                                'Estado',
+                                AppLocalizations.of(context).statusShort,
                                 widget.ruta.fechaCompletado == null
-                                    ? 'Activa'
-                                    : 'Completada',
+                                    ? AppLocalizations.of(context).active
+                                    : AppLocalizations.of(context).completed,
                               ),
                             ),
                           ],
@@ -161,9 +162,9 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                             Expanded(
                               child: _buildInfoCompacta(
                                 LucideIcons.user,
-                                'Repartidor',
+                                AppLocalizations.of(context).driverLabel,
                                 widget.ruta.repartidor?['nombre']?.toString() ??
-                                    'Desconocido',
+                                    AppLocalizations.of(context).unknown,
                               ),
                             ),
                             const SizedBox(width: MedRushTheme.spacingMd),
@@ -171,7 +172,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                               Expanded(
                                 child: _buildInfoCompacta(
                                   LucideIcons.mapPin,
-                                  'Distancia',
+                                  AppLocalizations.of(context).distanceLabel,
                                   StatusHelpers.formatearDistanciaKm(
                                       widget.ruta.distanciaTotalEstimada!),
                                 ),
@@ -185,7 +186,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                               Expanded(
                                 child: _buildInfoCompacta(
                                   LucideIcons.clock,
-                                  'Tiempo Estimado',
+                                  AppLocalizations.of(context).estimatedTimeLabel,
                                   StatusHelpers.formatearTiempo(
                                       widget.ruta.tiempoTotalEstimado!),
                                 ),
@@ -208,9 +209,9 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                               hoverColor: Colors.transparent,
                             ),
                             child: ExpansionTile(
-                              title: const Text(
-                                'Detalles adicionales',
-                                style: TextStyle(
+                              title: Text(
+                                AppLocalizations.of(context).additionalDetailsLabel,
+                                style: const TextStyle(
                                   fontSize: MedRushTheme.fontSizeBodySmall,
                                   fontWeight: MedRushTheme.fontWeightMedium,
                                   color: MedRushTheme.textSecondary,
@@ -228,7 +229,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                 if (widget.ruta.puntoInicio != null)
                                   _buildInfoCompacta(
                                     LucideIcons.mapPin,
-                                    'Punto de Inicio',
+                                    AppLocalizations.of(context).startPointLabel,
                                     (widget.ruta.puntoInicio!['latitude'] !=
                                                 null &&
                                             widget.ruta.puntoInicio![
@@ -247,7 +248,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                 if (widget.ruta.puntoFinal != null)
                                   _buildInfoCompacta(
                                     LucideIcons.flag,
-                                    'Punto Final',
+                                    AppLocalizations.of(context).endPointLabel,
                                     (widget.ruta.puntoFinal!['latitude'] !=
                                                 null &&
                                             widget.ruta
@@ -266,7 +267,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                 if (widget.ruta.createdAt != null)
                                   _buildInfoCompacta(
                                     LucideIcons.calendar,
-                                    'Fecha de Creación',
+                                    AppLocalizations.of(context).creationDateLabel,
                                     StatusHelpers.formatearFechaCompleta(
                                         widget.ruta.createdAt!),
                                   ),
@@ -313,9 +314,9 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Pedidos de la Ruta',
-                                  style: TextStyle(
+                                Text(
+                                  AppLocalizations.of(context).routeOrdersTitle,
+                                  style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeTitleMedium,
                                     fontWeight: MedRushTheme.fontWeightBold,
                                     color: MedRushTheme.textPrimary,
@@ -323,7 +324,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${_pedidosDetallados.length} pedidos en orden optimizado',
+                                  AppLocalizations.of(context).ordersInOptimizedOrderCount(_pedidosDetallados.length),
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodySmall,
                                     fontWeight: MedRushTheme.fontWeightMedium,
@@ -351,7 +352,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                                     size: 18,
                                     color: MedRushTheme.primaryGreen,
                                   ),
-                            tooltip: 'Refrescar pedidos',
+                            tooltip: AppLocalizations.of(context).refreshOrdersTooltip,
                           ),
                         ],
                       ),
@@ -516,7 +517,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
             const SizedBox(width: MedRushTheme.spacingXs),
             Expanded(
               child: Text(
-                pedido['paciente_nombre'] ?? 'Cliente no especificado',
+                pedido['paciente_nombre'] ?? AppLocalizations.of(context).clientNotSpecified,
                 style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   fontWeight: MedRushTheme.fontWeightBold,
@@ -538,7 +539,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
               const SizedBox(width: MedRushTheme.spacingXs),
               Expanded(
                 child: Text(
-                  'Pedido #${pedido['id'] ?? 'N/A'}',
+                  '${AppLocalizations.of(context).orderIdShort}${pedido['id'] ?? 'N/A'}',
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodySmall,
                     fontWeight: MedRushTheme.fontWeightMedium,
@@ -561,8 +562,8 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                 if (estado != null) ...[
                   _buildInfoRowCompactaConColor(
                     StatusHelpers.iconoPorEstadoPedidoString(estado),
-                    'Estado',
-                    StatusHelpers.estadoPedidoTextoString(estado),
+                    AppLocalizations.of(context).statusShort,
+                    StatusHelpers.estadoPedidoTextoString(estado, AppLocalizations.of(context)),
                     estadoColor,
                   ),
                   const SizedBox(height: MedRushTheme.spacingSm),
@@ -570,7 +571,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                 if (pedido['direccion_entrega_linea_1'] != null) ...[
                   _buildInfoRowCompacta(
                     LucideIcons.mapPin,
-                    'Dirección',
+                    AppLocalizations.of(context).address,
                     pedido['direccion_entrega_linea_1'],
                   ),
                   const SizedBox(height: MedRushTheme.spacingSm),
@@ -578,7 +579,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                 if (pedido['ubicacion_recojo'] != null) ...[
                   _buildInfoRowCompacta(
                     LucideIcons.building,
-                    'Ubicación Recojo',
+                    AppLocalizations.of(context).pickupLocationLabel,
                     (pedido['ubicacion_recojo']['latitude'] != null &&
                             pedido['ubicacion_recojo']['longitude'] != null)
                         ? StatusHelpers.formatearCoordenadasAltaPrecision(
@@ -593,7 +594,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                 if (pedido['ubicacion_entrega'] != null) ...[
                   _buildInfoRowCompacta(
                     LucideIcons.mapPin,
-                    'Ubicación Entrega',
+                    AppLocalizations.of(context).deliveryLocationLabel,
                     (pedido['ubicacion_entrega']['latitude'] != null &&
                             pedido['ubicacion_entrega']['longitude'] != null)
                         ? StatusHelpers.formatearCoordenadasAltaPrecision(
@@ -608,7 +609,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                 if (pedido['tipo_pedido'] != null) ...[
                   _buildInfoRowCompacta(
                     LucideIcons.package,
-                    'Tipo',
+                    AppLocalizations.of(context).typeLabel,
                     pedido['tipo_pedido'].toString(),
                   ),
                   const SizedBox(height: MedRushTheme.spacingSm),
@@ -617,7 +618,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
                     pedido['observaciones'].toString().isNotEmpty) ...[
                   _buildInfoRowCompacta(
                     LucideIcons.messageSquare,
-                    'Observaciones',
+                    AppLocalizations.of(context).observations,
                     pedido['observaciones'].toString(),
                   ),
                 ],
@@ -719,7 +720,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
         if (result.success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Pedidos actualizados exitosamente'),
+              content: Text(AppLocalizations.of(context).ordersUpdatedSuccess),
               backgroundColor: MedRushTheme.success,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -731,7 +732,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error al actualizar pedidos: ${result.error}'),
+              content: Text('${AppLocalizations.of(context).errorUpdatingOrders}: ${result.error}'),
               backgroundColor: MedRushTheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -750,7 +751,7 @@ class _RutaDetalleModalState extends State<RutaDetalleModal> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al actualizar pedidos: ${e.toString()}'),
+            content: Text('${AppLocalizations.of(context).errorUpdatingOrders}: ${e.toString()}'),
             backgroundColor: MedRushTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/ruta_optimizada.model.dart';
 import 'package:medrush/repositories/ruta.repository.dart';
 import 'package:medrush/screens/admin/modules/rutas/repartidor_detalle_ruta.dart';
@@ -156,13 +157,14 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
     return repartidores;
   }
 
-  String _getRepartidorNombre(String repartidorId) {
+  String _getRepartidorNombre(BuildContext context, String repartidorId) {
     final ruta = _rutas.firstWhere(
       (r) => r.repartidor?['id'] == repartidorId,
       orElse: () =>
           _rutas.isNotEmpty ? _rutas.first : const RutaOptimizada(id: ''),
     );
-    return ruta.repartidor?['nombre']?.toString() ?? 'Repartidor Desconocido';
+    return ruta.repartidor?['nombre']?.toString() ??
+        AppLocalizations.of(context).unknownDriver;
   }
 
   @override
@@ -204,12 +206,13 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
             return Column(
               children: [
                 _buildDropdownFiltro(
-                  'Estado',
+                  context,
+                  AppLocalizations.of(context).status,
                   _filtroEstado,
                   {
-                    'todos': 'Todas las rutas',
-                    'activas': 'Rutas activas',
-                    'completadas': 'Rutas completadas',
+                    'todos': AppLocalizations.of(context).allRoutes,
+                    'activas': AppLocalizations.of(context).activeRoutes,
+                    'completadas': AppLocalizations.of(context).completedRoutes,
                   },
                   (value) async {
                     setState(() {
@@ -220,13 +223,14 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
                 ),
                 const SizedBox(height: MedRushTheme.spacingMd),
                 _buildDropdownFiltro(
-                  'Repartidor',
+                  context,
+                  AppLocalizations.of(context).driver,
                   _filtroRepartidor,
                   {
-                    'todos': 'Todos los repartidores',
+                    'todos': AppLocalizations.of(context).allDrivers,
                     ...Map.fromEntries(
                       _getRepartidoresUnicos().map(
-                        (id) => MapEntry(id, _getRepartidorNombre(id)),
+                        (id) => MapEntry(id, _getRepartidorNombre(context, id)),
                       ),
                     ),
                   },
@@ -245,12 +249,13 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               children: [
                 Expanded(
                   child: _buildDropdownFiltro(
-                    'Estado',
+                    context,
+                    AppLocalizations.of(context).status,
                     _filtroEstado,
                     {
-                      'todos': 'Todas las rutas',
-                      'activas': 'Rutas activas',
-                      'completadas': 'Rutas completadas',
+                      'todos': AppLocalizations.of(context).allRoutes,
+                      'activas': AppLocalizations.of(context).activeRoutes,
+                      'completadas': AppLocalizations.of(context).completedRoutes,
                     },
                     (value) async {
                       setState(() {
@@ -263,13 +268,14 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
                 const SizedBox(width: MedRushTheme.spacingMd),
                 Expanded(
                   child: _buildDropdownFiltro(
-                    'Repartidor',
+                    context,
+                    AppLocalizations.of(context).driver,
                     _filtroRepartidor,
                     {
-                      'todos': 'Todos los repartidores',
+                      'todos': AppLocalizations.of(context).allDrivers,
                       ...Map.fromEntries(
                         _getRepartidoresUnicos().map(
-                          (id) => MapEntry(id, _getRepartidorNombre(id)),
+                          (id) => MapEntry(id, _getRepartidorNombre(context, id)),
                         ),
                       ),
                     },
@@ -290,6 +296,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
   }
 
   Widget _buildDropdownFiltro(
+    BuildContext context,
     String label,
     String value,
     Map<String, String> items,
@@ -350,19 +357,19 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
 
   Widget _buildContenido() {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
                 MedRushTheme.primaryGreen,
               ),
             ),
-            SizedBox(height: MedRushTheme.spacingLg),
+            const SizedBox(height: MedRushTheme.spacingLg),
             Text(
-              'Cargando rutas...',
-              style: TextStyle(
+              AppLocalizations.of(context).loadingRoutes,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textSecondary,
               ),
@@ -404,7 +411,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
             ElevatedButton.icon(
               onPressed: _cargarRutas,
               icon: const Icon(LucideIcons.refreshCw),
-              label: const Text('Reintentar'),
+              label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: MedRushTheme.primaryGreen,
                 foregroundColor: Colors.white,
@@ -1323,7 +1330,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => _mostrarDetallesRuta(ruta),
                 icon: const Icon(LucideIcons.eye, size: 16),
-                label: const Text('Ver Detalles'),
+                label: Text(AppLocalizations.of(context).viewDetails),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: MedRushTheme.primaryGreen,
                   foregroundColor: Colors.white,
@@ -1339,7 +1346,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => _mostrarDetallesRepartidor(ruta),
                 icon: const Icon(LucideIcons.user, size: 16),
-                label: const Text('Ver Repartidor'),
+                label: Text(AppLocalizations.of(context).viewDriver),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: MedRushTheme.secondaryBlue,
                   foregroundColor: Colors.white,
@@ -1359,7 +1366,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => _mostrarMapaRuta(ruta),
                 icon: const Icon(LucideIcons.map, size: 16),
-                label: const Text('Ver Mapa'),
+                label: Text(AppLocalizations.of(context).viewMap),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: MedRushTheme.warning,
                   foregroundColor: Colors.white,
@@ -1375,7 +1382,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => _refrescarPedidosRuta(ruta.id),
                 icon: const Icon(LucideIcons.refreshCw, size: 16),
-                label: const Text('Actualizar'),
+                label: Text(AppLocalizations.of(context).updateLabel),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: MedRushTheme.primaryGreen,
                   side: const BorderSide(color: MedRushTheme.primaryGreen),
@@ -1423,14 +1430,14 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Optimizar Rutas'),
-        content: const Text(
-          '¿Estás seguro de que quieres optimizar todas las rutas? Este proceso puede tomar varios minutos.',
+        title: Text(AppLocalizations.of(context).optimizeRoutesTitle),
+        content: Text(
+          AppLocalizations.of(context).optimizeRoutesConfirmation,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1438,7 +1445,7 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Optimizar'),
+            child: Text(AppLocalizations.of(context).optimizeButton),
           ),
         ],
       ),

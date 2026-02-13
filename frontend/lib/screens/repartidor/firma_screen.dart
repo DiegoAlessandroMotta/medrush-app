@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
@@ -114,9 +115,9 @@ class _FirmaScreenState extends State<FirmaScreen> {
         title: Text(
           widget.pedidoId.isNotEmpty
               ? (widget.esModoEdicion
-                  ? 'Editar Firma de Entrega'
-                  : 'Firma de Entrega')
-              : 'Firma de Muestra',
+                  ? AppLocalizations.of(context).editDeliverySignature
+                  : AppLocalizations.of(context).deliverySignature)
+              : AppLocalizations.of(context).sampleSignature,
           style: const TextStyle(
             color: MedRushTheme.textPrimary,
             fontSize: MedRushTheme.fontSizeHeadlineSmall,
@@ -284,8 +285,8 @@ class _FirmaScreenState extends State<FirmaScreen> {
 
   Future<void> _guardarFirma() async {
     if (!_hasSignature) {
-      NotificationService.showWarning('Debes firmar antes de guardar',
-          context: context);
+      NotificationService.showWarning(
+          AppLocalizations.of(context).mustSignBeforeSaving, context: context);
       return;
     }
 
@@ -336,9 +337,8 @@ class _FirmaScreenState extends State<FirmaScreen> {
 
       if (mounted) {
         NotificationService.showSuccess(
-            widget.pedidoId.isNotEmpty
-                ? 'Firma de entrega generada exitosamente'
-                : 'Firma de muestra generada exitosamente',
+            AppLocalizations.of(context).signatureSuccess(
+                widget.pedidoId.isNotEmpty ? 'delivery' : 'sample'),
             context: context);
 
         logInfo('📤 [FIRMA] Retornando base64 al caller');
@@ -351,7 +351,8 @@ class _FirmaScreenState extends State<FirmaScreen> {
       logError('❌ [FIRMA] Stack trace: ${StackTrace.current}');
 
       if (mounted) {
-        NotificationService.showError('Error al guardar la firma',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorSavingSignature,
             context: context);
       }
     } finally {

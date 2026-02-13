@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:medrush/l10n/app_localizations.dart';
 
 class MapWidget extends StatelessWidget {
   final double height;
@@ -79,8 +80,8 @@ class MapWidget extends StatelessWidget {
               markerId: const gmaps.MarkerId('farmacia'),
               position: pos,
               infoWindow: gmaps.InfoWindow(
-                title: title ?? 'Farmacia',
-                snippet: snippet ?? 'Ubicación de la farmacia',
+                title: title ?? AppLocalizations.of(context).pharmacy,
+                snippet: snippet ?? AppLocalizations.of(context).pharmacyLocation,
               ),
             ),
           },

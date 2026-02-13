@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
@@ -85,20 +86,20 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
       return Stack(
         children: [
           // Fondo oscuro
-          const ColoredBox(
+          ColoredBox(
             color: Colors.black,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(
+                  const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
                         MedRushTheme.primaryGreen),
                   ),
-                  SizedBox(height: MedRushTheme.spacingLg),
+                  const SizedBox(height: MedRushTheme.spacingLg),
                   Text(
-                    'Procesando código de barras...',
-                    style: TextStyle(
+                    AppLocalizations.of(context).processingBarcode,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodyLarge,
                       color: Colors.white,
                     ),
@@ -209,7 +210,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                         const SizedBox(width: MedRushTheme.spacingXs),
                         Expanded(
                           child: Text(
-                            'Pedido #${_pedidoEncontrado!.id}',
+                            '${AppLocalizations.of(context).orderIdShort}${_pedidoEncontrado!.id}',
                             style: const TextStyle(
                               fontSize: MedRushTheme.fontSizeBodyMedium,
                               color: MedRushTheme.textSecondary,
@@ -285,9 +286,9 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                           size: 16,
                         ),
                         const SizedBox(width: MedRushTheme.spacingXs),
-                        const Text(
-                          'Estado: ',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context).statusLabel,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: MedRushTheme.textSecondary,
                             fontWeight: MedRushTheme.fontWeightMedium,
@@ -295,7 +296,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                         ),
                         Text(
                           StatusHelpers.estadoPedidoTexto(
-                              _pedidoEncontrado!.estado),
+                              _pedidoEncontrado!.estado, AppLocalizations.of(context)),
                           style: TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: StatusHelpers.estadoPedidoColor(
@@ -318,14 +319,14 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                             size: 16,
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
-                          const Text(
-                            'Asignado a: ',
-                            style: TextStyle(
-                              fontSize: MedRushTheme.fontSizeBodySmall,
-                              color: MedRushTheme.textSecondary,
-                              fontWeight: MedRushTheme.fontWeightMedium,
+                            Text(
+                              AppLocalizations.of(context).assignedTo,
+                              style: const TextStyle(
+                                fontSize: MedRushTheme.fontSizeBodySmall,
+                                color: MedRushTheme.textSecondary,
+                                fontWeight: MedRushTheme.fontWeightMedium,
+                              ),
                             ),
-                          ),
                           Flexible(
                             child: Text(
                               _pedidoEncontrado!.repartidor?.nombre ??
@@ -371,17 +372,17 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                     // Firma especial (si aplica)
                     if (_pedidoEncontrado!.requiereFirmaEspecial == true) ...[
                       const SizedBox(height: MedRushTheme.spacingSm),
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             LucideIcons.penTool,
                             color: Colors.orange,
                             size: 16,
                           ),
-                          SizedBox(width: MedRushTheme.spacingXs),
+                          const SizedBox(width: MedRushTheme.spacingXs),
                           Text(
-                            'Requiere firma especial',
-                            style: TextStyle(
+                            AppLocalizations.of(context).requiresSpecialSignature,
+                            style: const TextStyle(
                               fontSize: MedRushTheme.fontSizeBodySmall,
                               color: Colors.orange,
                               fontWeight: MedRushTheme.fontWeightBold,
@@ -412,7 +413,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                   child: OutlinedButton.icon(
                     onPressed: _verDetallePedido,
                     icon: const Icon(LucideIcons.eye, size: 15),
-                    label: const Text('Detalle'),
+                    label: Text(AppLocalizations.of(context).viewDetails),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: MedRushTheme.textSecondary,
                       side: const BorderSide(color: MedRushTheme.borderLight),
@@ -432,7 +433,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                         backgroundColor: MedRushTheme.primaryGreen,
                         foregroundColor: MedRushTheme.textInverse,
                       ),
-                      child: const Text('Asignar'),
+                      child: Text(AppLocalizations.of(context).assign),
                     ),
                   ),
                 // Botón Entregar (solo si está en ruta)
@@ -444,7 +445,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                         _entregarPedido();
                       },
                       icon: const Icon(LucideIcons.packageOpen, size: 15),
-                      label: const Text('Entregar'),
+                      label: Text(AppLocalizations.of(context).deliver),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: MedRushTheme.primaryBlue,
                         foregroundColor: MedRushTheme.textInverse,
@@ -507,7 +508,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
 
         logWarning('Pedido no encontrado con código: $codigoBarras');
         NotificationService.showError(
-          'No se encontró ningún pedido con este código de barras',
+          AppLocalizations.of(context).noOrderWithBarcode,
           context: context,
         );
 
@@ -529,7 +530,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
         });
 
         NotificationService.showError(
-          'Error al procesar el código de barras',
+          AppLocalizations.of(context).errorProcessingBarcode,
           context: context,
         );
 
@@ -587,24 +588,24 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
       final confirmar = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.userPlus,
                 color: MedRushTheme.primaryGreen,
                 size: 24,
               ),
-              SizedBox(width: MedRushTheme.spacingSm),
-              Text('Asignar Pedido'),
+              const SizedBox(width: MedRushTheme.spacingSm),
+              Text(AppLocalizations.of(context).assignOrder),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '¿Deseas asignar este pedido a tu cuenta?',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).assignOrderConfirm,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   color: MedRushTheme.textPrimary,
                 ),
@@ -622,7 +623,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Pedido #${_pedidoEncontrado!.id}',
+                      '${AppLocalizations.of(context).orderIdShort}${_pedidoEncontrado!.id}',
                       style: const TextStyle(
                         fontWeight: MedRushTheme.fontWeightBold,
                         color: MedRushTheme.textPrimary,
@@ -651,7 +652,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -659,7 +660,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                 backgroundColor: MedRushTheme.primaryGreen,
                 foregroundColor: MedRushTheme.textInverse,
               ),
-              child: const Text('Asignar'),
+              child: Text(AppLocalizations.of(context).assign),
             ),
           ],
         ),
@@ -689,7 +690,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
         if (mounted) {
           Navigator.of(context).pop(); // Cerrar loading
           NotificationService.showError(
-            'No se pudo obtener la información del repartidor',
+            AppLocalizations.of(context).couldNotGetDriverInfo,
             context: context,
           );
         }
@@ -707,7 +708,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
 
         if (resultado.success && resultado.data != null) {
           NotificationService.showSuccess(
-            'Pedido asignado exitosamente',
+            AppLocalizations.of(context).orderAssignedSuccess,
             context: context,
           );
 
@@ -718,7 +719,8 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
           _resetScanner();
         } else {
           NotificationService.showError(
-            'Error al asignar pedido: ${resultado.error ?? "Error desconocido"}',
+            AppLocalizations.of(context).errorAssigningOrderDetail(
+                resultado.error ?? AppLocalizations.of(context).unknownError),
             context: context,
           );
           logError('Error al asignar pedido', resultado.error);
@@ -727,9 +729,9 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
     } catch (e) {
       logError('Error al asignar pedido', e);
       if (mounted) {
-        Navigator.of(context).pop(); // Cerrar loading si está abierto
+        Navigator.of(context).pop();
         NotificationService.showError(
-          'Error al asignar pedido: $e',
+          AppLocalizations.of(context).errorAssigningOrderDetail(e.toString()),
           context: context,
         );
       }

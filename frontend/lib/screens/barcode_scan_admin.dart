@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -55,20 +56,20 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Permiso de Cámara'),
-        content: const Text(
-            'La aplicación necesita acceso a la cámara para escanear códigos de barras.'),
+        title: Text(AppLocalizations.of(context).cameraPermissionTitle),
+        content: Text(
+            AppLocalizations.of(context).cameraPermissionContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               openAppSettings();
             },
-            child: const Text('Configuración'),
+            child: Text(AppLocalizations.of(context).settingsButton),
           ),
         ],
       ),
@@ -107,15 +108,17 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
               color: Colors.green[600],
             ),
             const SizedBox(width: 8),
-            const Text('Código Escaneado'),
+            Text(AppLocalizations.of(context).codeScanned),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Modo: ${widget.modo}'),
-            if (widget.pedidoId != null) Text('Pedido: #${widget.pedidoId}'),
+            Text('${AppLocalizations.of(context).modeLabel} ${widget.modo}'),
+            if (widget.pedidoId != null)
+              Text(
+                  '${AppLocalizations.of(context).orderNumberLabel} #${widget.pedidoId}'),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -134,7 +137,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _getSuccessMessage(widget.modo),
+              _getSuccessMessage(context, widget.modo),
               style: TextStyle(
                 color: Colors.green[700],
                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -145,7 +148,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
         actions: [
           TextButton(
             onPressed: _resetScanner,
-            child: const Text('Escanear Otro'),
+            child: Text(AppLocalizations.of(context).scanAnother),
           ),
           ElevatedButton(
             onPressed: () {
@@ -156,23 +159,24 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Confirmar'),
+            child: Text(AppLocalizations.of(context).confirm),
           ),
         ],
       ),
     );
   }
 
-  String _getSuccessMessage(String modo) {
+  String _getSuccessMessage(BuildContext context, String modo) {
+    final l10n = AppLocalizations.of(context);
     switch (modo.toLowerCase()) {
       case 'entrega':
-        return '✓ Código de entrega verificado correctamente';
+        return '✓ ${l10n.successDeliveryVerified}';
       case 'recogida':
-        return '✓ Código de recogida verificado correctamente';
+        return '✓ ${l10n.successPickupVerified}';
       case 'verificacion':
-        return '✓ Código verificado correctamente';
+        return '✓ ${l10n.successVerified}';
       default:
-        return '✓ Código escaneado correctamente';
+        return '✓ ${l10n.successScanned}';
     }
   }
 
@@ -196,7 +200,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Escanear - ${widget.modo}'),
+        title: Text(AppLocalizations.of(context).scanTitleWithMode(widget.modo)),
         backgroundColor: Colors.blue[800],
         foregroundColor: Colors.white,
         actions: [
@@ -204,12 +208,12 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             IconButton(
               icon: const Icon(Icons.flash_on),
               onPressed: _toggleFlash,
-              tooltip: 'Flash',
+              tooltip: AppLocalizations.of(context).flashTooltip,
             ),
             IconButton(
               icon: const Icon(Icons.flip_camera_ios),
               onPressed: _switchCamera,
-              tooltip: 'Cambiar Cámara',
+              tooltip: AppLocalizations.of(context).switchCameraTooltip,
             ),
           ],
         ],
@@ -359,7 +363,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Permiso de Cámara Requerido',
+              AppLocalizations.of(context).cameraPermissionRequired,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: MedRushTheme.fontWeightBold,
                   ),
@@ -367,7 +371,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Para escanear códigos de barras, necesitamos acceso a tu cámara.',
+              AppLocalizations.of(context).cameraPermissionBody,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: MedRushTheme.fontSizeBodyLarge,
@@ -390,7 +394,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                   }
                 },
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('Permitir Acceso a Cámara'),
+                label: Text(AppLocalizations.of(context).allowCameraAccess),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[800],
                   foregroundColor: Colors.white,
@@ -400,7 +404,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
           ],
         ),

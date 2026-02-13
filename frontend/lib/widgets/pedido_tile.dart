@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/utils/status_helpers.dart';
 
@@ -22,6 +23,7 @@ class PedidoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: InkWell(
@@ -65,7 +67,7 @@ class PedidoTile extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      StatusHelpers.estadoPedidoTexto(pedido.estado),
+                      StatusHelpers.estadoPedidoTexto(pedido.estado, l10n),
                       style: TextStyle(
                         color: StatusHelpers.estadoPedidoColor(pedido.estado),
                         fontSize: 12,
@@ -143,7 +145,7 @@ class PedidoTile extends StatelessWidget {
                       size: 16, color: Colors.grey),
                   const SizedBox(width: 8),
                   Text(
-                    StatusHelpers.tipoPedidoTexto(pedido.tipo),
+                    StatusHelpers.tipoPedidoTexto(pedido.tipo, l10n),
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
@@ -239,7 +241,7 @@ class PedidoTile extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: onRecoger,
                         icon: const Icon(Icons.qr_code_scanner, size: 16),
-                        label: const Text('Recoger'),
+                        label: Text(AppLocalizations.of(context).pickUpAction),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
@@ -253,7 +255,7 @@ class PedidoTile extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: onVerRuta,
                           icon: const Icon(Icons.map, size: 16),
-                          label: const Text('Ver Ruta'),
+                          label: Text(AppLocalizations.of(context).viewRoute),
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -262,7 +264,7 @@ class PedidoTile extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: onEntregar,
                           icon: const Icon(Icons.check, size: 16),
-                          label: const Text('Entregar'),
+                          label: Text(AppLocalizations.of(context).deliver),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,

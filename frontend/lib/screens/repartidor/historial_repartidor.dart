@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pagination.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/repositories/base.repository.dart';
@@ -110,7 +111,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
         logInfo('[LOAD_HISTORIAL] ${_paginationHelper.getStatusInfo()}');
       } else {
         setState(() {
-          _error = result.error ?? 'Error desconocido al cargar historial';
+          _error = result.error ?? AppLocalizations.of(context).errorLoadingHistory;
           _isLoading = false;
         });
         logError('[LOAD_HISTORIAL] Error al cargar historial: ${result.error}');
@@ -123,7 +124,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
       }
 
       setState(() {
-        _error = 'Error al cargar el historial: $e';
+        _error =
+            AppLocalizations.of(context).errorLoadingHistoryWithError(e);
         _isLoading = false;
       });
     }
@@ -288,19 +290,19 @@ class _HistorialScreenState extends State<HistorialScreen> {
                 });
                 await _loadHistorial(refresh: true);
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar pedidos...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchOrders,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingMd,
                 ),
@@ -317,22 +319,22 @@ class _HistorialScreenState extends State<HistorialScreen> {
             child: DropdownButton<String>(
               value: _selectedFilter,
               underline: Container(),
-              items: const [
+              items: [
                 DropdownMenuItem<String>(
                   value: 'Todos los estados',
-                  child: Text('Todos los estados'),
+                  child: Text(AppLocalizations.of(context).allStatuses),
                 ),
                 DropdownMenuItem<String>(
                   value: 'Entregados',
-                  child: Text('Entregados'),
+                  child: Text(AppLocalizations.of(context).filterDelivered),
                 ),
                 DropdownMenuItem<String>(
                   value: 'Cancelados',
-                  child: Text('Cancelados'),
+                  child: Text(AppLocalizations.of(context).filterCancelled),
                 ),
                 DropdownMenuItem<String>(
                   value: 'Fallidos',
-                  child: Text('Fallidos'),
+                  child: Text(AppLocalizations.of(context).filterFailed),
                 ),
               ],
               onChanged: (String? newValue) async {
@@ -418,7 +420,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Llamar',
+                      tooltip: AppLocalizations.of(context).call,
                       onPressed: () => _llamarCliente(pedido),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -432,7 +434,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Navegar',
+                      tooltip: AppLocalizations.of(context).navigate,
                       onPressed: () => _abrirNavegacion(pedido),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -480,7 +482,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoPedidoTexto(pedido.estado),
+                        StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -503,7 +505,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                     const SizedBox(width: 4),
                     Text(
                       StatusHelpers
-                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido),
+                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido, AppLocalizations.of(context)),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -529,9 +531,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Ver Detalles',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context).viewDetails,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
                     ),
@@ -590,7 +592,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede abrir navegación',
+          AppLocalizations.of(context).cannotOpenNavigation,
           context: context,
         );
       }
@@ -598,12 +600,13 @@ class _HistorialScreenState extends State<HistorialScreen> {
   }
 
   Future<void> _llamarCliente(Pedido pedido) async {
-    final telefono = pedido.telefonoCliente ?? 'No disponible';
+    final telefono = pedido.telefonoCliente ??
+        AppLocalizations.of(context).notAvailable;
 
-    if (telefono == 'No disponible') {
+    if (telefono == AppLocalizations.of(context).notAvailable) {
       if (mounted) {
         NotificationService.showError(
-          'Teléfono del cliente no disponible',
+          AppLocalizations.of(context).clientPhoneNotAvailable,
           context: context,
         );
       }
@@ -617,7 +620,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede realizar la llamada',
+          AppLocalizations.of(context).cannotMakeCall,
           context: context,
         );
       }
@@ -633,7 +636,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
       if (mounted) {
         NotificationService.showSuccess(
-          'Información copiada al portapapeles',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
@@ -644,7 +647,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
       logError('Error al copiar información del cliente', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar información',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }

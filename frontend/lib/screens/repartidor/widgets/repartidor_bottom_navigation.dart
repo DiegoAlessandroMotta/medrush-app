@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/routes/routes.dart';
 import 'package:medrush/theme/theme.dart';
 
@@ -24,12 +25,12 @@ class _RepartidorBottomNavigationState
     LucideIcons.user,
   ];
 
-  final labelList = <String>[
-    'Entregas',
-    'Historial',
-    'Ruta',
-    'Perfil',
-  ];
+  List<String> _labelList(BuildContext context) => <String>[
+        AppLocalizations.of(context).deliveriesTab,
+        AppLocalizations.of(context).historyTab,
+        AppLocalizations.of(context).routeTab,
+        AppLocalizations.of(context).profileTab,
+      ];
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _RepartidorBottomNavigationState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  labelList[index],
+                  _labelList(context)[index],
                   style: TextStyle(
                     fontSize: MedRushTheme.fontSizeLabelSmall,
                     fontWeight: isActive
@@ -100,7 +101,6 @@ class _RepartidorBottomNavigationState
     properties
       ..add(StringProperty('navigation', 'RepartidorBottomNavigation'))
       ..add(IntProperty('currentIndex', _controller.currentIndex))
-      ..add(IterableProperty<IconData>('iconList', iconList))
-      ..add(IterableProperty<String>('labelList', labelList));
+      ..add(IterableProperty<IconData>('iconList', iconList));
   }
 }

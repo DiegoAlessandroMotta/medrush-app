@@ -1,3 +1,4 @@
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
@@ -151,12 +152,13 @@ class Notificacion {
     required EstadoPedido estadoNuevo,
     required String destinatarioId,
     required TipoUsuario tipoDestinatario,
+    required AppLocalizations l10n,
     String? repartidorId,
     String? repartidorNombre,
   }) {
-    final titulo = 'Estado del Pedido Actualizado';
+    final titulo = l10n.notificationOrderStatusUpdated;
     final mensaje = _generarMensajeEstadoPedido(
-        codigoBarra, estadoAnterior, estadoNuevo, repartidorNombre);
+        codigoBarra, estadoAnterior, estadoNuevo, repartidorNombre, l10n);
 
     return Notificacion(
       id: 0, // Se asignará al guardar
@@ -190,10 +192,14 @@ class Notificacion {
     required EstadoRepartidor estadoAnterior,
     required EstadoRepartidor estadoNuevo,
     required String farmaciaId,
+    required AppLocalizations l10n,
   }) {
-    final titulo = 'Estado del Repartidor Actualizado';
-    final mensaje = 'El repartidor $repartidorNombre cambió de estado de '
-        '${StatusHelpers.estadoRepartidorTexto(estadoAnterior)} a ${StatusHelpers.estadoRepartidorTexto(estadoNuevo)}';
+    final titulo = l10n.notificationDriverStatusUpdated;
+    final mensaje = l10n.notificationDriverStatusChanged(
+      repartidorNombre,
+      StatusHelpers.estadoRepartidorTexto(estadoNuevo, l10n),
+      StatusHelpers.estadoRepartidorTexto(estadoAnterior, l10n),
+    );
 
     return Notificacion(
       id: 0,
@@ -224,10 +230,14 @@ class Notificacion {
     required EstadoFarmacia estadoAnterior,
     required EstadoFarmacia estadoNuevo,
     required String administradorId,
+    required AppLocalizations l10n,
   }) {
-    final titulo = 'Estado de la Farmacia Actualizado';
-    final mensaje = 'La farmacia $farmaciaNombre cambió de estado de '
-        '${StatusHelpers.estadoFarmaciaTexto(estadoAnterior)} a ${StatusHelpers.estadoFarmaciaTexto(estadoNuevo)}';
+    final titulo = l10n.notificationPharmacyStatusUpdated;
+    final mensaje = l10n.notificationPharmacyStatusChanged(
+      farmaciaNombre,
+      StatusHelpers.estadoFarmaciaTexto(estadoNuevo, l10n),
+      StatusHelpers.estadoFarmaciaTexto(estadoAnterior, l10n),
+    );
 
     return Notificacion(
       id: 0,
@@ -258,23 +268,27 @@ class Notificacion {
     EstadoPedido estadoAnterior,
     EstadoPedido estadoNuevo,
     String? repartidorNombre,
+    AppLocalizations l10n,
   ) {
     switch (estadoNuevo) {
       case EstadoPedido.asignado:
-        return 'El pedido $codigoBarra ha sido asignado a un repartidor';
+        return l10n.notificationOrderAssigned(codigoBarra);
       case EstadoPedido.recogido:
-        return 'El pedido $codigoBarra ha sido recogido por el repartidor';
+        return l10n.notificationOrderPickedUp(codigoBarra);
       case EstadoPedido.enRuta:
-        return 'El pedido $codigoBarra está en ruta hacia su destino';
+        return l10n.notificationOrderInRoute(codigoBarra);
       case EstadoPedido.entregado:
-        return 'El pedido $codigoBarra ha sido entregado exitosamente';
+        return l10n.notificationOrderDelivered(codigoBarra);
       case EstadoPedido.fallido:
-        return 'La entrega del pedido $codigoBarra ha fallado';
+        return l10n.notificationOrderFailed(codigoBarra);
       case EstadoPedido.cancelado:
-        return 'El pedido $codigoBarra ha sido cancelado';
+        return l10n.notificationOrderCancelled(codigoBarra);
       default:
-        return 'El estado del pedido $codigoBarra ha cambiado de '
-            '${estadoAnterior.texto} a ${estadoNuevo.texto}';
+        return l10n.notificationOrderStatusChanged(
+          codigoBarra,
+          StatusHelpers.estadoPedidoTexto(estadoNuevo, l10n),
+          StatusHelpers.estadoPedidoTexto(estadoAnterior, l10n),
+        );
     }
   }
 

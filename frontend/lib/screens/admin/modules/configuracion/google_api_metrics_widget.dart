@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/repositories/google_api_usage.repository.dart';
 import 'package:medrush/theme/theme.dart';
 
@@ -83,7 +84,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Uso de Google API',
+                  AppLocalizations.of(context).googleApiUsageTitle,
                   style: TextStyle(
                     fontSize: isMobile
                         ? MedRushTheme.fontSizeBodyMedium
@@ -97,14 +98,14 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                 icon: const Icon(LucideIcons.refreshCw,
                     size: 18, color: MedRushTheme.textSecondary),
                 onPressed: _loadStats,
-                tooltip: 'Actualizar métricas',
+                tooltip: AppLocalizations.of(context).refreshMetricsTooltip,
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Llamadas API (Últimos 30 días)',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).apiCallsLast30Days,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodySmall,
               color: MedRushTheme.textSecondary,
             ),
@@ -149,9 +150,9 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
             size: 32,
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
-          const Text(
-            'Error al cargar las métricas',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingMetrics,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               fontWeight: MedRushTheme.fontWeightMedium,
               color: MedRushTheme.error,
@@ -170,7 +171,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
           ElevatedButton.icon(
             onPressed: _loadStats,
             icon: const Icon(LucideIcons.refreshCw, size: 16),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.error,
               foregroundColor: Colors.white,
@@ -202,7 +203,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                   ),
                   const SizedBox(width: MedRushTheme.spacingSm),
                   Text(
-                    'Período: ${stats.period.formattedPeriod}',
+                    '${AppLocalizations.of(context).periodLabel}: ${stats.period.formattedPeriod}',
                     style: TextStyle(
                       fontSize: isMobile
                           ? MedRushTheme.fontSizeBodySmall
@@ -249,7 +250,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Solicitudes',
+                    AppLocalizations.of(context).requestsLabel,
                     style: TextStyle(
                       fontSize: isMobile ? 12 : 14,
                       fontWeight: MedRushTheme.fontWeightMedium,
@@ -267,7 +268,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
         // Servicios individuales
         if (stats.services.isNotEmpty) ...[
           Text(
-            'Servicios',
+            AppLocalizations.of(context).servicesLabel,
             style: TextStyle(
               fontSize: isMobile
                   ? MedRushTheme.fontSizeBodyMedium
@@ -335,7 +336,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
             Column(
               children: [
                 _buildServiceMetric(
-                  'Solicitudes',
+                  AppLocalizations.of(context).requestsLabel,
                   service.totalRequests.toString(),
                   LucideIcons.activity,
                   isMobile,
@@ -345,7 +346,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                   children: [
                     Expanded(
                       child: _buildServiceMetric(
-                        'Costo por solicitud',
+                        AppLocalizations.of(context).costPerRequest,
                         service.formattedCostPerRequest,
                         LucideIcons.dollarSign,
                         isMobile,
@@ -354,7 +355,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                     const SizedBox(width: MedRushTheme.spacingSm),
                     Expanded(
                       child: _buildServiceMetric(
-                        'Costo total',
+                        AppLocalizations.of(context).totalCost,
                         service.formattedCost,
                         LucideIcons.calculator,
                         isMobile,
@@ -369,7 +370,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
               children: [
                 Expanded(
                   child: _buildServiceMetric(
-                    'Solicitudes',
+                    AppLocalizations.of(context).requestsLabel,
                     service.totalRequests.toString(),
                     LucideIcons.activity,
                     isMobile,
@@ -377,7 +378,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                 ),
                 Expanded(
                   child: _buildServiceMetric(
-                    'Costo por solicitud',
+                    AppLocalizations.of(context).costPerRequest,
                     service.formattedCostPerRequest,
                     LucideIcons.dollarSign,
                     isMobile,
@@ -385,7 +386,7 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                 ),
                 Expanded(
                   child: _buildServiceMetric(
-                    'Costo total',
+                    AppLocalizations.of(context).totalCost,
                     service.formattedCost,
                     LucideIcons.calculator,
                     isMobile,
@@ -437,25 +438,25 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
         borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusMd),
         border: Border.all(color: MedRushTheme.borderLight),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.activity,
             color: MedRushTheme.textSecondary,
             size: 48,
           ),
-          SizedBox(height: MedRushTheme.spacingMd),
+          const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            'No hay datos de uso disponibles',
-            style: TextStyle(
+            AppLocalizations.of(context).noUsageDataAvailable,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
             ),
           ),
-          SizedBox(height: MedRushTheme.spacingSm),
+          const SizedBox(height: MedRushTheme.spacingSm),
           Text(
-            'Las métricas aparecerán cuando se realicen solicitudes a la API',
-            style: TextStyle(
+            AppLocalizations.of(context).metricsWillAppearWhenRequests,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodySmall,
               color: MedRushTheme.textSecondary,
             ),

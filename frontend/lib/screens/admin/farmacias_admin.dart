@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_elastic_list_view/flutter_elastic_list_view.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/repositories/farmacia.repository.dart';
 import 'package:medrush/screens/admin/modules/farmacias/farmacia_detalle.dart';
@@ -104,7 +105,8 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
             '${_farmaciasFiltradas.length} farmacias cargadas exitosamente');
       } else {
         setState(() {
-          _error = result.error ?? 'Error desconocido al cargar farmacias';
+          _error = result.error ??
+            AppLocalizations.of(context).errorLoadingPharmaciesUnknown;
           _isLoading = false;
         });
         logError('Error al cargar farmacias: ${result.error}');
@@ -117,7 +119,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
       }
 
       setState(() {
-        _error = 'Error al cargar las farmacias: $e';
+        _error = AppLocalizations.of(context).errorLoadingPharmacies;
         _isLoading = false;
       });
     }
@@ -161,7 +163,8 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         });
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cargar la página';
+          _error = result.error ??
+              AppLocalizations.of(context).errorLoadingPharmaciesUnknown;
           _isLoading = false;
         });
       }
@@ -170,7 +173,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cargar la página: $e';
+        _error = AppLocalizations.of(context).errorLoadingPharmacies;
         _isLoading = false;
       });
     }
@@ -208,7 +211,8 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         });
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cambiar items por página';
+          _error = result.error ??
+              AppLocalizations.of(context).errorLoadingPharmaciesUnknown;
           _isLoading = false;
         });
       }
@@ -217,7 +221,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cambiar items por página: $e';
+        _error = AppLocalizations.of(context).errorLoadingPharmacies;
         _isLoading = false;
       });
     }
@@ -260,15 +264,15 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
 
                     if (context.mounted) {
                       NotificationService.showSuccess(
-                          'Farmacia creada exitosamente',
+                          AppLocalizations.of(context).pharmacySavedSuccess,
                           context: context);
                     }
                   } catch (e) {
                     logError(
-                        'Error al recargar farmacias después de guardar', e);
+                          AppLocalizations.of(context).errorReloadPharmacies, e);
                     if (context.mounted) {
                       NotificationService.showWarning(
-                          'Farmacia guardada pero error al actualizar lista',
+                          AppLocalizations.of(context).pharmacySavedButErrorReload,
                           context: context);
                     }
                   }
@@ -409,20 +413,20 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                 });
                 await _loadFarmacias();
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar farmacias...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchPharmacies,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                   size: 20,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingSm,
                 ),
@@ -464,7 +468,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(
-                    value,
+                    _filterDisplayLabel(context, value),
                     style: const TextStyle(
                       color: MedRushTheme.textPrimary,
                       fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -581,14 +585,14 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
 
             if (context.mounted) {
               NotificationService.showSuccess(
-                  'Farmacia actualizada exitosamente',
+                  AppLocalizations.of(context).pharmacyUpdatedSuccess,
                   context: context);
             }
           } catch (e) {
             logError('Error al recargar farmacias después de guardar', e);
             if (context.mounted) {
               NotificationService.showWarning(
-                  'Farmacia guardada pero error al actualizar lista',
+                  AppLocalizations.of(context).pharmacySavedButErrorReload,
                   context: context);
             }
           }
@@ -617,7 +621,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         // Mostrar mensaje de éxito
         if (mounted) {
           NotificationService.showSuccess(
-            'Farmacia "${farmacia.nombre}" eliminada exitosamente',
+            AppLocalizations.of(context).pharmacyDeletedSuccess(farmacia.nombre),
             context: context,
           );
         }
@@ -628,7 +632,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
         // Mostrar mensaje de error
         if (mounted) {
           NotificationService.showError(
-            'Error al eliminar farmacia: ${result.error}',
+            AppLocalizations.of(context).errorDeletePharmacy(result.error!),
             context: context,
           );
         }
@@ -637,7 +641,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
       // Mostrar mensaje de error
       if (mounted) {
         NotificationService.showError(
-          'Error al eliminar farmacia: $e',
+          AppLocalizations.of(context).errorDeletePharmacy(e),
           context: context,
         );
       }
@@ -664,19 +668,19 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar farmacias...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchPharmacies,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingMd,
                 ),
@@ -709,7 +713,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
               ].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Text(_filterDisplayLabel(context, value)),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -794,7 +798,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Ver',
+                      tooltip: AppLocalizations.of(context).view,
                       onPressed: () {
                         showMaterialModalBottomSheet(
                           context: context,
@@ -816,7 +820,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Editar',
+                      tooltip: AppLocalizations.of(context).edit,
                       onPressed: () {
                         showMaterialModalBottomSheet(
                           context: context,
@@ -835,19 +839,22 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                                 }
                                 if (mounted) {
                                   NotificationService.showSuccess(
-                                      'Farmacia actualizada exitosamente',
+                                      AppLocalizations.of(context)
+                                          .pharmacyUpdatedSuccess,
                                       context: context);
                                 }
                               } catch (e) {
                                 logError(
-                                    'Error al recargar farmacias después de actualizar',
+                                    AppLocalizations.of(context)
+                                        .errorReloadPharmacies,
                                     e);
                                 if (!context.mounted) {
                                   return;
                                 }
                                 if (mounted) {
                                   NotificationService.showWarning(
-                                      'Farmacia actualizada pero error al actualizar lista',
+                                      AppLocalizations.of(context)
+                                          .pharmacySavedButErrorReload,
                                       context: context);
                                 }
                               }
@@ -949,7 +956,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoFarmaciaTexto(farmacia.estado),
+                        StatusHelpers.estadoFarmaciaTexto(farmacia.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -985,9 +992,9 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Ver Detalles',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context).viewDetails,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
                     ),
@@ -1023,19 +1030,19 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.building2,
             size: 64,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'No se encontraron farmacias',
-            style: TextStyle(
+            AppLocalizations.of(context).noPharmaciesFound,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyLarge,
               color: MedRushTheme.textSecondary,
             ),
@@ -1056,9 +1063,9 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
             color: Colors.red,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar las farmacias',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingPharmaciesUnknown,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -1066,7 +1073,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            _error ?? 'Error desconocido',
+            _error!,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
@@ -1077,7 +1084,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
           ElevatedButton.icon(
             onPressed: _loadFarmacias,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -1119,16 +1126,35 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
     }
   }
 
+  String _filterDisplayLabel(BuildContext context, String value) {
+    final l10n = AppLocalizations.of(context);
+    switch (value) {
+      case 'Todos los estados':
+        return l10n.allStatuses;
+      case 'Activa':
+        return l10n.active;
+      case 'Inactiva':
+        return l10n.inactive;
+      case 'Suspendida':
+        return l10n.suspended;
+      case 'En Revisión':
+        return l10n.inReview;
+      default:
+        return value;
+    }
+  }
+
   Future<void> _copiarInformacionFarmacia(Farmacia farmacia) async {
     try {
+      final l10n = AppLocalizations.of(context);
       final informacion =
-          'Farmacia: ${farmacia.nombre}\nDirección: ${farmacia.direccion}\nID: ${farmacia.id}';
+          '${l10n.pharmacy}: ${farmacia.nombre}\n${l10n.address}: ${farmacia.direccion}\n${l10n.idLabel}${farmacia.id}';
 
       await Clipboard.setData(ClipboardData(text: informacion));
 
       if (mounted) {
         NotificationService.showSuccess(
-          'Información copiada al portapapeles',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
@@ -1139,7 +1165,7 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
       logError('Error al copiar información de la farmacia', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar información',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }

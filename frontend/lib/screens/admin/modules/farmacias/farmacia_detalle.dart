@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -60,9 +61,9 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Detalle de Farmacia',
-                                  style: TextStyle(
+                                Text(
+                                  AppLocalizations.of(context).pharmacyDetailTitle,
+                                  style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeTitleLarge,
                                     fontWeight: MedRushTheme.fontWeightBold,
                                     color: MedRushTheme.textPrimary,
@@ -110,20 +111,32 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
 
                         // Información principal
                         _buildInfoCard(
-                          title: 'Información General',
+                          title: AppLocalizations.of(context).generalInfoTitle,
                           children: [
                             _buildIconRow(
-                                'ID', farmacia.id, LucideIcons.idCard),
-                            _buildIconRow('Nombre', farmacia.nombre,
+                                AppLocalizations.of(context).idShort,
+                                farmacia.id,
+                                LucideIcons.idCard),
+                            _buildIconRow(
+                                AppLocalizations.of(context).name,
+                                farmacia.nombre,
                                 LucideIcons.building2),
-                            _buildIconRow('Razón Social', farmacia.razonSocial,
+                            _buildIconRow(
+                                AppLocalizations.of(context).razonSocialLabel,
+                                farmacia.razonSocial,
                                 LucideIcons.building),
                             _buildIconRow(
-                                'RUC', farmacia.ruc, LucideIcons.shield),
+                                AppLocalizations.of(context).rucLabel,
+                                farmacia.ruc,
+                                LucideIcons.shield),
                             if (farmacia.cadena != null)
-                              _buildIconRow('Cadena', farmacia.cadena!,
+                              _buildIconRow(
+                                  AppLocalizations.of(context).cadenaLabel,
+                                  farmacia.cadena!,
                                   LucideIcons.store),
-                            _buildIconRow('Estado', farmacia.estado.name,
+                            _buildIconRow(
+                                AppLocalizations.of(context).statusShort,
+                                farmacia.estado.name,
                                 LucideIcons.flag),
                           ],
                         ),
@@ -132,25 +145,33 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
 
                         // Información de ubicación
                         _buildInfoCard(
-                          title: 'Ubicación',
+                          title: AppLocalizations.of(context).locationTitle,
                           children: [
-                            _buildIconRow('Dirección', farmacia.direccion,
+                            _buildIconRow(
+                                AppLocalizations.of(context).address,
+                                farmacia.direccion,
                                 LucideIcons.mapPin),
                             if (farmacia.city != null)
                               _buildIconRow(
-                                  'Ciudad', farmacia.city!, LucideIcons.mapPin),
+                                  AppLocalizations.of(context).city,
+                                  farmacia.city!,
+                                  LucideIcons.mapPin),
                             if (farmacia.state != null)
                               _buildIconRow(
-                                  'Estado', farmacia.state!, LucideIcons.map),
+                                  AppLocalizations.of(context).stateRegionLabel,
+                                  farmacia.state!,
+                                  LucideIcons.map),
                             if (farmacia.zipCode != null)
                               _buildIconRow(
-                                  'ZIP', farmacia.zipCode!, LucideIcons.mapPin),
+                                  AppLocalizations.of(context).zipCodeLabel,
+                                  farmacia.zipCode!,
+                                  LucideIcons.mapPin),
                             _buildIconRow(
-                                'Latitud',
+                                AppLocalizations.of(context).latitudeLabel,
                                 farmacia.latitud.toString(),
                                 LucideIcons.navigation),
                             _buildIconRow(
-                                'Longitud',
+                                AppLocalizations.of(context).longitudeLabel,
                                 farmacia.longitud.toString(),
                                 LucideIcons.navigation),
                             const SizedBox(height: 12),
@@ -187,22 +208,27 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
 
                         // Información de contacto
                         _buildInfoCard(
-                          title: 'Contacto',
+                          title: AppLocalizations.of(context).contactTitle,
                           children: [
                             if (farmacia.telefono != null)
-                              _buildIconRow('Teléfono', farmacia.telefono!,
+                              _buildIconRow(
+                                  AppLocalizations.of(context).phone,
+                                  farmacia.telefono!,
                                   LucideIcons.phone),
                             if (farmacia.email != null)
                               _buildIconRow(
-                                  'Email', farmacia.email!, LucideIcons.mail),
+                                  AppLocalizations.of(context).email,
+                                  farmacia.email!,
+                                  LucideIcons.mail),
                             if (farmacia.contactoResponsable != null)
                               _buildIconRow(
-                                  'Responsable',
+                                  AppLocalizations.of(context).responsibleLabel,
                                   farmacia.contactoResponsable!,
                                   LucideIcons.user),
                             if (farmacia.telefonoResponsable != null)
                               _buildIconRow(
-                                  'Teléfono Responsable',
+                                  AppLocalizations.of(context)
+                                      .responsiblePhoneLabel,
                                   farmacia.telefonoResponsable!,
                                   LucideIcons.phone),
                           ],
@@ -212,22 +238,26 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
 
                         // Información adicional
                         _buildInfoCard(
-                          title: 'Información Adicional',
+                          title: AppLocalizations.of(context).additionalInfoTitle,
                           children: [
                             if (farmacia.horarioAtencion != null)
-                              _buildIconRow('Horario',
-                                  farmacia.horarioAtencion!, LucideIcons.clock),
+                              _buildIconRow(
+                                  AppLocalizations.of(context).scheduleLabel,
+                                  farmacia.horarioAtencion!,
+                                  LucideIcons.clock),
                             _buildIconRow(
-                                'Delivery 24h',
-                                farmacia.delivery24h ? 'Sí' : 'No',
+                                AppLocalizations.of(context).delivery24hLabel,
+                                farmacia.delivery24h
+                                    ? AppLocalizations.of(context).yes
+                                    : AppLocalizations.of(context).no,
                                 LucideIcons.truck),
                             _buildIconRow(
-                                'Fecha Registro',
+                                AppLocalizations.of(context).registrationDateShort,
                                 _formatDate(farmacia.fechaRegistro),
                                 LucideIcons.calendar),
                             if (farmacia.fechaUltimaActualizacion != null)
                               _buildIconRow(
-                                  'Última Actualización',
+                                  AppLocalizations.of(context).lastUpdateLabel,
                                   _formatDate(
                                       farmacia.fechaUltimaActualizacion!),
                                   LucideIcons.refreshCw),
@@ -250,7 +280,7 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => MapaPantallaCompleta(
           puntoInicial: LatLng(farmacia.latitud, farmacia.longitud),
-          titulo: 'Ubicación de ${farmacia.nombre}',
+          titulo: AppLocalizations.of(context).pharmacyLocationTitle(farmacia.nombre),
         ),
       ),
     );

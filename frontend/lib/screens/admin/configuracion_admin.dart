@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/screens/admin/modules/configuracion/google_api_metrics_widget.dart';
@@ -16,7 +17,7 @@ class ConfiguracionAdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configuración'),
+        title: Text(AppLocalizations.of(context).settingsTitle),
         backgroundColor: MedRushTheme.primaryGreen,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -247,12 +248,12 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
-          'Actualización de contraseña disponible tras la integración con backend.',
+          AppLocalizations.of(context).passwordUpdateAvailable,
         ),
         behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       ),
     );
 
@@ -384,10 +385,10 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Perfil del Administrador',
-                      style: TextStyle(
+                      AppLocalizations.of(context).adminProfile,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodyLarge,
                         fontWeight: MedRushTheme.fontWeightSemiBold,
                         color: MedRushTheme.textPrimary,
@@ -421,10 +422,10 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
     final usuario = authProvider.usuario;
 
     if (usuario == null) {
-      return const Center(
+      return Center(
         child: Text(
-          'No se pudo cargar la información del usuario',
-          style: TextStyle(
+          AppLocalizations.of(context).couldNotLoadUserInfo,
+          style: const TextStyle(
             color: MedRushTheme.textSecondary,
           ),
         ),
@@ -438,44 +439,45 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildEditableField(
-            label: 'Nombre',
+            label: AppLocalizations.of(context).name,
             controller: _nombreController,
-            placeholder: 'Nombre del Admin',
+            placeholder: AppLocalizations.of(context).name,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Ingresa un nombre válido.';
+                return AppLocalizations.of(context).enterValidName;
               }
               if (value.trim().length < 3) {
-                return 'El nombre debe tener al menos 3 caracteres.';
+                return AppLocalizations.of(context).nameMinLength3;
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
           _buildEditableField(
-            label: 'Dirección de Email',
+            label: AppLocalizations.of(context).email,
             controller: _emailController,
-            placeholder: 'admin@healthcare.com',
+            placeholder: AppLocalizations.of(context).emailHint,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
+              final l10n = AppLocalizations.of(context);
               if (value == null || value.trim().isEmpty) {
-                return 'Ingresa una dirección de correo.';
+                return l10n.enterEmailAddress;
               }
               final emailError = Validators.email(value);
               if (emailError != null) {
                 return emailError;
               }
               if (!Validators.isValidEmailStrict(value.trim())) {
-                return 'Correo inválido.';
+                return l10n.invalidEmail;
               }
               return null;
             },
           ),
           const SizedBox(height: 16),
           _buildEditableField(
-            label: 'Teléfono',
+            label: AppLocalizations.of(context).phone,
             controller: _telefonoController,
-            placeholder: 'Ingresa tu número de contacto',
+            placeholder: AppLocalizations.of(context).phone,
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.done,
             inputFormatters: [
@@ -487,7 +489,7 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                 return null; // Campo opcional
               }
               if (trimmed.length < 6) {
-                return 'Ingresa un teléfono válido.';
+                return AppLocalizations.of(context).enterValidPhone;
               }
               return null;
             },
@@ -522,9 +524,9 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                         ),
                       ),
                     )
-                  : const Text(
-                      'Actualizar Perfil',
-                      style: TextStyle(
+                  : Text(
+                      AppLocalizations.of(context).updateProfileButton,
+                      style: const TextStyle(
                         fontWeight: MedRushTheme.fontWeightSemiBold,
                       ),
                     ),
@@ -576,10 +578,10 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Cambiar contraseña',
-                      style: TextStyle(
+                      AppLocalizations.of(context).changePassword,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodyLarge,
                         fontWeight: MedRushTheme.fontWeightSemiBold,
                         color: MedRushTheme.textPrimary,
@@ -607,49 +609,52 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildPasswordField(
-                      label: 'Contraseña actual',
+                      label: AppLocalizations.of(context).currentPassword,
                       controller: _currentPasswordController,
-                      hintText: 'Ingresa tu contraseña actual',
+                      hintText: AppLocalizations.of(context).enterCurrentPassword,
                       validator: (value) {
+                        final l10n = AppLocalizations.of(context);
                         if (value == null || value.isEmpty) {
-                          return 'Ingresa tu contraseña actual.';
+                          return l10n.enterCurrentPassword;
                         }
                         if (value.length < 8) {
-                          return 'La contraseña debe tener al menos 8 caracteres.';
+                          return l10n.passwordMinLength;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     _buildPasswordField(
-                      label: 'Nueva contraseña',
+                      label: AppLocalizations.of(context).newPassword,
                       controller: _newPasswordController,
-                      hintText: 'Elige una contraseña segura',
+                      hintText: AppLocalizations.of(context).enterNewPassword,
                       validator: (value) {
+                        final l10n = AppLocalizations.of(context);
                         if (value == null || value.isEmpty) {
-                          return 'Ingresa una nueva contraseña.';
+                          return l10n.enterNewPassword;
                         }
                         if (value.length < 12) {
-                          return 'Usa al menos 12 caracteres.';
+                          return l10n.newPasswordMin12;
                         }
                         if (!Validators.isComplexPassword(value)) {
-                          return 'Debe incluir mayúsculas, minúsculas y números.';
+                          return l10n.passwordMustIncludeComplexity;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     _buildPasswordField(
-                      label: 'Confirmar nueva contraseña',
+                      label: AppLocalizations.of(context).confirmNewPassword,
                       controller: _confirmPasswordController,
-                      hintText: 'Repite la nueva contraseña',
+                      hintText: AppLocalizations.of(context).repeatNewPassword,
                       textInputAction: TextInputAction.done,
                       validator: (value) {
+                        final l10n = AppLocalizations.of(context);
                         if (value == null || value.isEmpty) {
-                          return 'Confirma la nueva contraseña.';
+                          return l10n.confirmPasswordRequired;
                         }
                         if (value != _newPasswordController.text) {
-                          return 'Las contraseñas no coinciden.';
+                          return l10n.passwordsDoNotMatch;
                         }
                         return null;
                       },
@@ -684,9 +689,9 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Actualizar contraseña',
-                                style: TextStyle(
+                            : Text(
+                                AppLocalizations.of(context).updatePassword,
+                                style: const TextStyle(
                                   fontWeight: MedRushTheme.fontWeightSemiBold,
                                 ),
                               ),
@@ -874,9 +879,9 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Sesión',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context).session,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodyLarge,
                       fontWeight: MedRushTheme.fontWeightSemiBold,
                       color: MedRushTheme.textPrimary,
@@ -890,7 +895,7 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
                 child: ElevatedButton.icon(
                   icon: const Icon(LucideIcons.logOut,
                       color: MedRushTheme.textInverse, size: 16),
-                  label: const Text('Cerrar sesión'),
+                  label: Text(AppLocalizations.of(context).logout),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: MedRushTheme.error,
                     foregroundColor: MedRushTheme.textInverse,
@@ -915,32 +920,29 @@ class _ConfiguracionAdminContentState extends State<ConfiguracionAdminContent> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(LucideIcons.logOut, color: MedRushTheme.error),
-            SizedBox(width: 8),
-            Text('Cerrar Sesión'),
+            const Icon(LucideIcons.logOut, color: MedRushTheme.error),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).logout),
           ],
         ),
-        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        content: Text(AppLocalizations.of(context).logoutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
-              // Cerrar el diálogo de confirmación
               Navigator.of(context).pop();
-
-              // Ejecutar logout directamente sin loading adicional
               await _logout(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.error,
               foregroundColor: MedRushTheme.textInverse,
             ),
-            child: const Text('Cerrar Sesión'),
+            child: Text(AppLocalizations.of(context).logout),
           ),
         ],
       ),

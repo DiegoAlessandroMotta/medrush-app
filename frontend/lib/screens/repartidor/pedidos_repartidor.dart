@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pagination.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/repositories/base.repository.dart';
@@ -129,7 +130,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cargar los pedidos: $e';
+        _error = AppLocalizations.of(context).errorLoadingOrdersWithError(e);
         _isLoading = false;
       });
     }
@@ -303,19 +304,19 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                 });
                 await _limpiarCacheYRecargar();
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar pedidos...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchOrders,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingMd,
                 ),
@@ -333,8 +334,8 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
               value: _filtroEstado,
               underline: Container(),
               items: [
-                const DropdownMenuItem<EstadoPedido?>(
-                  child: Text('Filtrar'),
+                DropdownMenuItem<EstadoPedido?>(
+                  child: Text(AppLocalizations.of(context).filter),
                 ),
                 // Solo incluir estados relevantes para repartidor
                 ...EstadoPedido.values
@@ -344,7 +345,9 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                         estado == EstadoPedido.enRuta)
                     .map((estado) => DropdownMenuItem<EstadoPedido?>(
                           value: estado,
-                          child: Text(StatusHelpers.estadoPedidoTexto(estado)),
+                          child: Builder(
+                            builder: (context) => Text(StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context))),
+                          ),
                         )),
               ],
               onChanged: (EstadoPedido? newValue) async {
@@ -405,7 +408,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Llamar',
+                      tooltip: AppLocalizations.of(context).call,
                       onPressed: () => _llamarCliente(pedido),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -419,7 +422,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Navegar',
+                      tooltip: AppLocalizations.of(context).navigate,
                       onPressed: () => _abrirNavegacion(pedido),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -435,7 +438,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                           color: MedRushTheme.primaryBlue,
                           size: 20,
                         ),
-                        tooltip: 'Entregar',
+                        tooltip: AppLocalizations.of(context).deliver,
                         onPressed: () => _entregarPedido(pedido),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
@@ -483,7 +486,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoPedidoTexto(pedido.estado),
+                        StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -506,7 +509,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                     const SizedBox(width: 4),
                     Text(
                       StatusHelpers
-                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido),
+                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido, AppLocalizations.of(context)),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -532,9 +535,9 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Ver Detalles',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context).viewDetails,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
                     ),
@@ -549,28 +552,29 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    final l10n = AppLocalizations.of(context);
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.truck,
             size: 64,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'No tienes pedidos activos',
-            style: TextStyle(
+            l10n.noActiveOrders,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               color: MedRushTheme.textPrimary,
               fontWeight: MedRushTheme.fontWeightBold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Los pedidos asignados, recogidos y en ruta aparecerán aquí',
-            style: TextStyle(
+            l10n.activeOrdersDescription,
+            style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
             ),
@@ -618,7 +622,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede abrir navegación',
+          AppLocalizations.of(context).cannotOpenNavigation,
           context: context,
         );
       }
@@ -632,7 +636,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
     if (telefono == 'No disponible') {
       if (mounted) {
         NotificationService.showError(
-          'Teléfono del cliente no disponible',
+          AppLocalizations.of(context).clientPhoneNotAvailable,
           context: context,
         );
       }
@@ -646,7 +650,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede realizar la llamada',
+          AppLocalizations.of(context).cannotMakeCall,
           context: context,
         );
       }
@@ -662,7 +666,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
 
       if (mounted) {
         NotificationService.showSuccess(
-          'Información copiada al portapapeles',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
@@ -673,7 +677,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
       logError('Error al copiar información del cliente', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar información',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }

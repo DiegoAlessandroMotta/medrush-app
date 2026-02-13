@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/farmacias.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/geocoding_result.model.dart';
 import 'package:medrush/services/geocoding_service.dart';
@@ -58,12 +59,25 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
   EstadoFarmacia _estado = EstadoFarmacia.activa;
   bool _delivery24h = true;
   bool _isLoading = false;
+  bool _defaultScheduleSet = false;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
     _setupAddressListeners();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_defaultScheduleSet &&
+        widget.initialData == null &&
+        _horarioController.text == 'Lun-Vie: 8:00-20:00') {
+      _defaultScheduleSet = true;
+      _horarioController.text =
+          AppLocalizations.of(context).defaultSchedulePlaceholder;
+    }
   }
 
   void _setupAddressListeners() {
@@ -150,7 +164,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
       MaterialPageRoute(
         builder: (context) => MapaPantallaCompleta(
           puntoInicial: puntoInicial,
-          titulo: 'Seleccionar Ubicación de la Farmacia',
+          titulo: AppLocalizations.of(context).selectPharmacyLocationTitle,
           onUbicacionSeleccionada:
               (coordenadas, GeocodingResult? geocodingResult) {
             setState(() {
@@ -210,7 +224,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
     try {
       logInfo(
-          '${widget.initialData != null ? 'Actualizando' : 'Creando'} farmacia...');
+          widget.initialData != null
+              ? AppLocalizations.of(context).updatingPharmacy
+              : AppLocalizations.of(context).creatingPharmacy);
 
       // El backend maneja la validación de RUC único automáticamente
 
@@ -289,7 +305,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
       Navigator.of(context).pop();
     } catch (e) {
       logError(
-          'Error al ${widget.initialData != null ? 'actualizar' : 'crear'} farmacia',
+          widget.initialData != null
+              ? AppLocalizations.of(context).errorUpdatingPharmacy
+              : AppLocalizations.of(context).errorCreatingPharmacy,
           e);
 
       if (!mounted) {
@@ -302,7 +320,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
       // Mostrar error al usuario
       NotificationService.showError(
-        'Error al ${widget.initialData != null ? 'actualizar' : 'crear'} farmacia: $e',
+        '${widget.initialData != null ? AppLocalizations.of(context).errorUpdatingPharmacy : AppLocalizations.of(context).errorCreatingPharmacy}: $e',
         context: context,
         duration: const Duration(seconds: 3),
       );
@@ -318,14 +336,15 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar Eliminación'),
+        title: Text(AppLocalizations.of(context).confirmDeletion),
         content: Text(
-          '¿Estás seguro de que deseas eliminar la farmacia "${widget.initialData!.nombre}"?\n\nEsta acción no se puede deshacer.',
+          AppLocalizations.of(context)
+              .confirmDeletePharmacyQuestion(widget.initialData!.nombre),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -333,7 +352,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               backgroundColor: Colors.red[600],
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -366,7 +385,8 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
       // Mostrar mensaje de éxito
       NotificationService.showSuccess(
-        'Farmacia "${widget.initialData!.nombre}" eliminada exitosamente',
+        AppLocalizations.of(context)
+            .pharmacyDeletedSuccess(widget.initialData!.nombre),
         context: context,
         duration: const Duration(seconds: 3),
       );
@@ -377,7 +397,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
       // Cerrar el formulario
       Navigator.of(context).pop();
     } catch (e) {
-      logError('Error al eliminar farmacia', e);
+      logError(AppLocalizations.of(context).errorDeletingPharmacy, e);
 
       if (!mounted) {
         return;
@@ -389,7 +409,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
       // Mostrar error al usuario
       NotificationService.showError(
-        'Error al eliminar farmacia: $e',
+        '${AppLocalizations.of(context).errorDeletingPharmacy}: $e',
         context: context,
         duration: const Duration(seconds: 3),
       );
@@ -406,14 +426,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _nombreController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre de la Farmacia *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.building2),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).pharmacyNameLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.building2),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el nombre de la farmacia';
+                    return AppLocalizations.of(context).pleaseEnterPharmacyName;
                   }
                   return null;
                 },
@@ -423,10 +443,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _cadenaController,
-                decoration: const InputDecoration(
-                  labelText: 'Cadena (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.building),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).chainOptionalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.building),
                 ),
               ),
             ),
@@ -442,14 +462,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _responsableController,
-                decoration: const InputDecoration(
-                  labelText: 'Responsable *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.user),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).responsibleRequiredLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.user),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el responsable';
+                    return AppLocalizations.of(context).pleaseEnterResponsible;
                   }
                   return null;
                 },
@@ -460,10 +480,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               child: TextFormField(
                 controller: _telefonoResponsableController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono del Responsable (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.phone),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).responsiblePhoneOptionalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.phone),
                 ),
               ),
             ),
@@ -480,14 +500,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               child: TextFormField(
                 controller: _telefonoController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.phone),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).phoneRequiredLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.phone),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el teléfono';
+                    return AppLocalizations.of(context).pleaseEnterPhone;
                   }
                   return null;
                 },
@@ -498,15 +518,15 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               child: TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Correo Electrónico (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mail),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).emailOptionalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.mail),
                 ),
                 validator: (value) {
                   if (value != null && value.isNotEmpty) {
                     if (!Validators.isValidEmailStrict(value)) {
-                      return 'Por favor ingrese un correo válido';
+                      return AppLocalizations.of(context).pleaseEnterValidEmail;
                     }
                   }
                   return null;
@@ -522,14 +542,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         TextFormField(
           controller: _rucController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'RUC *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.shield),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).rucRequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.shield),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese el RUC';
+              return AppLocalizations.of(context).pleaseEnterRuc;
             }
             return null;
           },
@@ -555,9 +575,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Estado de la Farmacia',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).pharmacyStatusTitle,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodyMedium,
                         fontWeight: MedRushTheme.fontWeightMedium,
                         color: MedRushTheme.textPrimary,
@@ -572,11 +592,13 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                       items: EstadoFarmacia.values.map((estado) {
                         return DropdownMenuItem<EstadoFarmacia>(
                           value: estado,
-                          child: Text(
-                            StatusHelpers.estadoFarmaciaTexto(estado),
-                            style: TextStyle(
-                              color: StatusHelpers.estadoFarmaciaColor(estado),
-                              fontWeight: MedRushTheme.fontWeightMedium,
+                          child: Builder(
+                            builder: (context) => Text(
+                              StatusHelpers.estadoFarmaciaTexto(estado, AppLocalizations.of(context)),
+                              style: TextStyle(
+                                color: StatusHelpers.estadoFarmaciaColor(estado),
+                                fontWeight: MedRushTheme.fontWeightMedium,
+                              ),
                             ),
                           ),
                         );
@@ -617,16 +639,16 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Delivery 24 horas',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context).delivery24hHoursLabel,
+                            style: const TextStyle(
                               fontSize: MedRushTheme.fontSizeBodyMedium,
                               fontWeight: MedRushTheme.fontWeightMedium,
                               color: MedRushTheme.textPrimary,
                             ),
                           ),
                           Text(
-                            _delivery24h ? 'Disponible' : 'No disponible',
+                            _delivery24h ? AppLocalizations.of(context).available : AppLocalizations.of(context).notAvailable,
                             style: const TextStyle(
                               fontSize: MedRushTheme.fontSizeBodySmall,
                               color: MedRushTheme.textSecondary,
@@ -656,10 +678,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // Sexta fila: Horario de Atención
         TextFormField(
           controller: _horarioController,
-          decoration: const InputDecoration(
-            labelText: 'Horario de Atención (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.clock),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).scheduleOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.clock),
           ),
           validator: (value) {
             return null;
@@ -675,15 +697,15 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _direccionLinea1Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Dirección Línea 1 *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
-                  helperText: 'Calle, avenida, jirón, etc.',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).addressLine1RequiredLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.mapPin),
+                  helperText: AppLocalizations.of(context).addressLine1HelperText,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese la dirección línea 1';
+                    return AppLocalizations.of(context).pleaseEnterAddressLine1;
                   }
                   return null;
                 },
@@ -693,11 +715,11 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _direccionLinea2Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Dirección Línea 2 (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
-                  helperText: 'Piso, departamento, referencia, etc.',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).addressLine2OptionalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.mapPin),
+                  helperText: AppLocalizations.of(context).addressLine2HelperText,
                 ),
               ),
             ),
@@ -713,10 +735,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
             Expanded(
               child: TextFormField(
                 controller: _departamentoController,
-                decoration: const InputDecoration(
-                  labelText: 'ZIP Code (opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).zipOptionalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.mapPin),
                 ),
               ),
             ),
@@ -725,14 +747,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               flex: 2,
               child: TextFormField(
                 controller: _distritoController,
-                decoration: const InputDecoration(
-                  labelText: 'Ciudad *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(LucideIcons.mapPin),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).cityRequiredLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(LucideIcons.mapPin),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese la ciudad';
+                    return AppLocalizations.of(context).pleaseEnterCity;
                   }
                   return null;
                 },
@@ -751,14 +773,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 1. Campo Nombre de Farmacia
         TextFormField(
           controller: _nombreController,
-          decoration: const InputDecoration(
-            labelText: 'Nombre de la Farmacia *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.building2),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).pharmacyNameLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.building2),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese el nombre de la farmacia';
+              return AppLocalizations.of(context).pleaseEnterPharmacyName;
             }
             return null;
           },
@@ -769,10 +791,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 2. Campo Cadena
         TextFormField(
           controller: _cadenaController,
-          decoration: const InputDecoration(
-            labelText: 'Cadena (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.building),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).chainOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.building),
           ),
         ),
 
@@ -781,14 +803,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 3. Campo Responsable
         TextFormField(
           controller: _responsableController,
-          decoration: const InputDecoration(
-            labelText: 'Responsable *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.user),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).responsibleRequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.user),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese el responsable';
+              return AppLocalizations.of(context).pleaseEnterResponsible;
             }
             return null;
           },
@@ -800,10 +822,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         TextFormField(
           controller: _telefonoResponsableController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Teléfono del Responsable (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.phone),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).responsiblePhoneOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.phone),
           ),
         ),
 
@@ -813,14 +835,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         TextFormField(
           controller: _telefonoController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Teléfono *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.phone),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).phoneRequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.phone),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese el teléfono';
+              return AppLocalizations.of(context).pleaseEnterPhone;
             }
             return null;
           },
@@ -832,15 +854,15 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Correo Electrónico (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mail),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).emailOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.mail),
           ),
           validator: (value) {
             if (value != null && value.isNotEmpty) {
               if (!Validators.isValidEmailStrict(value)) {
-                return 'Por favor ingrese un correo válido';
+                return AppLocalizations.of(context).pleaseEnterValidEmail;
               }
             }
             return null;
@@ -853,14 +875,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         TextFormField(
           controller: _rucController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'RUC *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.shield),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).rucRequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.shield),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese el RUC';
+              return AppLocalizations.of(context).pleaseEnterRuc;
             }
             return null;
           },
@@ -882,9 +904,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Estado de la Farmacia',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).pharmacyStatusTitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   fontWeight: MedRushTheme.fontWeightMedium,
                   color: MedRushTheme.textPrimary,
@@ -899,11 +921,13 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                 items: EstadoFarmacia.values.map((estado) {
                   return DropdownMenuItem<EstadoFarmacia>(
                     value: estado,
-                    child: Text(
-                      StatusHelpers.estadoFarmaciaTexto(estado),
-                      style: TextStyle(
-                        color: StatusHelpers.estadoFarmaciaColor(estado),
-                        fontWeight: MedRushTheme.fontWeightMedium,
+                    child: Builder(
+                      builder: (context) => Text(
+                        StatusHelpers.estadoFarmaciaTexto(estado, AppLocalizations.of(context)),
+                        style: TextStyle(
+                          color: StatusHelpers.estadoFarmaciaColor(estado),
+                          fontWeight: MedRushTheme.fontWeightMedium,
+                        ),
                       ),
                     ),
                   );
@@ -925,10 +949,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 8. Campo Horario de Atención
         TextFormField(
           controller: _horarioController,
-          decoration: const InputDecoration(
-            labelText: 'Horario de Atención (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.clock),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).scheduleOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.clock),
           ),
           validator: (value) {
             return null;
@@ -960,16 +984,16 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Delivery 24 horas',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).delivery24hHoursLabel,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodyMedium,
                         fontWeight: MedRushTheme.fontWeightMedium,
                         color: MedRushTheme.textPrimary,
                       ),
                     ),
                     Text(
-                      _delivery24h ? 'Disponible' : 'No disponible',
+                      _delivery24h ? AppLocalizations.of(context).available : AppLocalizations.of(context).notAvailable,
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -996,15 +1020,15 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 10. Campo Dirección Línea 1
         TextFormField(
           controller: _direccionLinea1Controller,
-          decoration: const InputDecoration(
-            labelText: 'Dirección Línea 1 *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
-            helperText: 'Calle, avenida, jirón, etc.',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).addressLine1RequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.mapPin),
+            helperText: AppLocalizations.of(context).addressLine1HelperText,
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese la dirección línea 1';
+              return AppLocalizations.of(context).pleaseEnterAddressLine1;
             }
             return null;
           },
@@ -1015,11 +1039,11 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 11. Campo Dirección Línea 2
         TextFormField(
           controller: _direccionLinea2Controller,
-          decoration: const InputDecoration(
-            labelText: 'Dirección Línea 2 (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
-            helperText: 'Piso, departamento, referencia, etc.',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).addressLine2OptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.mapPin),
+            helperText: AppLocalizations.of(context).addressLine2HelperText,
           ),
         ),
 
@@ -1028,10 +1052,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 12. Campo ZIP Code
         TextFormField(
           controller: _departamentoController,
-          decoration: const InputDecoration(
-            labelText: 'ZIP Code (opcional)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).zipOptionalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.mapPin),
           ),
         ),
 
@@ -1040,14 +1064,14 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
         // 13. Campo Ciudad
         TextFormField(
           controller: _distritoController,
-          decoration: const InputDecoration(
-            labelText: 'Ciudad *',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(LucideIcons.mapPin),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context).cityRequiredLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(LucideIcons.mapPin),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Por favor ingrese la ciudad';
+              return AppLocalizations.of(context).pleaseEnterCity;
             }
             return null;
           },
@@ -1100,8 +1124,8 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                               children: [
                                 Text(
                                   widget.initialData != null
-                                      ? 'Editar Farmacia'
-                                      : 'Nueva Farmacia',
+                                      ? AppLocalizations.of(context).editPharmacy
+                                      : AppLocalizations.of(context).newPharmacy,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeTitleLarge,
                                     fontWeight: MedRushTheme.fontWeightBold,
@@ -1157,9 +1181,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                               const SizedBox(height: MedRushTheme.spacingLg),
 
                               // 12. Sección de coordenadas - Latitud y Longitud
-                              const Text(
-                                'Ubicación en el mapa',
-                                style: TextStyle(
+                              Text(
+                                AppLocalizations.of(context).mapLocationTitle,
+                                style: const TextStyle(
                                   fontSize: MedRushTheme.fontSizeBodyLarge,
                                   fontWeight: MedRushTheme.fontWeightMedium,
                                   color: MedRushTheme.textPrimary,
@@ -1176,6 +1200,9 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                         _buildLatLngFromControllers(),
                                     height: 300, // Aumentar altura del mapa
                                     onTapMapa: (pos) async {
+                                      // Guardar l10n antes del async para evitar problemas con BuildContext
+                                      final l10n = AppLocalizations.of(context);
+                                      
                                       _latitudController.text =
                                           StatusHelpers.formatearNumero(
                                               pos.latitude,
@@ -1225,7 +1252,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                         }
                                       } catch (e) {
                                         logError(
-                                            'Error en geocodificación del mapa pequeño',
+                                            l10n.geocodingErrorMap,
                                             e);
                                       }
 
@@ -1259,17 +1286,17 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
                                               decimal: true),
-                                      decoration: const InputDecoration(
-                                        labelText: 'Latitud *',
-                                        border: OutlineInputBorder(),
-                                        prefixIcon: Icon(LucideIcons.mapPin),
+                                      decoration: InputDecoration(
+                                        labelText: AppLocalizations.of(context).latitudeRequiredLabel,
+                                        border: const OutlineInputBorder(),
+                                        prefixIcon: const Icon(LucideIcons.mapPin),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Por favor ingrese la latitud';
+                                          return AppLocalizations.of(context).pleaseEnterLatitude;
                                         }
                                         if (double.tryParse(value) == null) {
-                                          return 'Por favor ingrese una latitud válida';
+                                          return AppLocalizations.of(context).pleaseEnterValidLatitude;
                                         }
                                         return null;
                                       },
@@ -1282,17 +1309,17 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
                                               decimal: true),
-                                      decoration: const InputDecoration(
-                                        labelText: 'Longitud *',
-                                        border: OutlineInputBorder(),
-                                        prefixIcon: Icon(LucideIcons.mapPin),
+                                      decoration: InputDecoration(
+                                        labelText: AppLocalizations.of(context).longitudeRequiredLabel,
+                                        border: const OutlineInputBorder(),
+                                        prefixIcon: const Icon(LucideIcons.mapPin),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Por favor ingrese la longitud';
+                                          return AppLocalizations.of(context).pleaseEnterLongitude;
                                         }
                                         if (double.tryParse(value) == null) {
-                                          return 'Por favor ingrese una longitud válida';
+                                          return AppLocalizations.of(context).pleaseEnterValidLongitude;
                                         }
                                         return null;
                                       },
@@ -1327,10 +1354,10 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                             )
                                           : const Icon(LucideIcons.save),
                                       label: _isLoading
-                                          ? const Text('Guardando...')
+                                          ? Text(AppLocalizations.of(context).saving)
                                           : Text(widget.initialData != null
-                                              ? 'Actualizar Farmacia'
-                                              : 'Crear Farmacia'),
+                                              ? AppLocalizations.of(context).updatePharmacy
+                                              : AppLocalizations.of(context).createPharmacy),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             MedRushTheme.primaryGreen,
@@ -1351,7 +1378,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
                                         onPressed:
                                             _isLoading ? null : _handleDelete,
                                         icon: const Icon(LucideIcons.trash2),
-                                        label: const Text('Eliminar'),
+                                        label: Text(AppLocalizations.of(context).delete),
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: Colors.red[600],
                                           side: BorderSide(

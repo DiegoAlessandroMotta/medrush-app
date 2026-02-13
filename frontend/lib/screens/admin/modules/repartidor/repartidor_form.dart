@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/base.repository.dart';
 import 'package:medrush/repositories/repartidor.repository.dart';
@@ -210,7 +211,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cambiar contraseña'),
+        title: Text(AppLocalizations.of(context).changePasswordTitle),
         content: Form(
           key: formKey,
           child: Column(
@@ -219,16 +220,16 @@ class _RepartidorFormState extends State<RepartidorForm> {
               TextFormField(
                 controller: newPassController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Nueva contraseña',
-                  prefixIcon: Icon(LucideIcons.lock),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).newPassword,
+                  prefixIcon: const Icon(LucideIcons.lock),
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Requerido';
+                    return AppLocalizations.of(context).requiredField;
                   }
                   if (v.length < 8) {
-                    return 'Mínimo 8 caracteres';
+                    return AppLocalizations.of(context).passwordMinLength;
                   }
                   return null;
                 },
@@ -237,16 +238,16 @@ class _RepartidorFormState extends State<RepartidorForm> {
               TextFormField(
                 controller: confirmController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirmar contraseña',
-                  prefixIcon: Icon(LucideIcons.lock),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).confirmNewPassword,
+                  prefixIcon: const Icon(LucideIcons.lock),
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Requerido';
+                    return AppLocalizations.of(context).requiredField;
                   }
                   if (v != newPassController.text) {
-                    return 'No coinciden';
+                    return AppLocalizations.of(context).passwordsDoNotMatchShort;
                   }
                   return null;
                 },
@@ -257,7 +258,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -281,7 +282,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                   if (!context.mounted) {
                     return;
                   }
-                  NotificationService.showSuccess('Contraseña actualizada',
+                  NotificationService.showSuccess(
+                      AppLocalizations.of(context).passwordUpdated,
                       context: context);
                   if (!context.mounted) {
                     return;
@@ -292,17 +294,19 @@ class _RepartidorFormState extends State<RepartidorForm> {
                     return;
                   }
                   NotificationService.showError(
-                      'No se pudo actualizar la contraseña',
+                      AppLocalizations.of(context).couldNotUpdatePassword,
                       context: context);
                 }
               } catch (e) {
                 if (!context.mounted) {
                   return;
                 }
-                NotificationService.showError('Error: $e', context: context);
+                NotificationService.showError(
+                    AppLocalizations.of(context).errorSavingDriver(e),
+                    context: context);
               }
             },
-            child: const Text('Guardar'),
+            child: Text(AppLocalizations.of(context).save),
           ),
         ],
       ),
@@ -383,6 +387,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
       // Conectar con el backend real
       final repository = RepartidorRepository();
+      // Guardar l10n antes del async para evitar problemas con BuildContext
+      final l10n = AppLocalizations.of(context);
+      
       RepositoryResult<Usuario?> result;
 
       if (widget.initialData != null) {
@@ -403,18 +410,20 @@ class _RepartidorFormState extends State<RepartidorForm> {
         if (mounted) {
           NotificationService.showSuccess(
             widget.initialData != null
-                ? 'Repartidor actualizado exitosamente'
-                : 'Repartidor creado exitosamente',
+                ? l10n.driverUpdatedSuccess
+                : l10n.driverCreatedSuccess,
             context: context,
           );
         }
       } else {
         throw Exception(
-            result.error ?? 'Error desconocido al guardar repartidor');
+            result.error ??
+                l10n.errorSavingDriverUnknown);
       }
     } catch (e) {
       if (mounted) {
-        NotificationService.showError('Error al guardar: $e', context: context);
+        NotificationService.showError(
+            AppLocalizations.of(context).errorSavingDriver(e), context: context);
       }
     } finally {
       if (mounted) {
@@ -433,9 +442,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
             DateTime.now().add(const Duration(days: 365)),
         firstDate: DateTime.now(),
         lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
-        helpText: 'Seleccionar fecha de vencimiento',
-        cancelText: 'Cancelar',
-        confirmText: 'Confirmar',
+        helpText: AppLocalizations.of(context).selectExpiryDate,
+        cancelText: AppLocalizations.of(context).cancel,
+        confirmText: AppLocalizations.of(context).confirm,
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -456,7 +465,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
       }
     } catch (e) {
       if (mounted) {
-        NotificationService.showError('Error al seleccionar fecha: $e',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorSelectingDate(e),
             context: context);
       }
     }
@@ -482,11 +492,11 @@ class _RepartidorFormState extends State<RepartidorForm> {
   Widget _buildTelefonoField() {
     return TextFormField(
       controller: _telefonoController,
-      decoration: const InputDecoration(
-        labelText: 'Número de Teléfono',
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context).phoneNumberLabel,
         hintText: '5551234567',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(LucideIcons.phone),
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(LucideIcons.phone),
         prefixText: '+1 ',
         helperText: '10 dígitos',
       ),
@@ -504,7 +514,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
         final soloNumeros = Validators.removeNonDigits(value);
 
         if (soloNumeros.length != 10) {
-          return 'El teléfono debe tener exactamente 10 dígitos';
+          return AppLocalizations.of(context).phoneMustBe10Digits;
         }
 
         return null;
@@ -560,8 +570,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               children: [
                                 Text(
                                   widget.initialData != null
-                                      ? 'Editar Repartidor'
-                                      : 'Nuevo Repartidor',
+                                      ? AppLocalizations.of(context).editDriver
+                                      : AppLocalizations.of(context).newDriver,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeTitleLarge,
                                     fontWeight: MedRushTheme.fontWeightBold,
@@ -571,8 +581,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 const SizedBox(height: 4),
                                 Text(
                                   widget.initialData != null
-                                      ? 'Modificando repartidor'
-                                      : 'Creando nuevo repartidor',
+                                      ? AppLocalizations.of(context).modifyingDriver
+                                      : AppLocalizations.of(context).creatingDriver,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodySmall,
                                     color: MedRushTheme.textSecondary,
@@ -657,20 +667,22 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           const SizedBox(height: MedRushTheme.spacingLg),
 
                           // Información Personal
-                          _buildSectionTitle('Información Personal'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).sectionPersonalInfo),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
                           // Nombre
                           TextFormField(
                             controller: _nombreController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nombre Completo *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.user),
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context).fullNameRequired,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.user),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'El nombre es requerido';
+                                return AppLocalizations.of(context).nameRequired;
                               }
                               return null;
                             },
@@ -680,18 +692,19 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           // Email
                           TextFormField(
                             controller: _emailController,
-                            decoration: const InputDecoration(
-                              labelText: 'Email *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.mail),
+                            decoration: InputDecoration(
+                              labelText:
+                                  '${AppLocalizations.of(context).email} *',
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.mail),
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'El email es requerido';
+                                return AppLocalizations.of(context).emailRequired;
                               }
                               if (!Validators.isValidEmailStrict(value)) {
-                                return 'Email inválido';
+                                return AppLocalizations.of(context).invalidEmail;
                               }
                               return null;
                             },
@@ -706,11 +719,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           TextFormField(
                             controller: _paisController,
                             readOnly: true,
-                            decoration: const InputDecoration(
-                              labelText: 'País',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.flag),
-                              helperText: 'Se enviará como USA por defecto',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).country,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.flag),
+                              helperText:
+                                  AppLocalizations.of(context).countryDefaultUSA,
                             ),
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
@@ -721,22 +735,25 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               children: [
                                 TextFormField(
                                   controller: _passwordController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Contraseña *',
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(LucideIcons.lock),
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        '${AppLocalizations.of(context).passwordLabel} *',
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(LucideIcons.lock),
                                   ),
                                   obscureText: true,
                                   validator: (value) {
                                     if (widget.initialData == null &&
                                         (value == null ||
                                             value.trim().isEmpty)) {
-                                      return 'La contraseña es requerida';
+                                      return AppLocalizations.of(context)
+                                          .passwordRequired;
                                     }
                                     if (value != null &&
                                         value.isNotEmpty &&
                                         value.length < 6) {
-                                      return 'La contraseña debe tener al menos 6 caracteres';
+                                      return AppLocalizations.of(context)
+                                          .passwordMin6Chars;
                                     }
                                     return null;
                                   },
@@ -752,12 +769,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           // ID
                           TextFormField(
                             controller: _dniIdNumeroController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'ID (Driver’s License o State ID)',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.idCard),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.idCard),
                               helperText:
-                                  'Letras y números; sin espacios ni guiones',
+                                  AppLocalizations.of(context).idHelper,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             inputFormatters: [
@@ -768,10 +785,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 5) {
-                                  return 'El ID debe tener al menos 5 caracteres';
+                                  return AppLocalizations.of(context).idMin5Chars;
                                 }
                                 if (!Validators.isAlphanumericOnly(value)) {
-                                  return 'Solo letras y números';
+                                  return AppLocalizations.of(context).alphanumericOnly;
                                 }
                               }
                               return null;
@@ -783,27 +800,32 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           const SizedBox(height: MedRushTheme.spacingLg),
 
                           // Información de Licencia
-                          _buildSectionTitle('Información de Licencia'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).sectionLicenseInfo),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
                           // Número de licencia
                           TextFormField(
                             controller: _licenciaNumeroController,
-                            decoration: const InputDecoration(
-                              labelText: 'Número de Licencia',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.idCard),
-                              helperText: 'Formato: Letras y números',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .licenseNumberLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.idCard),
+                              helperText:
+                                  AppLocalizations.of(context).licenseFormatHelper,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 5) {
-                                  return 'El número de licencia debe tener al menos 5 caracteres';
+                                  return AppLocalizations.of(context)
+                                      .licenseMin5Chars;
                                 }
                                 if (!Validators.isUppercaseAndNumbersOnly(
                                     value)) {
-                                  return 'Solo letras mayúsculas y números';
+                                  return AppLocalizations.of(context)
+                                      .uppercaseAndNumbersOnly;
                                 }
                               }
                               return null;
@@ -818,15 +840,16 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           InkWell(
                             onTap: _selectDate,
                             child: InputDecorator(
-                              decoration: const InputDecoration(
-                                labelText: 'Vencimiento de Licencia',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(LucideIcons.calendar),
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(context)
+                                    .licenseExpiryLabel,
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(LucideIcons.calendar),
                               ),
                               child: Text(
                                 _licenciaVencimiento != null
                                     ? '${_licenciaVencimiento!.day}/${_licenciaVencimiento!.month}/${_licenciaVencimiento!.year}'
-                                    : 'Seleccionar fecha',
+                                    : AppLocalizations.of(context).selectDate,
                                 style: TextStyle(
                                   color: _licenciaVencimiento != null
                                       ? MedRushTheme.textPrimary
@@ -838,27 +861,31 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           const SizedBox(height: MedRushTheme.spacingLg),
 
                           // Información del Vehículo
-                          _buildSectionTitle('Información del Vehículo'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).sectionVehicleInfo),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
                           // Placa
                           TextFormField(
                             controller: _vehiculoPlacaController,
-                            decoration: const InputDecoration(
-                              labelText: 'Placa del Vehículo',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.mapPin),
-                              helperText: 'Formato: ABC-123 o ABC123',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .vehiclePlateLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.mapPin),
+                              helperText:
+                                  AppLocalizations.of(context).vehiclePlateFormat,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 4) {
-                                  return 'La placa debe tener al menos 4 caracteres';
+                                  return AppLocalizations.of(context).plateMin4Chars;
                                 }
                                 if (!Validators.isUppercaseNumbersAndDashesOnly(
                                     value)) {
-                                  return 'Solo letras mayúsculas, números y guiones';
+                                  return AppLocalizations.of(context)
+                                      .uppercaseNumbersDashes;
                                 }
                               }
                               return null;
@@ -872,20 +899,23 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           // Marca
                           TextFormField(
                             controller: _vehiculoMarcaController,
-                            decoration: const InputDecoration(
-                              labelText: 'Marca del Vehículo',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.car),
-                              helperText: 'Ej: Toyota, Honda, Ford',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .vehicleBrandLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.car),
+                              helperText:
+                                  AppLocalizations.of(context).vehicleBrandHelper,
                             ),
                             textCapitalization: TextCapitalization.words,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 2) {
-                                  return 'La marca debe tener al menos 2 caracteres';
+                                  return AppLocalizations.of(context).brandMin2Chars;
                                 }
                                 if (!Validators.isLettersAndSpacesOnly(value)) {
-                                  return 'Solo letras y espacios';
+                                  return AppLocalizations.of(context)
+                                      .lettersAndSpacesOnly;
                                 }
                               }
                               return null;
@@ -899,21 +929,24 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           // Modelo
                           TextFormField(
                             controller: _vehiculoModeloController,
-                            decoration: const InputDecoration(
-                              labelText: 'Modelo del Vehículo',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.car),
-                              helperText: 'Ej: Corolla, Civic, Focus',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .vehicleModelLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.car),
+                              helperText:
+                                  AppLocalizations.of(context).vehicleModelHelper,
                             ),
                             textCapitalization: TextCapitalization.words,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 2) {
-                                  return 'El modelo debe tener al menos 2 caracteres';
+                                  return AppLocalizations.of(context).modelMin2Chars;
                                 }
                                 if (!Validators.isAlphanumericAndSpacesOnly(
                                     value)) {
-                                  return 'Solo letras, números, espacios y guiones';
+                                  return AppLocalizations.of(context)
+                                      .alphanumericSpacesDashes;
                                 }
                               }
                               return null;
@@ -927,11 +960,13 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           // Código registro del vehículo
                           TextFormField(
                             controller: _vehiculoCodigoRegistroController,
-                            decoration: const InputDecoration(
-                              labelText: 'Código de Registro del Vehículo',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(LucideIcons.badge),
-                              helperText: 'Alfanumérico; ej: ABC123456',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .vehicleRegistrationLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(LucideIcons.badge),
+                              helperText: AppLocalizations.of(context)
+                                  .vehicleRegistrationHelper,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             inputFormatters: [
@@ -942,10 +977,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 5) {
-                                  return 'Debe tener al menos 5 caracteres';
+                                  return AppLocalizations.of(context).min5Characters;
                                 }
                                 if (!Validators.isAlphanumericOnly(value)) {
-                                  return 'Solo letras y números';
+                                  return AppLocalizations.of(context).alphanumericOnly;
                                 }
                               }
                               return null;
@@ -957,7 +992,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           const SizedBox(height: MedRushTheme.spacingLg),
 
                           // Documentos y Fotos
-                          _buildSectionTitle('Documentos y Fotos'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).sectionDocuments),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
                           // Contenedor para las fotos de documentos
@@ -975,8 +1011,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               children: [
                                 // Foto de ID
                                 _buildDocumentPhoto(
-                                  title: 'Foto de ID',
-                                  subtitle: 'Documento de identidad',
+                                  title: AppLocalizations.of(context).photoIdTitle,
+                                  subtitle:
+                                      AppLocalizations.of(context).photoIdSubtitle,
                                   icon: LucideIcons.idCard,
                                   imageUrl: _fotoDniUrl,
                                   onImageChanged: _onDniImageChanged,
@@ -998,8 +1035,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
                                 // Foto de Licencia
                                 _buildDocumentPhoto(
-                                  title: 'Foto de Licencia de Conducir',
-                                  subtitle: 'Licencia de conducir vigente',
+                                  title: AppLocalizations.of(context)
+                                      .photoLicenseTitle,
+                                  subtitle: AppLocalizations.of(context)
+                                      .photoLicenseSubtitle,
                                   icon: LucideIcons.idCard,
                                   imageUrl: _fotoLicenciaUrl,
                                   onImageChanged: _onLicenciaImageChanged,
@@ -1022,8 +1061,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
                                 // Foto de Seguro Vehicular
                                 _buildDocumentPhoto(
-                                  title: 'Foto de Seguro del Vehículo',
-                                  subtitle: 'Póliza vigente',
+                                  title: AppLocalizations.of(context)
+                                      .photoInsuranceTitle,
+                                  subtitle: AppLocalizations.of(context)
+                                      .photoInsuranceSubtitle,
                                   icon: LucideIcons.shield,
                                   imageUrl: _fotoSeguroVehiculoUrl,
                                   onImageChanged: _onSeguroVehiculoImageChanged,
@@ -1038,22 +1079,26 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           const SizedBox(height: MedRushTheme.spacingLg),
 
                           // Configuración
-                          _buildSectionTitle('Configuración'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).sectionSettings),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
                           // Estado del repartidor
                           DropdownButtonFormField<EstadoRepartidor>(
                             initialValue: _estadoSeleccionado,
-                            decoration: const InputDecoration(
-                              labelText: 'Estado *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.assignment),
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context).stateRequired,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.assignment),
                             ),
                             items: EstadoRepartidor.values.map((estado) {
                               return DropdownMenuItem<EstadoRepartidor>(
                                 value: estado,
-                                child: Text(StatusHelpers.estadoRepartidorTexto(
-                                    estado)),
+                                child: Builder(
+                                  builder: (context) => Text(StatusHelpers.estadoRepartidorTexto(
+                                      estado, AppLocalizations.of(context))),
+                                ),
                               );
                             }).toList(),
                             onChanged: (EstadoRepartidor? value) {
@@ -1068,10 +1113,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
                           // Switch de activo
                           SwitchListTile(
-                            title: const Text('Usuario Activo'),
+                            title: Text(AppLocalizations.of(context).activeUser),
                             subtitle: Text(_activo
-                                ? 'El usuario puede acceder al sistema'
-                                : 'Usuario deshabilitado'),
+                                ? AppLocalizations.of(context).userCanAccessSystem
+                                : AppLocalizations.of(context).userDisabled),
                             value: _activo,
                             onChanged: (bool value) async {
                               if (widget.initialData == null) {
@@ -1099,7 +1144,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                     return;
                                   }
                                   NotificationService.showError(
-                                      'No se pudo actualizar estado activo',
+                                      AppLocalizations.of(context).couldNotUpdateActiveStatus,
                                       context: context);
                                 }
                               } catch (e) {
@@ -1110,7 +1155,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 if (!context.mounted) {
                                   return;
                                 }
-                                NotificationService.showError('Error: $e',
+                                NotificationService.showError(
+                                    AppLocalizations.of(context).errorUpdatingActiveStatus(e),
                                     context: context);
                               }
                             },
@@ -1123,7 +1169,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               child: TextButton.icon(
                                 onPressed: _showChangePasswordDialog,
                                 icon: const Icon(LucideIcons.lock),
-                                label: const Text('Cambiar contraseña'),
+                                label: Text(AppLocalizations.of(context).changePasswordTitle),
                               ),
                             ),
                           ],
@@ -1141,10 +1187,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   )
                                 : const Icon(LucideIcons.save),
                             label: Text(_isLoading
-                                ? 'Guardando...'
+                                ? AppLocalizations.of(context).saving
                                 : (widget.initialData != null
-                                    ? 'Actualizar'
-                                    : 'Crear Repartidor')),
+                                    ? AppLocalizations.of(context).updateLabel
+                                    : AppLocalizations.of(context).createDriver)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: MedRushTheme.primaryGreen,
                               foregroundColor: MedRushTheme.textInverse,
@@ -1326,9 +1372,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Toca para seleccionar',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).tapToSelect,
+          style: const TextStyle(
             fontSize: 12,
             color: MedRushTheme.textSecondary,
           ),
@@ -1356,7 +1402,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
       }
     } catch (e) {
       if (mounted) {
-        NotificationService.showError('Error al subir imagen: $e',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorUploadingImage(e),
             context: context);
       }
     }
@@ -1368,27 +1415,27 @@ class _RepartidorFormState extends State<RepartidorForm> {
       width: 150,
       height: 150,
       color: MedRushTheme.backgroundSecondary,
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.person,
             size: 48,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Foto del repartidor',
-            style: TextStyle(
+            AppLocalizations.of(context).driverPhotoPlaceholder,
+            style: const TextStyle(
               fontSize: 14,
               color: MedRushTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Toca para seleccionar',
-            style: TextStyle(
+            AppLocalizations.of(context).tapToSelect,
+            style: const TextStyle(
               fontSize: 12,
               color: MedRushTheme.textSecondary,
             ),
@@ -1422,7 +1469,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
       }
     } catch (e) {
       if (mounted) {
-        NotificationService.showError('Error al subir imagen: $e',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorUploadingImage(e),
             context: context);
       }
     }

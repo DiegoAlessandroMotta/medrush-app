@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/geocoding_result.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/services/geocoding_service.dart';
@@ -141,7 +142,7 @@ class _MapaWidgetState extends State<MapaWidget> {
         markerId: const MarkerId('punto'),
         position: widget.puntoSeleccionado!,
         infoWindow: InfoWindow(
-          title: widget.markerTitle ?? 'Ubicación',
+          title: widget.markerTitle ?? AppLocalizations.of(context).locationLabel,
           snippet: widget.markerSnippet,
         ),
         icon: widget.readOnly
@@ -266,7 +267,9 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
         _geocodingResult = null;
       }
     } catch (e) {
-      _direccionEncontrada = 'Error al obtener dirección';
+      if (mounted) {
+        _direccionEncontrada = AppLocalizations.of(context).errorGettingAddress;
+      }
     } finally {
       if (mounted) {
         setState(() {});
@@ -311,9 +314,9 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Ubicación seleccionada:',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context).selectedLocationLabel,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: MedRushTheme.textSecondary,
                           ),
@@ -412,10 +415,10 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                     ),
                   ),
                 ] else ...[
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Toca el mapa para seleccionar una ubicación',
-                      style: TextStyle(
+                      AppLocalizations.of(context).tapMapToSelectLocation,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodyMedium,
                         color: MedRushTheme.textSecondary,
                       ),
@@ -487,7 +490,7 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                       );
                     },
                     icon: const Icon(LucideIcons.navigation),
-                    label: const Text('Centrar'),
+                    label: Text(AppLocalizations.of(context).centerButton),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: MedRushTheme.primaryGreen,
                       side: const BorderSide(color: MedRushTheme.primaryGreen),
@@ -500,7 +503,7 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                     onPressed:
                         _puntoSeleccionado != null ? _confirmarUbicacion : null,
                     icon: const Icon(LucideIcons.check),
-                    label: const Text('Confirmar'),
+                    label: Text(AppLocalizations.of(context).confirmButton),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: MedRushTheme.primaryGreen,
                       foregroundColor: MedRushTheme.textInverse,
@@ -511,7 +514,7 @@ class _MapaPantallaCompletaState extends State<MapaPantallaCompleta> {
                 OutlinedButton.icon(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(LucideIcons.x),
-                  label: const Text('Salir'),
+                  label: Text(AppLocalizations.of(context).exitButton),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: MedRushTheme.textSecondary,
                     side: const BorderSide(color: MedRushTheme.textSecondary),

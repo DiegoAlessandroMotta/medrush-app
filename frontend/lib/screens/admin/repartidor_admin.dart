@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/repartidor.repository.dart';
 import 'package:medrush/screens/admin/modules/repartidor/repartidor_detalles.dart';
@@ -91,14 +92,15 @@ class _PersonalScreenState extends State<PersonalScreen> {
         logInfo('${result.data!.length} repartidores cargados en la UI');
       } else {
         setState(() {
-          _error = result.error ?? 'No se pudo cargar la lista de repartidores';
+          _error = result.error ??
+            AppLocalizations.of(context).errorLoadingDriversUnknown;
           _isLoading = false;
         });
       }
     } catch (e) {
       logError('Error al cargar repartidores en la UI', e);
       setState(() {
-        _error = 'Error al cargar repartidores: $e';
+        _error = AppLocalizations.of(context).errorLoadingDrivers(e.toString());
         _isLoading = false;
       });
     }
@@ -150,8 +152,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
           _loadRepartidores();
           NotificationService.showSuccess(
               repartidor == null
-                  ? 'Repartidor creado exitosamente'
-                  : 'Repartidor actualizado exitosamente',
+                  ? AppLocalizations.of(context).driverCreatedSuccess
+                  : AppLocalizations.of(context).driverUpdatedSuccess,
               context: context);
         },
         onImageUpdated: () {
@@ -181,11 +183,15 @@ class _PersonalScreenState extends State<PersonalScreen> {
   }
 
   Future<void> _deleteRepartidor(Usuario repartidor) async {
+    // Guardar l10n antes del async para evitar problemas con BuildContext
+    final l10n = AppLocalizations.of(context);
+    
     try {
       logInfo('Eliminando repartidor: ${repartidor.nombre}');
       final result = await _repo.deleteRepartidor(repartidor.id);
       if (!result.success) {
-        throw Exception(result.error ?? 'No se pudo eliminar el repartidor');
+        throw Exception(result.error ??
+            l10n.errorLoadingDriversUnknown);
       }
 
       _loadRepartidores(); // Recargar la lista
@@ -193,13 +199,14 @@ class _PersonalScreenState extends State<PersonalScreen> {
       if (mounted) {
         Navigator.of(context).pop(); // Cerrar el diálogo de detalles
         NotificationService.showSuccess(
-            'Repartidor "${repartidor.nombre}" eliminado exitosamente',
+            AppLocalizations.of(context).driverDeletedSuccess(repartidor.nombre),
             context: context);
       }
     } catch (e) {
       logError('Error al eliminar repartidor', e);
       if (mounted) {
-        NotificationService.showError('Error al eliminar repartidor: $e',
+        NotificationService.showError(
+            AppLocalizations.of(context).errorDeleteDriver(e),
             context: context);
       }
     }
@@ -349,20 +356,20 @@ class _PersonalScreenState extends State<PersonalScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar repartidores...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchDrivers,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                   size: 20,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingSm,
                 ),
@@ -395,13 +402,15 @@ class _PersonalScreenState extends State<PersonalScreen> {
                 fontSize: MedRushTheme.fontSizeBodyMedium,
               ),
               items: [
-                const DropdownMenuItem<EstadoRepartidor?>(
-                  child: Text('Todos los estados'),
+                DropdownMenuItem<EstadoRepartidor?>(
+                  child: Text(AppLocalizations.of(context).allStatuses),
                 ),
                 ...EstadoRepartidor.values.map((estado) {
                   return DropdownMenuItem<EstadoRepartidor?>(
                     value: estado,
-                    child: Text(StatusHelpers.estadoRepartidorTexto(estado)),
+                    child: Builder(
+                      builder: (context) => Text(StatusHelpers.estadoRepartidorTexto(estado, AppLocalizations.of(context))),
+                    ),
                   );
                 }),
               ],
@@ -485,9 +494,9 @@ class _PersonalScreenState extends State<PersonalScreen> {
             color: Colors.red,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar los repartidores',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).errorLoadingDriversUnknown,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -495,7 +504,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            _error ?? 'Error desconocido',
+            _error ?? AppLocalizations.of(context).errorUnknown,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
@@ -506,7 +515,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
           ElevatedButton.icon(
             onPressed: _loadRepartidores,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: MedRushTheme.textInverse,
@@ -537,19 +546,19 @@ class _PersonalScreenState extends State<PersonalScreen> {
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 filled: false,
-                hintText: 'Buscar repartidores...',
-                hintStyle: TextStyle(
+                hintText: AppLocalizations.of(context).searchDrivers,
+                hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   LucideIcons.search,
                   color: MedRushTheme.textSecondary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: MedRushTheme.spacingMd,
                   vertical: MedRushTheme.spacingMd,
                 ),
@@ -566,7 +575,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
             child: DropdownButton<EstadoRepartidor?>(
               value: _filtroEstado,
               underline: Container(),
-              hint: const Text('Estado'),
+              hint: Text(AppLocalizations.of(context).status),
               dropdownColor: MedRushTheme.surface,
               borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
               style: const TextStyle(
@@ -574,13 +583,15 @@ class _PersonalScreenState extends State<PersonalScreen> {
                 fontSize: MedRushTheme.fontSizeBodyMedium,
               ),
               items: [
-                const DropdownMenuItem<EstadoRepartidor?>(
-                  child: Text('Todos los estados'),
+                DropdownMenuItem<EstadoRepartidor?>(
+                  child: Text(AppLocalizations.of(context).allStatuses),
                 ),
                 ...EstadoRepartidor.values.map((estado) {
                   return DropdownMenuItem<EstadoRepartidor?>(
                     value: estado,
-                    child: Text(StatusHelpers.estadoRepartidorTexto(estado)),
+                    child: Builder(
+                      builder: (context) => Text(StatusHelpers.estadoRepartidorTexto(estado, AppLocalizations.of(context))),
+                    ),
                   );
                 }),
               ],
@@ -611,7 +622,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadRepartidores,
-              child: const Text('Reintentar'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -664,7 +675,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                           color: MedRushTheme.textSecondary),
                       const SizedBox(width: MedRushTheme.spacingSm),
                       Text(
-                        'Repartidores desactivados (${inactivos.length})',
+                        AppLocalizations.of(context).deactivatedDriversCount(inactivos.length),
                         style: const TextStyle(
                           color: MedRushTheme.textSecondary,
                           fontWeight: MedRushTheme.fontWeightMedium,
@@ -736,7 +747,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                         color: MedRushTheme.primaryGreen,
                         size: 20,
                       ),
-                      tooltip: 'Llamar',
+                      tooltip: AppLocalizations.of(context).call,
                       onPressed: () => _llamarRepartidor(repartidor),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
@@ -750,7 +761,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                         color: MedRushTheme.textSecondary,
                         size: 20,
                       ),
-                      tooltip: 'Editar',
+                      tooltip: AppLocalizations.of(context).edit,
                       onPressed: () =>
                           _showRepartidorForm(repartidor: repartidor),
                       padding: EdgeInsets.zero,
@@ -849,7 +860,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
                       Text(
                         StatusHelpers.estadoRepartidorTexto(
                             repartidor.estadoRepartidor ??
-                                EstadoRepartidor.desconectado),
+                                EstadoRepartidor.desconectado,
+                            AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -871,7 +883,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatLastSeen(repartidor.updatedAt),
+                      _formatLastSeen(context, repartidor.updatedAt),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -897,9 +909,9 @@ class _PersonalScreenState extends State<PersonalScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Ver Detalles',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context).viewDetails,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       fontWeight: MedRushTheme.fontWeightMedium,
                     ),
@@ -913,20 +925,22 @@ class _PersonalScreenState extends State<PersonalScreen> {
     );
   }
 
-  String _formatLastSeen(DateTime? last) {
-    // ignore: always_put_control_body_on_new_line
-    if (last == null) return 'sin actividad';
+  String _formatLastSeen(BuildContext context, DateTime? last) {
+    final l10n = AppLocalizations.of(context);
+    if (last == null) {
+      return l10n.lastActivityNoActivity;
+    }
     final diff = DateTime.now().difference(last);
     if (diff.inMinutes < 1) {
-      return 'justo ahora';
+      return l10n.lastActivityJustNow;
     }
     if (diff.inMinutes < 60) {
-      return 'hace ${diff.inMinutes} min';
+      return l10n.lastActivityMinutesAgo(diff.inMinutes);
     }
     if (diff.inHours < 24) {
-      return 'hace ${diff.inHours} h';
+      return l10n.lastActivityHoursAgo(diff.inHours);
     }
-    return 'hace ${diff.inDays} d';
+    return l10n.lastActivityDaysAgo(diff.inDays);
   }
 
   Widget _buildShimmerLoading() {
@@ -963,8 +977,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
           const SizedBox(height: MedRushTheme.spacingLg),
           Text(
             _searchController.text.isNotEmpty || _filtroEstado != null
-                ? 'No se encontraron repartidores con los filtros aplicados'
-                : 'No hay repartidores registrados',
+                ? AppLocalizations.of(context).noDriversMatchFilters
+                : AppLocalizations.of(context).noDriversRegistered,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyLarge,
               color: MedRushTheme.textSecondary,
@@ -975,7 +989,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
           ElevatedButton.icon(
             onPressed: _showRepartidorForm,
             icon: const Icon(LucideIcons.plus),
-            label: const Text('Agregar Repartidor'),
+            label: Text(AppLocalizations.of(context).addDriver),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryGreen,
               foregroundColor: Colors.white,
@@ -1076,15 +1090,16 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   Future<void> _copiarInformacionRepartidor(Usuario repartidor) async {
     try {
+      final l10n = AppLocalizations.of(context);
       final informacion =
-          'Repartidor: ${repartidor.nombre}\nEmail: ${repartidor.email}\nID: ${repartidor.id}';
+          '${l10n.driverLabel}${repartidor.nombre}\n${l10n.email}: ${repartidor.email}\n${l10n.idLabel}${repartidor.id}';
 
       await Clipboard.setData(ClipboardData(text: informacion));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Información copiada al portapapeles'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).infoCopied),
             backgroundColor: MedRushTheme.primaryGreen,
           ),
         );
@@ -1096,8 +1111,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
       logError('❌ Error al copiar información del repartidor', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al copiar información'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).errorCopyingInfo),
             backgroundColor: Colors.red,
           ),
         );
@@ -1110,7 +1125,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
     if (repartidor.telefono == null || repartidor.telefono!.isEmpty) {
       if (mounted) {
         NotificationService.showError(
-          'Teléfono del repartidor no disponible',
+          AppLocalizations.of(context).driverPhoneNotAvailable,
           context: context,
         );
       }
@@ -1127,7 +1142,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
       } else {
         if (mounted) {
           NotificationService.showError(
-            'No se puede realizar la llamada',
+            AppLocalizations.of(context).cannotMakeCall,
             context: context,
           );
         }
@@ -1136,7 +1151,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
       logError('❌ Error al llamar al repartidor', e);
       if (mounted) {
         NotificationService.showError(
-          'Error al realizar la llamada',
+          AppLocalizations.of(context).errorMakingCall,
           context: context,
         );
       }

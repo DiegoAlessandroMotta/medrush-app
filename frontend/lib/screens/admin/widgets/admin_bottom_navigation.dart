@@ -2,6 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/routes/routes.dart';
 import 'package:medrush/theme/theme.dart';
 
@@ -21,13 +22,13 @@ class _AdminBottomNavigationState extends State<AdminBottomNavigation> {
     LucideIcons.settings,
   ];
 
-  final labelList = <String>[
-    'Entregas',
-    'Farmacias',
-    'Repartidores',
-    'Rutas',
-    'Settings',
-  ];
+  List<String> _labelList(BuildContext context) => <String>[
+        AppLocalizations.of(context).deliveriesTab,
+        AppLocalizations.of(context).pharmaciesTab,
+        AppLocalizations.of(context).driversTab,
+        AppLocalizations.of(context).routesTab,
+        AppLocalizations.of(context).settingsTab,
+      ];
 
   late AdminNavigationController _controller;
 
@@ -37,8 +38,7 @@ class _AdminBottomNavigationState extends State<AdminBottomNavigation> {
     properties
       ..add(StringProperty('navigation', 'AdminBottomNavigation'))
       ..add(IntProperty('currentIndex', _controller.currentIndex))
-      ..add(IterableProperty<IconData>('iconList', iconList))
-      ..add(IterableProperty<String>('labelList', labelList));
+      ..add(IterableProperty<IconData>('iconList', iconList));
   }
 
   @override
@@ -73,7 +73,7 @@ class _AdminBottomNavigationState extends State<AdminBottomNavigation> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  labelList[index],
+                  _labelList(context)[index],
                   style: TextStyle(
                     fontSize: MedRushTheme.fontSizeLabelSmall,
                     fontWeight: isActive

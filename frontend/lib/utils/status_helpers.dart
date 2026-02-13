@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
@@ -11,22 +12,22 @@ import 'package:medrush/utils/validators.dart';
 class StatusHelpers {
   const StatusHelpers._();
 
-  static String estadoPedidoTexto(EstadoPedido estado) {
+  static String estadoPedidoTexto(EstadoPedido estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoPedido.pendiente:
-        return 'Pendiente';
+        return l10n.statusPending;
       case EstadoPedido.asignado:
-        return 'Asignado';
+        return l10n.statusAssigned;
       case EstadoPedido.recogido:
-        return 'Recogido';
+        return l10n.statusPickedUp;
       case EstadoPedido.enRuta:
-        return 'En Ruta';
+        return l10n.statusInRoute;
       case EstadoPedido.entregado:
-        return 'Entregado';
+        return l10n.statusDelivered;
       case EstadoPedido.fallido:
-        return 'Fallido';
+        return l10n.statusFailed;
       case EstadoPedido.cancelado:
-        return 'Cancelado';
+        return l10n.statusCancelled;
     }
   }
 
@@ -68,28 +69,28 @@ class StatusHelpers {
     }
   }
 
-  static String tipoPedidoTexto(TipoPedido tipo) {
+  static String tipoPedidoTexto(TipoPedido tipo, AppLocalizations l10n) {
     switch (tipo) {
       case TipoPedido.medicamentos:
-        return 'Medicamentos';
+        return l10n.orderTypeMedicines;
       case TipoPedido.insumosMedicos:
-        return 'Insumos Médicos';
+        return l10n.orderTypeMedicalSupplies;
       case TipoPedido.equiposMedicos:
-        return 'Equipos Médicos';
+        return l10n.orderTypeMedicalEquipment;
       case TipoPedido.medicamentosControlados:
-        return 'Medicamentos Controlados';
+        return l10n.orderTypeControlledMedicines;
     }
   }
 
   // ===== Repartidor =====
-  static String estadoRepartidorTexto(EstadoRepartidor estado) {
+  static String estadoRepartidorTexto(EstadoRepartidor estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoRepartidor.disponible:
-        return 'Disponible';
+        return l10n.driverStatusAvailable;
       case EstadoRepartidor.enRuta:
-        return 'En Ruta';
+        return l10n.driverStatusInRoute;
       case EstadoRepartidor.desconectado:
-        return 'Desconectado';
+        return l10n.driverStatusDisconnected;
     }
   }
 
@@ -120,16 +121,16 @@ class StatusHelpers {
   }
 
   // ===== Farmacia =====
-  static String estadoFarmaciaTexto(EstadoFarmacia estado) {
+  static String estadoFarmaciaTexto(EstadoFarmacia estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoFarmacia.activa:
-        return 'Activa';
+        return l10n.pharmacyStatusActive;
       case EstadoFarmacia.inactiva:
-        return 'Inactiva';
+        return l10n.pharmacyStatusInactive;
       case EstadoFarmacia.suspendida:
-        return 'Suspendida';
+        return l10n.pharmacyStatusSuspended;
       case EstadoFarmacia.enRevision:
-        return 'En Revisión';
+        return l10n.pharmacyStatusUnderReview;
     }
   }
 
@@ -160,29 +161,29 @@ class StatusHelpers {
   }
 
   // ===== Delegaciones para Theme (compatibilidad) =====
-  static String estadoPedidoTextoString(String status) {
+  static String estadoPedidoTextoString(String status, AppLocalizations l10n) {
     switch (status.toLowerCase()) {
       case 'pendiente':
-        return 'Pendiente';
+        return l10n.statusPending;
       case 'asignado':
-        return 'Asignado';
+        return l10n.statusAssigned;
       case 'en_progreso':
-        return 'En Progreso';
+        return l10n.inProgress;
       case 'recogido':
-        return 'Recogido';
+        return l10n.statusPickedUp;
       case 'en_ruta':
       case 'enruta':
-        return 'En Ruta';
+        return l10n.statusInRoute;
       case 'entregado':
       case 'completado':
-        return 'Entregado';
+        return l10n.statusDelivered;
       case 'fallido':
       case 'error':
-        return 'Fallido';
+        return l10n.statusFailed;
       case 'cancelado':
-        return 'Cancelado';
+        return l10n.statusCancelled;
       default:
-        return 'Desconocido';
+        return l10n.unknown;
     }
   }
 
@@ -253,7 +254,7 @@ class StatusHelpers {
   }
 
   // ===== Formateo de Fechas =====
-  static String formatearFechaRelativa(DateTime fecha) {
+  static String formatearFechaRelativa(DateTime fecha, AppLocalizations l10n) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final fechaComparar = DateTime(fecha.year, fecha.month, fecha.day);
@@ -267,14 +268,14 @@ class StatusHelpers {
     } else if (diferencia == -1) {
       return 'Ayer, ${_formatearHora(fecha)}';
     } else if (diferencia > 1 && diferencia <= 7) {
-      return '${_obtenerNombreDia(fecha)}, ${_formatearHora(fecha)}';
+      return '${_obtenerNombreDia(fecha, l10n)}, ${_formatearHora(fecha)}';
     } else {
       return '${fecha.day}/${fecha.month}/${fecha.year}, ${_formatearHora(fecha)}';
     }
   }
 
   /// Formatea una fecha relativa optimizada (solo muestra año si es diferente al actual)
-  static String formatearFechaRelativaOptimizada(DateTime fecha) {
+  static String formatearFechaRelativaOptimizada(DateTime fecha, AppLocalizations l10n) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final fechaComparar = DateTime(fecha.year, fecha.month, fecha.day);
@@ -288,7 +289,7 @@ class StatusHelpers {
     } else if (diferencia == -1) {
       return 'Ayer, ${_formatearHora(fecha)}';
     } else if (diferencia > 1 && diferencia <= 7) {
-      return '${_obtenerNombreDia(fecha)}, ${_formatearHora(fecha)}';
+      return '${_obtenerNombreDia(fecha, l10n)}, ${_formatearHora(fecha)}';
     } else {
       // Solo mostrar año si es diferente al actual
       final anoActual = ahora.year;
@@ -426,21 +427,21 @@ class StatusHelpers {
     return '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')}';
   }
 
-  static String _obtenerNombreDia(DateTime fecha) {
-    const dias = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo'
+  static String _obtenerNombreDia(DateTime fecha, AppLocalizations l10n) {
+    final dias = [
+      l10n.monday,
+      l10n.tuesday,
+      l10n.wednesday,
+      l10n.thursday,
+      l10n.friday,
+      l10n.saturday,
+      l10n.sunday
     ];
     return dias[fecha.weekday - 1];
   }
 
   static String formatearFechaConVentana(
-      DateTime fechaInicio, DateTime fechaFin) {
+      DateTime fechaInicio, DateTime fechaFin, AppLocalizations l10n) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final fechaComparar =
@@ -456,7 +457,7 @@ class StatusHelpers {
     } else if (diferencia == -1) {
       prefijoFecha = 'Ayer';
     } else if (diferencia > 1 && diferencia <= 7) {
-      prefijoFecha = _obtenerNombreDia(fechaInicio);
+      prefijoFecha = _obtenerNombreDia(fechaInicio, l10n);
     } else {
       prefijoFecha =
           '${fechaInicio.day}/${fechaInicio.month}/${fechaInicio.year}';
@@ -509,8 +510,10 @@ class StatusHelpers {
     }
 
     // Validar que el tiempo sea razonable (máximo 24 horas = 1440 minutos)
+    // Nota: Este método necesita AppLocalizations pero se mantiene sin l10n por compatibilidad
+    // Se puede mejorar en el futuro para recibir l10n como parámetro
     if (minutosFinales > 1440) {
-      return 'Tiempo inválido';
+      return 'Tiempo inválido'; // TODO: Localizar cuando se añada l10n como parámetro
     }
 
     final horas = minutosFinales ~/ 60;
@@ -630,7 +633,7 @@ class StatusHelpers {
   /// Obtiene la fecha más relevante según el sistema de prioridad:
   /// Prioridad 1: fechaEntrega > Prioridad 2: fechaRecogida > Prioridad 3: fechaAsignacion
   /// Si no hay fechas disponibles, retorna un mensaje descriptivo según el estado
-  static String obtenerFechaSegunPrioridad(Pedido pedido) {
+  static String obtenerFechaSegunPrioridad(Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaCompletaOptimizada(pedido.fechaEntrega!);
@@ -647,12 +650,12 @@ class StatusHelpers {
     }
 
     // Fallback: mostrar mensaje según estado si no hay ninguna fecha
-    return _obtenerMensajeFallbackPorEstado(pedido.estado);
+    return _obtenerMensajeFallbackPorEstado(pedido.estado, l10n);
   }
 
   /// Obtiene la fecha más relevante con formato personalizado
   static String obtenerFechaSegunPrioridadConFormato(
-      Pedido pedido, String Function(DateTime) formateador) {
+      Pedido pedido, String Function(DateTime) formateador, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formateador(pedido.fechaEntrega!);
@@ -669,11 +672,11 @@ class StatusHelpers {
     }
 
     // Fallback: mostrar mensaje según estado si no hay ninguna fecha
-    return _obtenerMensajeFallbackPorEstado(pedido.estado);
+    return _obtenerMensajeFallbackPorEstado(pedido.estado, l10n);
   }
 
   /// Obtiene solo la fecha (sin hora) según el sistema de prioridad
-  static String obtenerFechaSegunPrioridadSoloFecha(Pedido pedido) {
+  static String obtenerFechaSegunPrioridadSoloFecha(Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaAPI(pedido.fechaEntrega!);
@@ -690,11 +693,11 @@ class StatusHelpers {
     }
 
     // Fallback: mostrar mensaje según estado si no hay ninguna fecha
-    return _obtenerMensajeFallbackPorEstado(pedido.estado);
+    return _obtenerMensajeFallbackPorEstado(pedido.estado, l10n);
   }
 
   /// Obtiene la fecha relativa según el sistema de prioridad
-  static String obtenerFechaRelativaSegunPrioridad(Pedido pedido) {
+  static String obtenerFechaRelativaSegunPrioridad(Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaRelativaMejorada(pedido.fechaEntrega!);
@@ -711,42 +714,42 @@ class StatusHelpers {
     }
 
     // Fallback: mostrar mensaje según estado si no hay ninguna fecha
-    return _obtenerMensajeFallbackPorEstado(pedido.estado);
+    return _obtenerMensajeFallbackPorEstado(pedido.estado, l10n);
   }
 
   /// Obtiene la fecha relativa optimizada según el sistema de prioridad (solo muestra año si es diferente al actual)
-  static String obtenerFechaRelativaSegunPrioridadOptimizada(Pedido pedido) {
+  static String obtenerFechaRelativaSegunPrioridadOptimizada(Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
-      return formatearFechaRelativaOptimizada(pedido.fechaEntrega!);
+      return formatearFechaRelativaOptimizada(pedido.fechaEntrega!, l10n);
     }
 
     // Prioridad 2: fechaRecogida (si no hay entrega)
     if (pedido.fechaRecogida != null) {
-      return formatearFechaRelativaOptimizada(pedido.fechaRecogida!);
+      return formatearFechaRelativaOptimizada(pedido.fechaRecogida!, l10n);
     }
 
     // Prioridad 3: fechaAsignacion (si no hay recogida ni entrega)
     if (pedido.fechaAsignacion != null) {
-      return formatearFechaRelativaOptimizada(pedido.fechaAsignacion!);
+      return formatearFechaRelativaOptimizada(pedido.fechaAsignacion!, l10n);
     }
 
     // Fallback: mostrar mensaje según estado si no hay ninguna fecha
-    return _obtenerMensajeFallbackPorEstado(pedido.estado);
+    return _obtenerMensajeFallbackPorEstado(pedido.estado, l10n);
   }
 
   /// Obtiene el tipo de fecha que se está mostrando según la prioridad
-  static String obtenerTipoFechaMostrada(Pedido pedido) {
+  static String obtenerTipoFechaMostrada(Pedido pedido, AppLocalizations l10n) {
     if (pedido.fechaEntrega != null) {
-      return 'Entrega';
+      return l10n.dateTypeDelivery;
     }
     if (pedido.fechaRecogida != null) {
-      return 'Recogida';
+      return l10n.dateTypePickup;
     }
     if (pedido.fechaAsignacion != null) {
-      return 'Asignación';
+      return l10n.dateTypeAssignment;
     }
-    return 'Sin fecha';
+    return l10n.noDate;
   }
 
   /// Obtiene el icono correspondiente al tipo de fecha mostrada
@@ -778,22 +781,22 @@ class StatusHelpers {
   }
 
   /// Obtiene mensaje fallback según el estado del pedido
-  static String _obtenerMensajeFallbackPorEstado(EstadoPedido estado) {
+  static String _obtenerMensajeFallbackPorEstado(EstadoPedido estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoPedido.pendiente:
-        return 'Sin fecha';
+        return l10n.noDate;
       case EstadoPedido.asignado:
-        return 'Recién asignado';
+        return l10n.recentlyAssigned;
       case EstadoPedido.recogido:
-        return 'Recién recogido';
+        return l10n.recentlyPickedUp;
       case EstadoPedido.enRuta:
-        return 'En ruta';
+        return l10n.inRoute;
       case EstadoPedido.entregado:
-        return 'Recién entregado';
+        return l10n.recentlyDelivered;
       case EstadoPedido.fallido:
-        return 'Entrega fallida';
+        return l10n.deliveryFailed;
       case EstadoPedido.cancelado:
-        return 'Cancelado';
+        return l10n.statusCancelled;
     }
   }
 
@@ -818,20 +821,20 @@ class StatusHelpers {
   }
 
   /// Obtiene el texto legible del motivo de fallo
-  static String motivoFallaTexto(MotivoFalla motivo) {
+  static String motivoFallaTexto(MotivoFalla motivo, AppLocalizations l10n) {
     switch (motivo) {
       case MotivoFalla.noSeEncontraba:
-        return 'Cliente no se encontraba';
+        return l10n.failureReasonClientNotFound;
       case MotivoFalla.direccionIncorrecta:
-        return 'Dirección incorrecta';
+        return l10n.failureReasonWrongAddress;
       case MotivoFalla.noRecibioLlamadas:
-        return 'No recibió llamadas';
+        return l10n.failureReasonNoCalls;
       case MotivoFalla.rechazoEntrega:
-        return 'Rechazó la entrega';
+        return l10n.failureReasonDeliveryRejected;
       case MotivoFalla.accesoDenegado:
-        return 'Acceso denegado';
+        return l10n.failureReasonAccessDenied;
       case MotivoFalla.otro:
-        return 'Otro motivo';
+        return l10n.failureReasonOther;
     }
   }
 

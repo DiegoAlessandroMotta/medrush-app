@@ -1,3 +1,5 @@
+import 'package:medrush/l10n/app_localizations.dart';
+
 // Tipos de eventos del sistema (alineados con EventosPedidoEnum del backend)
 enum TipoEvento {
   // Eventos principales de pedidos
@@ -185,53 +187,53 @@ class EventoPedido {
     }
   }
 
-  String get tipoTexto {
+  String tipoTexto(AppLocalizations l10n) {
     switch (tipo) {
       case TipoEvento.creado:
-        return 'Creado';
+        return l10n.eventTypeCreated;
       case TipoEvento.asignado:
-        return 'Asignado';
+        return l10n.eventTypeAssigned;
       case TipoEvento.recogido:
-        return 'Recogido';
+        return l10n.eventTypePickedUp;
       case TipoEvento.enRuta:
-        return 'En Ruta';
+        return l10n.eventTypeInRoute;
       case TipoEvento.entregado:
-        return 'Entregado';
+        return l10n.eventTypeDelivered;
       case TipoEvento.fallido:
-        return 'Entrega Fallida';
+        return l10n.eventTypeFailed;
       case TipoEvento.cancelado:
-        return 'Cancelado';
+        return l10n.eventTypeCancelled;
       case TipoEvento.reagendado:
-        return 'Reagendado';
+        return l10n.eventTypeRescheduled;
       // Eventos del sistema
       case TipoEvento.pedidoCreado:
-        return 'Pedido Creado';
+        return l10n.eventTypeOrderCreated;
       case TipoEvento.pedidoAsignado:
-        return 'Pedido Asignado';
+        return l10n.eventTypeOrderAssigned;
       case TipoEvento.pedidoRecogido:
-        return 'Pedido Recogido';
+        return l10n.eventTypePickedUp;
       case TipoEvento.pedidoEnRuta:
-        return 'Pedido En Ruta';
+        return l10n.eventTypeInRoute;
       case TipoEvento.pedidoEntregado:
-        return 'Pedido Entregado';
+        return l10n.eventTypeDelivered;
       case TipoEvento.pedidoFallido:
-        return 'Pedido Fallido';
+        return l10n.eventTypeFailed;
       case TipoEvento.pedidoCancelado:
-        return 'Pedido Cancelado';
+        return l10n.eventTypeCancelled;
       case TipoEvento.rutaOptimizada:
-        return 'Ruta Optimizada';
+        return l10n.eventTypeRouteOptimized;
       case TipoEvento.ubicacionActualizada:
-        return 'Ubicación Actualizada';
+        return l10n.eventTypeLocationUpdated;
       case TipoEvento.repartidorConectado:
-        return 'Repartidor Conectado';
+        return l10n.eventTypeDriverConnected;
       case TipoEvento.repartidorDesconectado:
-        return 'Repartidor Desconectado';
+        return l10n.eventTypeDriverDisconnected;
       case TipoEvento.farmaciaConectada:
-        return 'Farmacia Conectada';
+        return l10n.eventTypePharmacyConnected;
       case TipoEvento.farmaciaDesconectada:
-        return 'Farmacia Desconectada';
+        return l10n.eventTypePharmacyDisconnected;
       case TipoEvento.notificacionEnviada:
-        return 'Notificación Enviada';
+        return l10n.eventTypeNotificationSent;
     }
   }
 

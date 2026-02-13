@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 
@@ -198,7 +199,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Galería'),
+                title: Text(AppLocalizations.of(context).gallery),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage();
@@ -206,7 +207,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Cámara'),
+                title: Text(AppLocalizations.of(context).camera),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage();
@@ -260,7 +261,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
           TextButton.icon(
             onPressed: _removeImage,
             icon: const Icon(Icons.delete_outline, size: 16),
-            label: const Text('Eliminar'),
+            label: Text(AppLocalizations.of(context).delete),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

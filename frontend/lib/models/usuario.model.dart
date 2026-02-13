@@ -1,3 +1,4 @@
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 // Tipos de usuario del sistema (alineados con RolesEnum del backend)
@@ -304,9 +305,9 @@ class Usuario {
   bool get esRepartidor => tipoUsuario == TipoUsuario.repartidor;
   bool get esAdministrador => tipoUsuario == TipoUsuario.administrador;
 
-  String get vehiculoCompleto {
+  String vehiculoCompleto(AppLocalizations l10n) {
     if (vehiculoMarca == null && vehiculoModelo == null) {
-      return 'No especificado';
+      return l10n.notSpecified;
     }
     return '${vehiculoMarca ?? ''} ${vehiculoModelo ?? ''}'.trim();
   }
@@ -327,12 +328,12 @@ class Usuario {
 
 // Extensiones para los enums
 extension TipoUsuarioExtension on TipoUsuario {
-  String get texto {
+  String texto(AppLocalizations l10n) {
     switch (this) {
       case TipoUsuario.administrador:
-        return 'Administrador';
+        return l10n.userTypeAdministrator;
       case TipoUsuario.repartidor:
-        return 'Repartidor';
+        return l10n.userTypeDriver;
     }
   }
 }

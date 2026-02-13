@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
 import 'package:medrush/services/notification_service.dart';
@@ -52,7 +53,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
   List<Pedido> get _pedidosFiltrados => _pedidos;
 
   // Lista de pedidos agrupados por fecha
-  List<Widget> get _pedidosAgrupadosPorFecha {
+  List<Widget> _pedidosAgrupadosPorFecha(BuildContext context) {
     if (_pedidosFiltrados.isEmpty) {
       return [];
     }
@@ -83,7 +84,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
       final pedidosDelDia = pedidosPorFecha[fechaKey]!;
 
       // Agregar separador de fecha
-      widgets.add(_buildSeparadorFecha(fechaKey, pedidosDelDia.length));
+      widgets.add(_buildSeparadorFecha(context, fechaKey, pedidosDelDia.length));
 
       // Agregar pedidos del día
       for (final pedido in pedidosDelDia) {
@@ -150,7 +151,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         logInfo('${_pedidos.length} pedidos cargados para PDF');
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cargar pedidos';
+          _error = result.error ?? AppLocalizations.of(context).errorLoadingOrders;
           _isLoading = false;
         });
         logError('Error al cargar pedidos para PDF: ${result.error}');
@@ -159,7 +160,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
       logError('Error al cargar pedidos para PDF', e);
       if (mounted) {
         setState(() {
-          _error = 'Error al cargar pedidos: $e';
+          _error = AppLocalizations.of(context).errorLoadingOrdersWithError(e);
           _isLoading = false;
         });
       }
@@ -184,7 +185,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
     return Scaffold(
       backgroundColor: MedRushTheme.backgroundPrimary,
       appBar: AppBar(
-        title: Text('Generar PDF - ${_getFiltroTexto()}'),
+        title: Text('${AppLocalizations.of(context).generatePdfTitle} - ${_getFiltroTexto(context)}'),
         backgroundColor: MedRushTheme.backgroundPrimary,
         elevation: 0,
         leading: IconButton(
@@ -234,7 +235,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: MedRushTheme.spacingMd),
-      children: _pedidosAgrupadosPorFecha,
+      children: _pedidosAgrupadosPorFecha(context),
     );
   }
 
@@ -323,12 +324,14 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                           color: MedRushTheme.textInverse,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          StatusHelpers.estadoPedidoTexto(pedido.estado),
-                          style: const TextStyle(
-                            fontSize: MedRushTheme.fontSizeBodySmall,
-                            color: MedRushTheme.textInverse,
-                            fontWeight: MedRushTheme.fontWeightMedium,
+                        Builder(
+                          builder: (context) => Text(
+                            StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
+                            style: const TextStyle(
+                              fontSize: MedRushTheme.fontSizeBodySmall,
+                              color: MedRushTheme.textInverse,
+                              fontWeight: MedRushTheme.fontWeightMedium,
+                            ),
                           ),
                         ),
                       ],
@@ -372,20 +375,20 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                   // Recargar datos con el nuevo término de búsqueda
                   await _loadPedidos();
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   filled: false,
-                  hintText: 'Filtrar por nombre, dirección',
-                  hintStyle: TextStyle(
+                  hintText: AppLocalizations.of(context).filterByNameAddressHint,
+                  hintStyle: const TextStyle(
                     color: MedRushTheme.textSecondary,
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                   ),
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     LucideIcons.search,
                     color: MedRushTheme.textSecondary,
                     size: 20,
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: MedRushTheme.spacingMd,
                     vertical: MedRushTheme.spacingSm,
                   ),
@@ -415,7 +418,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                 size: 18,
               ),
               label: Text(
-                _selectAll ? 'Deseleccionar Todo' : 'Seleccionar Todo',
+                _selectAll ? AppLocalizations.of(context).deselectAll : AppLocalizations.of(context).selectAll,
                 style: const TextStyle(
                   color: MedRushTheme.textPrimary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -457,7 +460,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                         ),
                         const SizedBox(width: MedRushTheme.spacingXs),
                         Text(
-                          _getFiltroTexto(),
+                          _getFiltroTexto(context),
                           style: const TextStyle(
                             color: MedRushTheme.textPrimary,
                             fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -489,11 +492,13 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                               ),
                               const SizedBox(width: MedRushTheme.spacingXs),
                               Expanded(
-                                child: Text(
-                                  StatusHelpers.estadoPedidoTexto(estado),
-                                  style: const TextStyle(
-                                    fontSize: MedRushTheme.fontSizeBodyMedium,
-                                    color: MedRushTheme.textPrimary,
+                                child: Builder(
+                                  builder: (context) => Text(
+                                    StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+                                    style: const TextStyle(
+                                      fontSize: MedRushTheme.fontSizeBodyMedium,
+                                      color: MedRushTheme.textPrimary,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -508,19 +513,19 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                     value: 'actions',
                     child: Divider(),
                   ),
-                  const DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     value: 'select_all',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           LucideIcons.check,
                           color: MedRushTheme.primaryGreen,
                           size: 16,
                         ),
-                        SizedBox(width: MedRushTheme.spacingXs),
+                        const SizedBox(width: MedRushTheme.spacingXs),
                         Text(
-                          'Seleccionar Todos',
-                          style: TextStyle(
+                          AppLocalizations.of(context).selectAllOrders,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodyMedium,
                             color: MedRushTheme.textPrimary,
                           ),
@@ -528,19 +533,19 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                       ],
                     ),
                   ),
-                  const DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     value: 'clear_all',
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           LucideIcons.x,
                           color: MedRushTheme.textSecondary,
                           size: 16,
                         ),
-                        SizedBox(width: MedRushTheme.spacingXs),
+                        const SizedBox(width: MedRushTheme.spacingXs),
                         Text(
-                          'Limpiar Filtros',
-                          style: TextStyle(
+                          AppLocalizations.of(context).clearFilters,
+                          style: const TextStyle(
                             fontSize: MedRushTheme.fontSizeBodyMedium,
                             color: MedRushTheme.textPrimary,
                           ),
@@ -688,7 +693,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         _actualizarSeleccion();
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cargar la página';
+          _error = result.error ?? AppLocalizations.of(context).errorLoadingPage;
           _isLoading = false;
         });
       }
@@ -697,7 +702,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cargar la página: $e';
+        _error = '${AppLocalizations.of(context).errorLoadingPage}: $e';
         _isLoading = false;
       });
     }
@@ -739,7 +744,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         _actualizarSeleccion();
       } else {
         setState(() {
-          _error = result.error ?? 'Error al cambiar items por página';
+          _error = result.error ?? AppLocalizations.of(context).errorChangingItemsPerPage;
           _isLoading = false;
         });
       }
@@ -748,7 +753,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         return;
       }
       setState(() {
-        _error = 'Error al cambiar items por página: $e';
+        _error = '${AppLocalizations.of(context).errorChangingItemsPerPage}: $e';
         _isLoading = false;
       });
     }
@@ -778,7 +783,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
               onPressed:
                   _pedidosSeleccionados.isNotEmpty ? _copiarCodigos : null,
               icon: const Icon(LucideIcons.copy, size: 18),
-              label: const Text('Copiar Datos'),
+              label: Text(AppLocalizations.of(context).copyData),
               style: OutlinedButton.styleFrom(
                 foregroundColor: MedRushTheme.primaryBlue,
                 side: const BorderSide(color: MedRushTheme.primaryBlue),
@@ -806,7 +811,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
                       ),
                     )
                   : const Icon(LucideIcons.download, size: 18),
-              label: Text(_isPrinting ? 'Generando PDF...' : 'Generar PDF'),
+              label: Text(_isPrinting ? AppLocalizations.of(context).generatingPdf : AppLocalizations.of(context).generatePdfTitle),
               style: ElevatedButton.styleFrom(
                 backgroundColor: MedRushTheme.primaryGreen,
                 foregroundColor: MedRushTheme.textInverse,
@@ -821,17 +826,17 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             color: MedRushTheme.primaryBlue,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'Cargando pedidos para PDF...',
-            style: TextStyle(
+            AppLocalizations.of(context).loadingOrdersForPdf,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyLarge,
               color: MedRushTheme.textPrimary,
               fontWeight: MedRushTheme.fontWeightMedium,
@@ -843,6 +848,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
   }
 
   Widget _buildErrorState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -853,9 +859,9 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
             color: MedRushTheme.primaryBlue,
           ),
           const SizedBox(height: MedRushTheme.spacingLg),
-          const Text(
-            'Error al cargar pedidos',
-            style: TextStyle(
+          Text(
+            l10n.errorLoadingOrders,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
@@ -863,7 +869,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
           ),
           const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            _error ?? 'Error desconocido',
+            _error ?? l10n.unknownError,
             style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
@@ -874,7 +880,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
           ElevatedButton.icon(
             onPressed: _loadPedidos,
             icon: const Icon(LucideIcons.refreshCw),
-            label: const Text('Reintentar'),
+            label: Text(l10n.retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: MedRushTheme.primaryBlue,
               foregroundColor: MedRushTheme.textInverse,
@@ -886,28 +892,29 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    final l10n = AppLocalizations.of(context);
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.barcode,
             size: 64,
             color: MedRushTheme.textSecondary,
           ),
-          SizedBox(height: MedRushTheme.spacingLg),
+          const SizedBox(height: MedRushTheme.spacingLg),
           Text(
-            'No hay pedidos pendientes para generar PDF',
-            style: TextStyle(
+            l10n.noPendingOrdersForPdf,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               fontWeight: MedRushTheme.fontWeightBold,
               color: MedRushTheme.textPrimary,
             ),
           ),
-          SizedBox(height: MedRushTheme.spacingMd),
+          const SizedBox(height: MedRushTheme.spacingMd),
           Text(
-            'Los pedidos pendientes aparecerán aquí para generar etiquetas de envío',
-            style: TextStyle(
+            l10n.pendingOrdersPdfDescription,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeBodyMedium,
               color: MedRushTheme.textSecondary,
             ),
@@ -1019,23 +1026,24 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
   }
 
   // Construir separador de fecha
-  Widget _buildSeparadorFecha(String fechaKey, int cantidad) {
+  Widget _buildSeparadorFecha(BuildContext context, String fechaKey, int cantidad) {
+    final l10n = AppLocalizations.of(context);
     String titulo;
     String subtitulo;
 
     switch (fechaKey) {
       case 'hoy':
-        titulo = 'Hoy';
-        subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+        titulo = l10n.dateToday;
+        subtitulo = l10n.ordersCountLabel(cantidad);
       case 'ayer':
-        titulo = 'Ayer';
-        subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+        titulo = l10n.dateYesterday;
+        subtitulo = l10n.ordersCountLabel(cantidad);
       case 'anteayer':
-        titulo = 'Anteayer';
-        subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+        titulo = l10n.dateDayBeforeYesterday;
+        subtitulo = l10n.ordersCountLabel(cantidad);
       case 'hace3dias':
-        titulo = 'Hace 3 días';
-        subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+        titulo = l10n.dateThreeDaysAgo;
+        subtitulo = l10n.ordersCountLabel(cantidad);
       default:
         // Fecha específica
         final partes = fechaKey.split('-');
@@ -1046,10 +1054,10 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
             int.parse(partes[2]), // día
           );
           titulo = '${fecha.day}/${fecha.month}/${fecha.year}';
-          subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+          subtitulo = l10n.ordersCountLabel(cantidad);
         } else {
           titulo = fechaKey;
-          subtitulo = '$cantidad pedido${cantidad != 1 ? 's' : ''}';
+          subtitulo = l10n.ordersCountLabel(cantidad);
         }
     }
 
@@ -1212,6 +1220,9 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
       logInfo(
           'Generando PDF con ${pedidosSeleccionados.length} etiquetas de envío - Iniciado a las ${DateTime.now().toIso8601String()}');
 
+      // Guardar l10n antes del async para evitar problemas con BuildContext
+      final l10n = AppLocalizations.of(context);
+
       // Mostrar progreso al usuario
       if (mounted) {
         NotificationService.showInfo(
@@ -1239,7 +1250,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
 
         if (fileUrl != null) {
           // PDF está listo, descargar inmediatamente
-          await _descargarPdfDesdeUrl(fileUrl, filename);
+          await _descargarPdfDesdeUrl(fileUrl, filename, l10n);
 
           if (mounted) {
             NotificationService.showSuccess(
@@ -1248,7 +1259,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
             );
           }
         } else {
-          throw Exception('No se recibió URL de descarga del PDF');
+          throw Exception(l10n.pdfDownloadUrlNotReceived);
         }
 
         stopwatch.stop();
@@ -1256,18 +1267,15 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         logInfo(
             'Solicitud de PDF procesada: ${pedidosSeleccionados.length} etiquetas - Tiempo total del proceso: ${totalSeconds.toStringAsFixed(2)}s (${stopwatch.elapsedMilliseconds}ms)');
       } else {
-        throw Exception(result.error ?? 'Error desconocido al generar PDF');
+        throw Exception(result.error ?? l10n.unknownErrorGeneratingPdf);
       }
     } catch (e) {
       logError('Error al generar PDF', e);
       if (mounted) {
-        String errorMessage = 'Error al generar PDF';
-        if (e.toString().contains('Timeout')) {
-          errorMessage =
-              'La generación del PDF tardó demasiado. Intente con menos etiquetas.';
-        } else {
-          errorMessage = 'Error al generar PDF: ${e.toString()}';
-        }
+        final l10n = AppLocalizations.of(context);
+        final String errorMessage = e.toString().contains('Timeout')
+            ? l10n.pdfGenerationTimeout
+            : l10n.errorGeneratingPdfWithError(e);
 
         NotificationService.showError(
           errorMessage,
@@ -1285,7 +1293,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
 
   /// Descarga el PDF desde una URL del backend
   Future<void> _descargarPdfDesdeUrl(
-      String downloadUrl, String filename) async {
+      String downloadUrl, String filename, AppLocalizations l10n) async {
     final stopwatch = Stopwatch()..start();
     try {
       // Usar url_launcher para abrir la URL de descarga
@@ -1302,7 +1310,7 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         logInfo(
             'PDF abierto para descarga desde backend - Tiempo: ${stopwatch.elapsedMilliseconds}ms');
       } else {
-        throw Exception('No se puede abrir la URL de descarga');
+        throw Exception(l10n.couldNotOpenDownloadLink);
       }
     } catch (e) {
       logError('Error al abrir PDF desde URL', e);
@@ -1318,14 +1326,15 @@ class _PedidosPrintScreenState extends State<PedidosPrintScreen> {
         .toList();
   }
 
-  String _getFiltroTexto() {
+  String _getFiltroTexto(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final seleccionados = _getEstadosSeleccionados();
     if (seleccionados.isEmpty) {
-      return 'Solo Pendientes';
+      return l10n.onlyPending;
     } else if (seleccionados.length == 1) {
-      return StatusHelpers.estadoPedidoTexto(seleccionados.first);
+      return StatusHelpers.estadoPedidoTexto(seleccionados.first, l10n);
     } else {
-      return '${seleccionados.length} estados';
+      return l10n.statesCount(seleccionados.length);
     }
   }
 }

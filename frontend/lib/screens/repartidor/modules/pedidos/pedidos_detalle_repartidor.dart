@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/farmacias.api.dart';
 import 'package:medrush/api/pedidos.api.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/screens/repartidor/entregar_repartidor.dart';
@@ -147,17 +148,17 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         final decision = await showDialog<String>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Confirmar entrega'),
-            content: const Text(
-                '¿Deseas capturar la firma del cliente antes de marcar como entregado?'),
+            title: Text(AppLocalizations.of(context).confirmDeliveryTitle),
+            content: Text(
+                AppLocalizations.of(context).confirmDeliveryWithSignature),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop('capture'),
-                child: const Text('Capturar firma'),
+                child: Text(AppLocalizations.of(context).captureSignature),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop('deliver'),
-                child: const Text('Entregar sin firma'),
+                child: Text(AppLocalizations.of(context).deliverWithoutSignature),
               ),
             ],
           ),
@@ -223,7 +224,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       });
 
       NotificationService.showSuccess(
-        'Estado actualizado a: ${StatusHelpers.estadoPedidoTexto(nuevoEstado)}',
+        'Estado actualizado a: ${StatusHelpers.estadoPedidoTexto(nuevoEstado, AppLocalizations.of(context))}',
         context: context,
       );
     } catch (e) {
@@ -236,7 +237,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       });
 
       NotificationService.showError(
-        'Error al actualizar estado: $e',
+        AppLocalizations.of(context).errorUpdatingState(e),
         context: context,
       );
     }
@@ -253,7 +254,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede llamar a ${_pedido!.pacienteTelefono}',
+          AppLocalizations.of(context).cannotMakeCall,
           context: context,
         );
       }
@@ -269,14 +270,14 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       await Clipboard.setData(ClipboardData(text: _pedido!.pacienteTelefono));
       if (mounted) {
         NotificationService.showSuccess(
-          'Teléfono copiado al portapapeles: ${_pedido!.pacienteTelefono}',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
     } catch (e) {
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar teléfono: $e',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }
@@ -286,7 +287,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
   Future<void> _copiarEmailAlPortapapeles() async {
     if (_pedido == null || _pedido!.pacienteEmail == null) {
       NotificationService.showInfo(
-        'El cliente no tiene email registrado',
+        AppLocalizations.of(context).clientHasNoEmail,
         context: context,
       );
       return;
@@ -296,14 +297,14 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       await Clipboard.setData(ClipboardData(text: _pedido!.pacienteEmail!));
       if (mounted) {
         NotificationService.showSuccess(
-          'Email copiado al portapapeles: ${_pedido!.pacienteEmail}',
+          AppLocalizations.of(context).infoCopied,
           context: context,
         );
       }
     } catch (e) {
       if (mounted) {
         NotificationService.showError(
-          'Error al copiar email: $e',
+          AppLocalizations.of(context).errorCopyingInfo,
           context: context,
         );
       }
@@ -325,7 +326,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede abrir Google Maps',
+          AppLocalizations.of(context).couldNotOpenMaps,
           context: context,
         );
       }
@@ -348,7 +349,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
     } else {
       if (mounted) {
         NotificationService.showError(
-          'No se puede abrir navegación',
+          AppLocalizations.of(context).cannotOpenNavigation,
           context: context,
         );
       }
@@ -389,7 +390,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Pedido #${widget.pedidoId}',
+                              '${AppLocalizations.of(context).orderIdShort}${widget.pedidoId}',
                               style: const TextStyle(
                                 fontSize: MedRushTheme.fontSizeTitleLarge,
                                 fontWeight: MedRushTheme.fontWeightBold,
@@ -410,7 +411,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                 ),
                                 child: Text(
                                   StatusHelpers.estadoPedidoTexto(
-                                      _pedido!.estado),
+                                      _pedido!.estado, AppLocalizations.of(context)),
                                   style: const TextStyle(
                                     color: MedRushTheme.textInverse,
                                     fontSize: MedRushTheme.fontSizeLabelSmall,
@@ -458,26 +459,28 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Estado del pedido
-                              _buildInfoSection('Estado de la Entrega', [
+                              _buildInfoSection(AppLocalizations.of(context).deliveryStatus, [
                                 if (_pedido!.prioridad > 1)
                                   _buildInfoRow(
-                                      'Prioridad', 'P${_pedido!.prioridad}'),
+                                      AppLocalizations.of(context).priority,
+                                      'P${_pedido!.prioridad}'),
                                 _buildTimelineInfo(),
                               ]),
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
-                              // Información del cliente
-                              _buildInfoSection('Información del Cliente', [
+                              _buildInfoSection(
+                                  AppLocalizations.of(context).clientInformation, [
                                 _buildInfoRow(
-                                    'Nombre', _pedido!.pacienteNombre),
+                                    AppLocalizations.of(context).name,
+                                    _pedido!.pacienteNombre),
                                 _buildInfoRowWithActions(
-                                  'Teléfono',
+                                  AppLocalizations.of(context).phone,
                                   _pedido!.pacienteTelefono,
                                   [
                                     _buildActionButton(
                                       icon: LucideIcons.copy,
-                                      tooltip: 'Copiar teléfono',
+                                      tooltip: AppLocalizations.of(context).copyPhoneTooltip,
                                       onPressed: _copiarTelefonoAlPortapapeles,
                                     ),
                                   ],
@@ -485,12 +488,12 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                 if (_pedido!.pacienteEmail != null &&
                                     _pedido!.pacienteEmail!.isNotEmpty)
                                   _buildInfoRowWithActions(
-                                    'Email',
+                                    AppLocalizations.of(context).email,
                                     _pedido!.pacienteEmail!,
                                     [
                                       _buildActionButton(
                                         icon: LucideIcons.copy,
-                                        tooltip: 'Copiar email',
+                                        tooltip: AppLocalizations.of(context).copyEmail,
                                         onPressed: _copiarEmailAlPortapapeles,
                                       ),
                                     ],
@@ -503,7 +506,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                     onPressed: _llamarCliente,
                                     icon:
                                         const Icon(LucideIcons.phone, size: 22),
-                                    label: const Text('Llamar al Cliente'),
+                                    label: Text(AppLocalizations.of(context).callClient),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           MedRushTheme.primaryGreen,
@@ -517,19 +520,23 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
-                              // Información de ubicación
-                              _buildInfoSection('Ubicación de Entrega', [
+                              _buildInfoSection(
+                                  AppLocalizations.of(context).deliveryLocationLabel, [
                                 _buildInfoRow(
-                                    'Dirección', _pedido!.direccionEntrega),
+                                    AppLocalizations.of(context).address,
+                                    _pedido!.direccionEntrega),
                                 if (_pedido!.direccionDetalle != null &&
                                     _pedido!.direccionDetalle!.isNotEmpty)
                                   _buildInfoRow(
-                                      'Detalle', _pedido!.direccionDetalle!),
+                                      AppLocalizations.of(context).detail,
+                                      _pedido!.direccionDetalle!),
                                 _buildInfoRow(
-                                    'Distrito', _pedido!.distritoEntrega),
+                                    AppLocalizations.of(context).districtLabel,
+                                    _pedido!.distritoEntrega),
                                 if (_pedido!.codigoAcceso != null &&
                                     _pedido!.codigoAcceso!.isNotEmpty)
-                                  _buildInfoRow('Código de Acceso',
+                                  _buildInfoRow(
+                                      AppLocalizations.of(context).accessCode,
                                       _pedido!.codigoAcceso!),
                                 if (_pedido!.tiempoEntregaEstimado != null ||
                                     _pedido!.distanciaEstimada != null) ...[
@@ -579,7 +586,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                         onPressed: _abrirMapas,
                                         icon: const Icon(LucideIcons.map,
                                             size: 20),
-                                        label: const Text('Ver Mapa'),
+                                        label: Text(AppLocalizations.of(context).viewMap),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
                                               MedRushTheme.primaryGreen,
@@ -594,7 +601,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                         onPressed: _abrirNavegacion,
                                         icon: const Icon(LucideIcons.navigation,
                                             size: 20),
-                                        label: const Text('Navegar'),
+                                        label: Text(AppLocalizations.of(context).navigate),
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor:
                                               MedRushTheme.primaryGreen,
@@ -609,16 +616,23 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
-                              // Información de la farmacia
                               if (_farmacia != null)
-                                _buildInfoSection('Farmacia', [
-                                  _buildInfoRow('Nombre', _farmacia!.nombre),
-                                  _buildInfoRow('Cadena',
-                                      _farmacia!.cadena ?? 'Sin cadena'),
+                                _buildInfoSection(
+                                    AppLocalizations.of(context).pharmacy, [
                                   _buildInfoRow(
-                                      'Dirección', _farmacia!.direccion),
-                                  _buildInfoRow('Teléfono',
-                                      _farmacia!.telefono ?? 'Sin teléfono'),
+                                      AppLocalizations.of(context).name,
+                                      _farmacia!.nombre),
+                                  _buildInfoRow(
+                                      AppLocalizations.of(context).cadenaLabel,
+                                      _farmacia!.cadena ??
+                                          AppLocalizations.of(context).noChain),
+                                  _buildInfoRow(
+                                      AppLocalizations.of(context).address,
+                                      _farmacia!.direccion),
+                                  _buildInfoRow(
+                                      AppLocalizations.of(context).phone,
+                                      _farmacia!.telefono ??
+                                          AppLocalizations.of(context).noPhone),
                                   if (_farmacia!.delivery24h) ...[
                                     const SizedBox(height: 8),
                                     Container(
@@ -628,9 +642,9 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                         color: MedRushTheme.primaryGreen,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: const Text(
-                                        'Delivery 24h',
-                                        style: TextStyle(
+                                      child: Text(
+                                        AppLocalizations.of(context).delivery24hLabel,
+                                        style: const TextStyle(
                                           color: MedRushTheme.textInverse,
                                           fontSize:
                                               MedRushTheme.fontSizeLabelSmall,
@@ -644,8 +658,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
-                              // Productos
-                              _buildInfoSection('Tipo de Pedido', [
+                              _buildInfoSection(
+                                  AppLocalizations.of(context).orderTypeSectionTitle, [
                                 Container(
                                   padding: const EdgeInsets.all(
                                     MedRushTheme.spacingMd,
@@ -694,9 +708,9 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
-                                              'Tipo de pedido',
-                                              style: TextStyle(
+                                            Text(
+                                              AppLocalizations.of(context).orderTypeLabel,
+                                              style: const TextStyle(
                                                 fontSize: MedRushTheme
                                                     .fontSizeTitleMedium,
                                                 fontWeight: MedRushTheme
@@ -709,7 +723,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                             ),
                                             Text(
                                               StatusHelpers.tipoPedidoTexto(
-                                                  _pedido!.tipoPedido),
+                                                  _pedido!.tipoPedido, AppLocalizations.of(context)),
                                               style: TextStyle(
                                                 fontSize: MedRushTheme
                                                     .fontSizeBodyLarge,
@@ -745,20 +759,20 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                             .withValues(alpha: 0.3),
                                       ),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           LucideIcons.pencil,
                                           size: 18,
                                           color: MedRushTheme.specialSignature,
                                         ),
-                                        SizedBox(
+                                        const SizedBox(
                                           width: MedRushTheme.spacingSm,
                                         ),
                                         Text(
-                                          'Requiere Firma Especial',
-                                          style: TextStyle(
+                                          AppLocalizations.of(context).requiresSpecialSignature,
+                                          style: const TextStyle(
                                             color:
                                                 MedRushTheme.specialSignature,
                                             fontWeight:
@@ -778,7 +792,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               // Firma Digital (si existe)
                               if (_pedido!.firmaDigitalUrl != null &&
                                   _pedido!.firmaDigitalUrl!.isNotEmpty)
-                                _buildInfoSection('Firma Digital', [
+                                _buildInfoSection(
+                                    AppLocalizations.of(context).digitalSignatureLabel, [
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(
@@ -794,18 +809,18 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        const Row(
+                                        Row(
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               LucideIcons.pencil,
                                               color: MedRushTheme.primaryGreen,
                                               size: 18,
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                                 width: MedRushTheme.spacingSm),
                                             Text(
-                                              'Firma Capturada',
-                                              style: TextStyle(
+                                              AppLocalizations.of(context).signatureCaptured,
+                                              style: const TextStyle(
                                                 fontSize: MedRushTheme
                                                     .fontSizeBodyMedium,
                                                 fontWeight: MedRushTheme
@@ -845,7 +860,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               // Observaciones y detalles
                               if (_pedido!.observaciones != null &&
                                   _pedido!.observaciones!.isNotEmpty)
-                                _buildInfoSection('Observaciones', [
+                                _buildInfoSection(
+                                    AppLocalizations.of(context).observations, [
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(
@@ -902,9 +918,9 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             color: MedRushTheme.textSecondary,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Entrega no encontrada',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).deliveryNotFound,
+            style: const TextStyle(
               fontSize: MedRushTheme.fontSizeTitleLarge,
               color: MedRushTheme.textPrimary,
               fontWeight: MedRushTheme.fontWeightBold,
@@ -912,7 +928,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'La entrega #${widget.pedidoId} no existe',
+            AppLocalizations.of(context).deliveryNotFoundWithId(widget.pedidoId),
             style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -1063,28 +1079,28 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       children: [
         if (_pedido!.createdAt != null)
           _buildTimelineItem(
-            'Creado',
+            AppLocalizations.of(context).created,
             _pedido!.createdAt!,
             LucideIcons.clock,
             Colors.grey,
           ),
         if (_pedido!.fechaAsignacion != null)
           _buildTimelineItem(
-            'Asignado',
+            AppLocalizations.of(context).assigned,
             _pedido!.fechaAsignacion!,
             LucideIcons.userPlus,
             Colors.blue,
           ),
         if (_pedido!.fechaRecogida != null)
           _buildTimelineItem(
-            'Recogido',
+            AppLocalizations.of(context).pickedUp,
             _pedido!.fechaRecogida!,
             LucideIcons.package,
             Colors.purple,
           ),
         if (_pedido!.fechaEntrega != null)
           _buildTimelineItem(
-            'Entregado',
+            AppLocalizations.of(context).deliveredStatus,
             _pedido!.fechaEntrega!,
             LucideIcons.check,
             Colors.green,
@@ -1176,35 +1192,36 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
   }
 
   String _getAccionTexto(EstadoPedido estado) {
+    final l10n = AppLocalizations.of(context);
     switch (estado) {
       case EstadoPedido.asignado:
-        return 'Asignar';
+        return l10n.assign;
       case EstadoPedido.recogido:
-        return 'Recoger';
+        return l10n.pickUpAction;
       case EstadoPedido.enRuta:
-        return 'En Ruta';
+        return l10n.onRoute;
       case EstadoPedido.entregado:
-        return 'Entregar';
+        return l10n.deliver;
       default:
-        return 'Siguiente';
+        return l10n.next;
     }
   }
 
   Widget _buildFirmaImage() {
     if (_pedido?.firmaDigitalUrl == null || _pedido!.firmaDigitalUrl!.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               LucideIcons.triangleAlert,
               color: MedRushTheme.textSecondary,
               size: 24,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-              'No hay firma disponible',
-              style: TextStyle(
+              AppLocalizations.of(context).noSignatureAvailable,
+              style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodySmall,
                 color: MedRushTheme.textSecondary,
               ),
@@ -1223,19 +1240,19 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         firmaUrl,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.triangleAlert,
                   color: MedRushTheme.textSecondary,
                   size: 24,
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Error al cargar firma',
-                  style: TextStyle(
+                  AppLocalizations.of(context).errorLoadingSignature,
+                  style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodySmall,
                     color: MedRushTheme.textSecondary,
                   ),
@@ -1255,19 +1272,19 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           ),
         );
       } catch (e) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.triangleAlert,
                 color: MedRushTheme.textSecondary,
                 size: 24,
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Error al renderizar SVG',
-                style: TextStyle(
+                AppLocalizations.of(context).errorRenderingSvg,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodySmall,
                   color: MedRushTheme.textSecondary,
                 ),
@@ -1283,19 +1300,19 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           base64Decode(firmaUrl),
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.triangleAlert,
                     color: MedRushTheme.textSecondary,
                     size: 24,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Error al decodificar firma',
-                    style: TextStyle(
+                    AppLocalizations.of(context).errorDecodingSignature,
+                    style: const TextStyle(
                       fontSize: MedRushTheme.fontSizeBodySmall,
                       color: MedRushTheme.textSecondary,
                     ),
@@ -1306,20 +1323,19 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           },
         );
       } catch (e) {
-        // Si falla el decode, mostrar error
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.triangleAlert,
                 color: MedRushTheme.textSecondary,
                 size: 24,
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Formato de firma inválido',
-                style: TextStyle(
+                AppLocalizations.of(context).invalidSignatureFormat,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodySmall,
                   color: MedRushTheme.textSecondary,
                 ),

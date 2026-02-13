@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/leg_info.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/theme/theme.dart';
@@ -103,7 +104,7 @@ class RutaMapList extends StatelessWidget {
                     color: MedRushTheme.primaryBlue,
                     size: 20,
                   ),
-                  tooltip: 'Re-optimizar ruta',
+                  tooltip: AppLocalizations.of(context).reoptimizeRoute,
                   style: IconButton.styleFrom(
                     backgroundColor:
                         MedRushTheme.primaryBlue.withValues(alpha: 0.1),
@@ -122,9 +123,9 @@ class RutaMapList extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: MedRushTheme.spacingSm),
-                    const Text(
-                      'Entregas programadas',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).scheduledDeliveries,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeTitleSmall,
                         fontWeight: MedRushTheme.fontWeightBold,
                         color: MedRushTheme.textPrimary,
@@ -162,7 +163,8 @@ class RutaMapList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final pedido = pedidosPendientesRecogida[index];
                   final tienePolyline = pedidosConPolyline.contains(pedido.id);
-                  return _buildEntregaItem(pedido, index + 1,
+                  return _buildEntregaItem(
+                      context, pedido, index + 1,
                       isActive: tienePolyline);
                 },
               ),
@@ -199,26 +201,43 @@ class RutaMapList extends StatelessWidget {
   }
 
   /// Obtiene el tooltip de navegación según el estado del pedido
-  String _getNavigationTooltip(EstadoPedido estado) {
+  String _getNavigationTooltip(BuildContext context, EstadoPedido estado) {
+    final l10n = AppLocalizations.of(context);
     switch (estado) {
       case EstadoPedido.pendiente:
-        return 'Navegar a recogida';
+        return l10n.navigateToPickup;
       case EstadoPedido.asignado:
-        return 'Navegar a punto de recogida';
+        return l10n.navigateToPickupPoint;
       case EstadoPedido.recogido:
-        return 'Navegar a punto de entrega';
       case EstadoPedido.enRuta:
-        return 'Navegar a punto de entrega';
+        return l10n.navigateToDeliveryPoint;
       case EstadoPedido.entregado:
-        return 'Pedido entregado';
+        return l10n.orderDelivered;
       case EstadoPedido.fallido:
-        return 'Pedido fallido';
+        return l10n.orderFailed;
       case EstadoPedido.cancelado:
-        return 'Pedido cancelado';
+        return l10n.orderCancelledStatus;
     }
   }
 
-  Widget _buildEntregaItem(Pedido pedido, int orden, {bool isActive = true}) {
+  String _getTimeLabel(BuildContext context, EstadoPedido estado) {
+    final l10n = AppLocalizations.of(context);
+    switch (estado) {
+      case EstadoPedido.asignado:
+      case EstadoPedido.pendiente:
+        return l10n.toPickup;
+      case EstadoPedido.recogido:
+      case EstadoPedido.enRuta:
+        return l10n.toDelivery;
+      case EstadoPedido.entregado:
+      case EstadoPedido.fallido:
+      case EstadoPedido.cancelado:
+        return l10n.completedStatus;
+    }
+  }
+
+  Widget _buildEntregaItem(
+      BuildContext context, Pedido pedido, int orden, {bool isActive = true}) {
     final info = legInfoByPedidoId[pedido.id];
 
     return Card(
@@ -307,9 +326,9 @@ class RutaMapList extends StatelessWidget {
                               color: const Color(0xFF757575),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'En Cola',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).inQueue,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -330,9 +349,9 @@ class RutaMapList extends StatelessWidget {
                                     Color(0xFF9C27B0), // Morado para recogida
                               ),
                               const SizedBox(width: 4),
-                              const Text(
-                                'Recoger en: ',
-                                style: TextStyle(
+                              Text(
+                                AppLocalizations.of(context).pickupAt,
+                                style: const TextStyle(
                                   fontSize: MedRushTheme.fontSizeBodyMedium,
                                   fontWeight: FontWeight.w500,
                                   color: MedRushTheme.textSecondary,
@@ -342,7 +361,7 @@ class RutaMapList extends StatelessWidget {
                                 child: Text(
                                   info != null
                                       ? info.distanceText
-                                      : 'Ruta no disponible',
+                                      : AppLocalizations.of(context).routeNotAvailable,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodyMedium,
                                     fontWeight: FontWeight.w500,
@@ -368,7 +387,7 @@ class RutaMapList extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${_toSpanishDuration(info.durationText)} (${_getTimeLabel(pedido.estado)})',
+                                '${_toSpanishDuration(info.durationText)} (${_getTimeLabel(context, pedido.estado)})',
                                 style: const TextStyle(
                                   fontSize: MedRushTheme.fontSizeBodyMedium,
                                   fontWeight: FontWeight.w500,
@@ -458,7 +477,7 @@ class RutaMapList extends StatelessWidget {
                           color: _getNavigationColor(pedido.estado),
                           size: 20,
                         ),
-                        tooltip: _getNavigationTooltip(pedido.estado),
+                        tooltip: _getNavigationTooltip(context, pedido.estado),
                         style: IconButton.styleFrom(
                           backgroundColor: _getNavigationColor(pedido.estado)
                               .withValues(alpha: 0.1),
@@ -477,7 +496,7 @@ class RutaMapList extends StatelessWidget {
                           color: MedRushTheme.primaryGreen,
                           size: 20,
                         ),
-                        tooltip: 'Ver detalles',
+                        tooltip: AppLocalizations.of(context).viewDetailsTooltip,
                         style: IconButton.styleFrom(
                           backgroundColor:
                               MedRushTheme.primaryGreen.withValues(alpha: 0.1),
@@ -498,22 +517,6 @@ class RutaMapList extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Obtiene la etiqueta del tiempo según el estado del pedido
-  String _getTimeLabel(EstadoPedido estado) {
-    switch (estado) {
-      case EstadoPedido.asignado:
-      case EstadoPedido.pendiente:
-        return 'a recogida';
-      case EstadoPedido.recogido:
-      case EstadoPedido.enRuta:
-        return 'a entrega';
-      case EstadoPedido.entregado:
-      case EstadoPedido.fallido:
-      case EstadoPedido.cancelado:
-        return 'completado';
-    }
   }
 }
 
@@ -610,28 +613,27 @@ class RutaMapCompactCard extends StatelessWidget {
   }
 
   /// Obtiene el tooltip de navegación según el estado del pedido
-  String _getNavigationTooltip(EstadoPedido estado) {
+  String _getNavigationTooltip(BuildContext context, EstadoPedido estado) {
+    final l10n = AppLocalizations.of(context);
     switch (estado) {
       case EstadoPedido.pendiente:
-        return 'Navegar a recogida';
+        return l10n.navigateToPickup;
       case EstadoPedido.asignado:
-        return 'Navegar a punto de recogida';
+        return l10n.navigateToPickupPoint;
       case EstadoPedido.recogido:
-        return 'Navegar a punto de entrega';
       case EstadoPedido.enRuta:
-        return 'Navegar a punto de entrega';
+        return l10n.navigateToDeliveryPoint;
       case EstadoPedido.entregado:
-        return 'Pedido entregado';
+        return l10n.orderDelivered;
       case EstadoPedido.fallido:
-        return 'Pedido fallido';
+        return l10n.orderFailed;
       case EstadoPedido.cancelado:
-        return 'Pedido cancelado';
+        return l10n.orderCancelledStatus;
     }
   }
 
   /// Obtiene la dirección de recogida formateada para el carousel (más compacta)
   String _getDireccionRecojoCompact(Pedido pedido) {
-    // Si hay coordenadas de recogida, mostrar coordenadas formateadas más cortas
     if (pedido.latitudRecojo != null && pedido.longitudRecojo != null) {
       return StatusHelpers.formatearCoordenadas(
           pedido.latitudRecojo!, pedido.longitudRecojo!,
@@ -641,18 +643,19 @@ class RutaMapCompactCard extends StatelessWidget {
   }
 
   /// Obtiene la etiqueta del tiempo según el estado del pedido
-  String _getTimeLabel(EstadoPedido estado) {
+  String _getTimeLabel(BuildContext context, EstadoPedido estado) {
+    final l10n = AppLocalizations.of(context);
     switch (estado) {
       case EstadoPedido.asignado:
       case EstadoPedido.pendiente:
-        return 'a recogida';
+        return l10n.toPickup;
       case EstadoPedido.recogido:
       case EstadoPedido.enRuta:
-        return 'a entrega';
+        return l10n.toDelivery;
       case EstadoPedido.entregado:
       case EstadoPedido.fallido:
       case EstadoPedido.cancelado:
-        return 'completado';
+        return l10n.completedStatus;
     }
   }
 
@@ -738,9 +741,9 @@ class RutaMapCompactCard extends StatelessWidget {
                             color: Color(0xFF9C27B0), // Morado para recogida
                           ),
                           const SizedBox(width: 2),
-                          const Text(
-                            'Recoger: ',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context).pickupLabel,
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
                               color: MedRushTheme.textSecondary,
@@ -774,7 +777,7 @@ class RutaMapCompactCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 2),
                           Text(
-                            '${_toSpanishDuration(legInfo!.durationText)} (${_getTimeLabel(pedido.estado)})',
+                            '${_toSpanishDuration(legInfo!.durationText)} (${_getTimeLabel(context, pedido.estado)})',
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
@@ -841,7 +844,7 @@ class RutaMapCompactCard extends StatelessWidget {
                   color: _getNavigationColor(pedido.estado),
                   size: 16,
                 ),
-                tooltip: _getNavigationTooltip(pedido.estado),
+                tooltip: _getNavigationTooltip(context, pedido.estado),
                 style: IconButton.styleFrom(
                   backgroundColor:
                       _getNavigationColor(pedido.estado).withValues(alpha: 0.1),

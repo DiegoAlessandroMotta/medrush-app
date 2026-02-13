@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/repositories/farmacia.repository.dart';
 import 'package:medrush/theme/theme.dart';
@@ -42,18 +43,16 @@ class FarmaciasTableView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header de la tabla
-          _buildTableHeader(),
-          // Contenido de la tabla
+          _buildTableHeader(context),
           Expanded(
-            child: _buildTableContent(),
+            child: _buildTableContent(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(MedRushTheme.spacingMd),
       decoration: const BoxDecoration(
@@ -65,38 +64,31 @@ class FarmaciasTableView extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // NOMBRE
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('NOMBRE'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderName),
           ),
-          // DIRECCIÓN
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('DIRECCIÓN'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderAddress),
           ),
-          // RESPONSABLE
           Expanded(
             flex: 2,
-            child: _buildHeaderCell('RESPONSABLE'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderResponsible),
           ),
-          // TELÉFONO
           Expanded(
-            child: _buildHeaderCell('TELÉFONO'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderPhone),
           ),
-          // CIUDAD
           SizedBox(
             width: 120,
-            child: _buildHeaderCell('CIUDAD'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderCity),
           ),
-          // UBICACIÓN
           SizedBox(
             width: 140,
-            child: _buildHeaderCell('UBICACIÓN'),
+            child: _buildHeaderCell(AppLocalizations.of(context).tableHeaderLocation),
           ),
-          // ACCIONES
           Expanded(
-            child: _buildCenteredHeaderCell('ACCIONES'),
+            child: _buildCenteredHeaderCell(AppLocalizations.of(context).actions),
           ),
         ],
       ),
@@ -127,18 +119,18 @@ class FarmaciasTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildTableContent() {
+  Widget _buildTableContent(BuildContext context) {
     if (isLoading) {
       return _buildShimmerLoading();
     }
 
     if (farmacias.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(MedRushTheme.spacingLg),
+          padding: const EdgeInsets.all(MedRushTheme.spacingLg),
           child: Text(
-            'No hay farmacias para mostrar',
-            style: TextStyle(
+            AppLocalizations.of(context).noPharmaciesToShow,
+            style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,
             ),
@@ -149,14 +141,14 @@ class FarmaciasTableView extends StatelessWidget {
 
     return ListView.builder(
       itemCount: farmacias.length,
-      itemBuilder: (context, index) {
+      itemBuilder: (ctx, index) {
         final farmacia = farmacias[index];
-        return _buildTableRow(farmacia, index);
+        return _buildTableRow(ctx, farmacia, index);
       },
     );
   }
 
-  Widget _buildTableRow(Farmacia farmacia, int index) {
+  Widget _buildTableRow(BuildContext context, Farmacia farmacia, int index) {
     final isEven = index % 2 == 0;
 
     return DecoratedBox(
@@ -215,7 +207,7 @@ class FarmaciasTableView extends StatelessWidget {
                         // Estado debajo del nombre con altura fija
                         SizedBox(
                           height: 18, // Altura fija más pequeña para el estado
-                          child: _buildStatusBadge(farmacia),
+                          child: _buildStatusBadge(context, farmacia),
                         ),
                       ],
                     ),
@@ -239,7 +231,7 @@ class FarmaciasTableView extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                farmacia.contactoResponsable ?? 'Sin responsable',
+                farmacia.contactoResponsable ?? AppLocalizations.of(context).noResponsible,
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -250,7 +242,7 @@ class FarmaciasTableView extends StatelessWidget {
             // TELÉFONO
             Expanded(
               child: Text(
-                farmacia.telefono ?? 'Sin teléfono',
+                farmacia.telefono ?? AppLocalizations.of(context).noPhone,
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -262,7 +254,7 @@ class FarmaciasTableView extends StatelessWidget {
             SizedBox(
               width: 120,
               child: Text(
-                farmacia.city ?? 'Sin ciudad',
+                farmacia.city ?? AppLocalizations.of(context).noCity,
                 style: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -270,10 +262,9 @@ class FarmaciasTableView extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // UBICACIÓN
             SizedBox(
               width: 140,
-              child: _buildUbicacionCell(farmacia),
+              child: _buildUbicacionCell(context, farmacia),
             ),
             // ACCIONES
             Expanded(
@@ -285,9 +276,9 @@ class FarmaciasTableView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(Farmacia farmacia) {
+  Widget _buildStatusBadge(BuildContext context, Farmacia farmacia) {
     final color = StatusHelpers.estadoFarmaciaColor(farmacia.estado);
-    final texto = StatusHelpers.estadoFarmaciaTexto(farmacia.estado);
+    final texto = StatusHelpers.estadoFarmaciaTexto(farmacia.estado, AppLocalizations.of(context));
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -336,7 +327,7 @@ class FarmaciasTableView extends StatelessWidget {
               size: 18,
             ),
             onPressed: () => onView(farmacia),
-            tooltip: 'Ver detalles',
+            tooltip: AppLocalizations.of(context).viewDetailsTooltip,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -351,7 +342,7 @@ class FarmaciasTableView extends StatelessWidget {
               size: 18,
             ),
             onPressed: () => onEdit(farmacia),
-            tooltip: 'Editar',
+            tooltip: AppLocalizations.of(context).edit,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -366,7 +357,7 @@ class FarmaciasTableView extends StatelessWidget {
               size: 18,
             ),
             onPressed: () => _showDeleteConfirmation(context, farmacia),
-            tooltip: 'Eliminar',
+            tooltip: AppLocalizations.of(context).delete,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -378,21 +369,19 @@ class FarmaciasTableView extends StatelessWidget {
     );
   }
 
-  String _getUbicacionText(Farmacia farmacia) {
-    // Mostrar coordenadas si están disponibles
+  String _getUbicacionText(BuildContext context, Farmacia farmacia) {
     if (farmacia.latitud != 0.0 && farmacia.longitud != 0.0) {
       return StatusHelpers.formatearCoordenadasEstandar(
           farmacia.latitud, farmacia.longitud);
     }
-    return 'No disponible';
+    return AppLocalizations.of(context).notAvailable;
   }
 
-  Widget _buildUbicacionCell(Farmacia farmacia) {
-    // Si no hay coordenadas, mostrar texto simple
+  Widget _buildUbicacionCell(BuildContext context, Farmacia farmacia) {
     if (farmacia.latitud == 0.0 || farmacia.longitud == 0.0) {
-      return const Text(
-        'No disponible',
-        style: TextStyle(
+      return Text(
+        AppLocalizations.of(context).notAvailable,
+        style: const TextStyle(
           color: MedRushTheme.textSecondary,
           fontSize: MedRushTheme.fontSizeBodySmall,
         ),
@@ -414,7 +403,7 @@ class FarmaciasTableView extends StatelessWidget {
           const SizedBox(width: 2),
           Flexible(
             child: Text(
-              _getUbicacionText(farmacia),
+              _getUbicacionText(context, farmacia),
               style: const TextStyle(
                 color: MedRushTheme.textSecondary,
                 fontSize: MedRushTheme.fontSizeBodySmall,
@@ -454,15 +443,15 @@ class FarmaciasTableView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               LucideIcons.triangleAlert,
               color: Colors.red,
               size: 24,
             ),
-            SizedBox(width: MedRushTheme.spacingSm),
-            Text('Confirmar eliminación'),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(AppLocalizations.of(context).confirmDeletion),
           ],
         ),
         content: Column(
@@ -470,7 +459,8 @@ class FarmaciasTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro de que deseas eliminar la farmacia "${farmacia.nombre}"?',
+              AppLocalizations.of(context)
+                  .confirmDeletePharmacyQuestionShort(farmacia.nombre),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -485,18 +475,18 @@ class FarmaciasTableView extends StatelessWidget {
                     BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.info,
                     color: Colors.red,
                     size: 20,
                   ),
-                  SizedBox(width: MedRushTheme.spacingSm),
+                  const SizedBox(width: MedRushTheme.spacingSm),
                   Expanded(
                     child: Text(
-                      'Esta acción no se puede deshacer. La farmacia será eliminada permanentemente.',
-                      style: TextStyle(
+                      AppLocalizations.of(context).deletePharmacyIrreversible,
+                      style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: Colors.red,
                       ),
@@ -510,7 +500,7 @@ class FarmaciasTableView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -521,7 +511,7 @@ class FarmaciasTableView extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -553,8 +543,10 @@ class FarmaciasTableView extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('Farmacia "${farmacia.nombre}" eliminada exitosamente'),
+              content: Text(
+                AppLocalizations.of(context)
+                    .pharmacyDeletedSuccess(farmacia.nombre),
+              ),
               backgroundColor: MedRushTheme.primaryGreen,
             ),
           );
@@ -567,7 +559,9 @@ class FarmaciasTableView extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error al eliminar farmacia: ${result.error}'),
+              content: Text(
+                '${AppLocalizations.of(context).errorDeletingPharmacy}: ${result.error}',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -582,10 +576,12 @@ class FarmaciasTableView extends StatelessWidget {
       // Mostrar mensaje de error
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al eliminar farmacia: $e'),
-            backgroundColor: Colors.red,
-          ),
+            SnackBar(
+              content: Text(
+                '${AppLocalizations.of(context).errorDeletingPharmacy}: $e',
+              ),
+              backgroundColor: Colors.red,
+            ),
         );
       }
     }
