@@ -1,4 +1,8 @@
+
+
 # Backend
+
+
 backend/venv/
 
 # Variables de entorno
@@ -52,3 +56,6 @@ flutter_windows.dll.pdb
 
 # Large build artifacts
 *.cache.dill.track.dill
+
+guardado.md
+CODEMAGIC_SETUP.md

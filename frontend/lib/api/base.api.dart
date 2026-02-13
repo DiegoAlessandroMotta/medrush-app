@@ -723,6 +723,28 @@ abstract class BaseApi {
     return null;
   }
 
+  /// Almacena el último email utilizado para el login
+  static Future<void> storeLastUsedEmail(String email) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(EndpointManager.lastUsedEmailKey, email);
+      logInfo('📧 Email recordado: $email');
+    } catch (e) {
+      logError('Error al guardar el último email', e);
+    }
+  }
+
+  /// Obtiene el último email utilizado
+  static Future<String?> getLastUsedEmail() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(EndpointManager.lastUsedEmailKey);
+    } catch (e) {
+      logError('Error al obtener el último email', e);
+      return null;
+    }
+  }
+
   /// Limpia todos los datos de autenticación
   static Future<void> clearAuthData() async {
     await _storage.deleteAll();

@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "loginTitle": "Login",
+  "loginSubtitle": "Enter your credentials to continue",
+  "emailLabel": "Email address",
+  "emailHint": "example@medrush.pe",
+  "passwordLabel": "Password",
+  "passwordHint": "Enter your password",
+  "loginButton": "Login",
+  "loggingIn": "Logging in...",
+  "capsLockActive": "Caps Lock on",
+  "rememberEmail": "Remember email",
+  "serverConnectionError": "No server connection",
+  "checkingConnection": "Checking server connection...",
+  "sessionExpiredWarning": "Your session has expired. Please login again.",
+  "downloadApkTooltip": "Download APK for Android",
+  "connectionFailed": "Could not connect to server",
+  "connectionError": "Connection error: {error}"
+}

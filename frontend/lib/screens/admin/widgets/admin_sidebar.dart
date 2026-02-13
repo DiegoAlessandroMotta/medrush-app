@@ -33,11 +33,16 @@ class _AdminSidebarNavigationState extends State<AdminSidebarNavigation> {
           builder: (context, authProvider, child) {
             return Column(
               children: [
-                const SizedBox(height: MedRushTheme.spacingXl),
+                const SizedBox(height: MedRushTheme.spacingMd),
 
                 // Logo compacto + texto
                 Container(
-                  padding: const EdgeInsets.all(MedRushTheme.spacingLg),
+                  padding: const EdgeInsets.fromLTRB(
+                    MedRushTheme.spacingLg,
+                    MedRushTheme.spacingSm,
+                    MedRushTheme.spacingLg,
+                    MedRushTheme.spacingMd,
+                  ),
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [

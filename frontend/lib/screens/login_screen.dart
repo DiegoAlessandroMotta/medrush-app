@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/repositories/apk.repository.dart';
 import 'package:medrush/routes/routes.dart';
@@ -49,16 +50,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Mostrar mensaje si se redirigió por token expirado
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLastEmail();
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.state == AuthState.unauthenticated &&
           authProvider.error == null) {
         // Mostrar mensaje informativo sobre sesión expirada
         NotificationService.showWarning(
-          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+          AppLocalizations.of(context).sessionExpiredWarning,
           context: context,
         );
       }
     });
+  }
+
+  /// Carga el último email utilizado para facilitar el re-login
+  Future<void> _loadLastEmail() async {
+    final lastEmail = await BaseApi.getLastUsedEmail();
+    if (lastEmail != null && lastEmail.isNotEmpty && mounted) {
+      setState(() {
+        _emailController.text = lastEmail;
+      });
+    }
   }
 
   @override
@@ -232,6 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -248,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: MedRushTheme.primaryGreen,
                   size: 24,
                 ),
-                tooltip: 'Descargar APK para Android',
+                tooltip: l10n.downloadApkTooltip,
                 style: IconButton.styleFrom(
                   backgroundColor:
                       MedRushTheme.primaryGreen.withValues(alpha: 0.1),
@@ -302,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
 
                         // Formulario de login
-                        _buildLoginForm(authProvider),
+                        _buildLoginForm(authProvider, l10n),
 
                         if (authProvider.error != null) ...[
                           const SizedBox(height: MedRushTheme.spacingMd),
@@ -331,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginForm(AuthProvider authProvider) {
+  Widget _buildLoginForm(AuthProvider authProvider, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -354,10 +367,9 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: MedRushTheme.spacingXl),
 
-              // Título del formulario
-              const Text(
-                'Iniciar Sesión',
-                style: TextStyle(
+              Text(
+                l10n.loginTitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeHeadlineSmall,
                   fontWeight: MedRushTheme.fontWeightBold,
                   color: MedRushTheme.textPrimary,
@@ -367,9 +379,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: MedRushTheme.spacingMd),
 
-              const Text(
-                'Ingresa tus credenciales para continuar',
-                style: TextStyle(
+              Text(
+                l10n.loginSubtitle,
+                style: const TextStyle(
                   fontSize: MedRushTheme.fontSizeBodyMedium,
                   color: MedRushTheme.textSecondary,
                 ),
@@ -388,8 +400,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   FocusScope.of(context).nextFocus();
                 },
                 decoration: InputDecoration(
-                  labelText: 'Correo electrónico',
-                  hintText: 'ejemplo@medrush.pe',
+                  labelText: l10n.emailLabel,
+                  hintText: l10n.emailHint,
                   prefixIcon: const Icon(LucideIcons.mail,
                       color: MedRushTheme.textSecondary),
                   border: OutlineInputBorder(
@@ -426,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _login(),
                 decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  hintText: 'Ingresa tu contraseña',
+                  labelText: l10n.passwordLabel,
+                  hintText: l10n.passwordHint,
                   prefixIcon: const Icon(LucideIcons.lock,
                       color: MedRushTheme.textSecondary),
                   suffixIcon: IconButton(
@@ -488,18 +500,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               MedRushTheme.borderRadiusMd,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 LucideIcons.keyboard,
                                 size: 16,
                                 color: MedRushTheme.info,
                               ),
-                              SizedBox(width: MedRushTheme.spacingSm),
+                              const SizedBox(width: MedRushTheme.spacingSm),
                               Expanded(
                                 child: Text(
-                                  'Bloq Mayús activado',
-                                  style: TextStyle(
+                                  l10n.capsLockActive,
+                                  style: const TextStyle(
                                     color: MedRushTheme.info,
                                     fontSize: MedRushTheme.fontSizeLabelSmall,
                                     fontWeight: MedRushTheme.fontWeightMedium,
@@ -531,10 +543,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     elevation: MedRushTheme.elevationSm,
                   ),
                   child: authProvider.state == AuthState.loading
-                      ? const Row(
+                      ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
@@ -542,10 +554,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 strokeWidth: 2,
                               ),
                             ),
-                            SizedBox(width: MedRushTheme.spacingSm),
+                            const SizedBox(width: MedRushTheme.spacingSm),
                             Text(
-                              'Iniciando sesión...',
-                              style: TextStyle(
+                              l10n.loggingIn,
+                              style: const TextStyle(
                                 color: MedRushTheme.textInverse,
                                 fontSize: MedRushTheme.fontSizeLabelLarge,
                                 fontWeight: MedRushTheme.fontWeightMedium,
@@ -553,15 +565,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(LucideIcons.logIn,
+                            const Icon(LucideIcons.logIn,
                                 color: MedRushTheme.textInverse),
-                            SizedBox(width: MedRushTheme.spacingSm),
+                            const SizedBox(width: MedRushTheme.spacingSm),
                             Text(
-                              'Iniciar Sesión',
-                              style: TextStyle(
+                              l10n.loginTitle,
+                              style: const TextStyle(
                                 fontSize: MedRushTheme.fontSizeLabelLarge,
                                 fontWeight: MedRushTheme.fontWeightMedium,
                                 color: MedRushTheme.textInverse,
@@ -614,7 +626,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Verificando conexión al servidor...',
+                AppLocalizations.of(context).checkingConnection,
                 style: TextStyle(
                   color: Colors.blue.shade700,
                   fontSize: MedRushTheme.fontSizeBodySmall,
@@ -661,7 +673,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sin conexión al servidor',
+                    AppLocalizations.of(context).serverConnectionError,
                     style: TextStyle(
                       color: Colors.red.shade700,
                       fontSize: MedRushTheme.fontSizeBodySmall,

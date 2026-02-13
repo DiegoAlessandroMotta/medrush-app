@@ -220,8 +220,8 @@ class _EntregasDetallesState extends State<EntregasDetalles> {
                       children: [
                         // Información básica
                         _buildInfoSection('Información Básica', [
-                          _buildIconRow('ID del Pedido', pedido.id,
-                              LucideIcons.fingerprint),
+                          _buildIconRow(
+                              'ID del Pedido', pedido.id, LucideIcons.hash),
                           _buildIconRow('Código de Barra', pedido.codigoBarra,
                               LucideIcons.barcode),
                           _buildIconRow('Cliente', pedido.pacienteNombre,

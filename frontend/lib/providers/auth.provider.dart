@@ -170,6 +170,9 @@ class AuthProvider extends ChangeNotifier {
         // Guardar datos del usuario
         await _saveUserData(_usuario!);
 
+        // Guardar el email para el próximo login
+        await BaseApi.storeLastUsedEmail(email);
+
         // TODO: Implementar actualización de estado del repartidor cuando el backend lo soporte
         // Por ahora, solo log ya que no hay endpoint para esto
         if (_usuario?.esRepartidor == true) {

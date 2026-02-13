@@ -8,19 +8,21 @@ class EndpointManager {
 
   // URLs del servidor de producción
   static const String _prodDomain = 'medrush.ksdemosapps.com';
-  
+
   static String get serverDomain {
     if (_isLocal) {
       if (kIsWeb) {
         return 'localhost:4000';
       }
-      return '10.0.2.2:4000'; 
+      return '10.0.2.2:4000';
     }
     return _prodDomain;
   }
 
-  static String get serverUrl => _isLocal ? 'http://$serverDomain/api' : 'https://$serverDomain/api';
-  static String get serverWebSocketUrl => _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
+  static String get serverUrl =>
+      _isLocal ? 'http://$serverDomain/api' : 'https://$serverDomain/api';
+  static String get serverWebSocketUrl =>
+      _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
 
   // Configuración de URLs
   static String get baseUrl => serverUrl;
@@ -44,6 +46,7 @@ class EndpointManager {
   static const String refreshTokenKey = 'refresh_token';
   static const String userKey = 'user_data';
   static const String sessionKey = 'laravel_session';
+  static const String lastUsedEmailKey = 'last_used_email';
 
   // Configuración de WebSocket - siempre usar el servidor de producción
   static String get websocketUrl => serverWebSocketUrl;

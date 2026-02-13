@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:medrush/firebase_options.dart';
+import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/providers/auth.provider.dart';
 import 'package:medrush/providers/rutas.provider.dart';
 import 'package:medrush/routes/routes.dart';
@@ -77,7 +79,18 @@ class MedRushApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: MedRushTheme.lightTheme,
         // darkTheme eliminado porque no existe tema oscuro
+        // darkTheme eliminado porque no existe tema oscuro
         themeMode: ThemeMode.light, // Fuerza siempre el tema claro
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // English (Default)
+          Locale('es'), // Spanish
+        ],
         home: const AuthWrapper(),
         routes: AppRoutes.getRoutes(),
         onGenerateRoute: (settings) {

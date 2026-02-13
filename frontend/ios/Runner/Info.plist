@@ -51,5 +51,40 @@
 	<string>Esta aplicación necesita acceso a la ubicación para mostrar tu posición en el mapa.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Esta aplicación necesita acceso a la ubicación para mostrar tu posición en el mapa.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MedRush necesita acceso a la cámara para escanear códigos de barras y capturar fotos de entrega.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MedRush necesita acceso a tu galería para adjuntar comprobantes de entrega.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MedRush necesita acceso al micrófono para la captura de video si fuera necesario.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>https</string>
+		<string>http</string>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+		<string>baidumap</string>
+		<string>iosamap</string>
+		<string>waze</string>
+		<string>yandexmaps</string>
+		<string>yandexnavi</string>
+		<string>citymapper</string>
+		<string>mapswithme</string>
+		<string>osmandmaps</string>
+		<string>dgis</string>
+		<string>qqmap</string>
+		<string>here-location</string>
+		<string>tomtomgo</string>
+		<string>copilot</string>
+		<string>sygic</string>
+		<string>nmap</string>
+		<string>kakaomap</string>
+		<string>tmap</string>
+		<string>szn-mapy</string>
+	</array>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

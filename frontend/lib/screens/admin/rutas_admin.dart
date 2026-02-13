@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -8,8 +9,8 @@ import 'package:medrush/screens/admin/modules/rutas/repartidor_detalle_ruta.dart
 import 'package:medrush/screens/admin/modules/rutas/ruta_detalle.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
-import 'package:medrush/widgets/mapa_ruta_completa_widget.dart';
 import 'package:medrush/widgets/mapa_ruta_compacto_widget.dart';
+import 'package:medrush/widgets/mapa_ruta_completa_widget.dart';
 
 class RutasAdminScreen extends StatefulWidget {
   const RutasAdminScreen({super.key});
@@ -1043,8 +1044,8 @@ class _RutasAdminScreenState extends State<RutasAdminScreen> {
     }
 
     // Ordenar pedidos por orden de entrega
-    final pedidosOrdenados = List<Map<String, dynamic>>.from(pedidos);
-    pedidosOrdenados.sort((a, b) {
+    final pedidosOrdenados = List<Map<String, dynamic>>.from(pedidos)
+    ..sort((a, b) {
       final ordenA = _obtenerOrdenPedido(a);
       final ordenB = _obtenerOrdenPedido(b);
       return ordenA.compareTo(ordenB);
