@@ -5,8 +5,8 @@ import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/repositories/farmacia.repository.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class FarmaciasTableView extends StatelessWidget {
   final List<Farmacia> farmacias;
@@ -390,7 +390,8 @@ class FarmaciasTableView extends StatelessWidget {
 
     // Si hay coordenadas, hacer clickeable para abrir Google Maps
     return InkWell(
-      onTap: () => _openGoogleMaps(farmacia.latitud, farmacia.longitud),
+      onTap: () => UrlLauncherHelper.openGoogleMapsPlace(
+          farmacia.latitud, farmacia.longitud),
       borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -415,28 +416,6 @@ class FarmaciasTableView extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _openGoogleMaps(double latitud, double longitud) async {
-    try {
-      // Crear URL para Google Maps
-      final url = Uri.parse('https://www.google.com/maps?q=$latitud,$longitud');
-
-      // Verificar si se puede abrir la URL
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        // Fallback: intentar con el esquema de la app de Google Maps
-        final fallbackUrl =
-            Uri.parse('geo:$latitud,$longitud?q=$latitud,$longitud');
-        if (await canLaunchUrl(fallbackUrl)) {
-          await launchUrl(fallbackUrl);
-        }
-      }
-    } catch (e) {
-      // Si hay error, mostrar mensaje (opcional)
-      debugPrint('Error al abrir Google Maps: $e');
-    }
   }
 
   void _showDeleteConfirmation(BuildContext context, Farmacia farmacia) {

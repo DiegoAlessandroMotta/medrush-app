@@ -634,6 +634,8 @@
   "quantityLabelShort": "Cantidad: {count}",
   "medicationDefaultName": "Medicamento",
   "selectDriverForOrderHint": "Selecciona un repartidor para asignar al pedido",
+  "driversAvailableTapToSearch": "{count} repartidores disponibles - Toca para buscar",
+  "driversAvailableCount": "{count} disponibles",
   "buildingAccessCodeHelper": "Código para acceder al edificio o condominio",
   "phoneRequired": "El teléfono es requerido",
   "errorUnassigningDriver": "Error al retirar repartidor",

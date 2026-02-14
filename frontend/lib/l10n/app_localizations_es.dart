@@ -2059,6 +2059,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Selecciona un repartidor para asignar al pedido';
 
   @override
+  String driversAvailableTapToSearch(Object count) {
+    return '$count repartidores disponibles - Toca para buscar';
+  }
+
+  @override
+  String driversAvailableCount(Object count) {
+    return '$count disponibles';
+  }
+
+  @override
   String get buildingAccessCodeHelper =>
       'Código para acceder al edificio o condominio';
 

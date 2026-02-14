@@ -348,15 +348,20 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
           );
         }
       } else {
-        throw Exception(resultado.error ?? AppLocalizations.of(context).unknownError);
+        if (!mounted) {
+          return;
+        }
+        throw Exception(
+            resultado.error ?? AppLocalizations.of(context).unknownError);
       }
     } catch (e) {
-      if (mounted) {
-        NotificationService.showError(
-          '${AppLocalizations.of(context).errorStartingCleanup}: ${e.toString()}',
-          context: context,
-        );
+      if (!mounted) {
+        return;
       }
+      NotificationService.showError(
+        '${AppLocalizations.of(context).errorStartingCleanup}: ${e.toString()}',
+        context: context,
+      );
     } finally {
       if (mounted) {
         setState(() {

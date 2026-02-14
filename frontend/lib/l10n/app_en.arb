@@ -634,6 +634,8 @@
   "quantityLabelShort": "Quantity: {count}",
   "medicationDefaultName": "Medication",
   "selectDriverForOrderHint": "Select a driver to assign to the order",
+  "driversAvailableTapToSearch": "{count} drivers available - Tap to search",
+  "driversAvailableCount": "{count} available",
   "buildingAccessCodeHelper": "Code to access building or condominium",
   "phoneRequired": "Phone is required",
   "errorUnassigningDriver": "Error unassigning driver",

@@ -12,8 +12,8 @@ import 'package:medrush/services/csv.service.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
+import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:medrush/utils/validators.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Transición personalizada para la pantalla de CSV
 class CsvScreenRoute<T> extends PageRouteBuilder<T> {
@@ -1096,34 +1096,6 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
     return null;
   }
 
-  /// Abre Google Maps con las coordenadas proporcionadas
-  Future<void> _openGoogleMaps(double latitud, double longitud) async {
-    try {
-      // Crear URL para Google Maps
-      final url = Uri.parse('https://www.google.com/maps?q=$latitud,$longitud');
-
-      // Verificar si se puede abrir la URL
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        // Fallback: intentar con el esquema de la app de Google Maps
-        final fallbackUrl =
-            Uri.parse('geo:$latitud,$longitud?q=$latitud,$longitud');
-        if (await canLaunchUrl(fallbackUrl)) {
-          await launchUrl(fallbackUrl);
-        }
-      }
-    } catch (e) {
-      logError('Error al abrir Google Maps', e);
-      if (mounted) {
-        NotificationService.showError(
-          'No se pudo abrir Google Maps: $e',
-          context: context,
-        );
-      }
-    }
-  }
-
   /// Construye una celda con dropdown para tipo de pedido
   Widget _buildTipoPedidoCell(String value, int row, String header) {
     final l10n = AppLocalizations.of(context);
@@ -1229,8 +1201,10 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           vertical: 12.0,
         ),
         child: InkWell(
-          onTap: () =>
-              _openGoogleMaps(coordinates['lat']!, coordinates['lng']!),
+          onTap: () => UrlLauncherHelper.openGoogleMapsPlace(
+              coordinates['lat']!, coordinates['lng']!,
+              context: context,
+              errorMessage: AppLocalizations.of(context).couldNotOpenMaps),
           borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
           child: Row(
             mainAxisSize: MainAxisSize.min,

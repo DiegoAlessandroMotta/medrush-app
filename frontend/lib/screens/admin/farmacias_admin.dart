@@ -268,9 +268,9 @@ class _FarmaciasListScreenState extends State<FarmaciasListScreen> {
                           context: context);
                     }
                   } catch (e) {
-                    logError(
-                          AppLocalizations.of(context).errorReloadPharmacies, e);
                     if (context.mounted) {
+                      logError(
+                          AppLocalizations.of(context).errorReloadPharmacies, e);
                       NotificationService.showWarning(
                           AppLocalizations.of(context).pharmacySavedButErrorReload,
                           context: context);

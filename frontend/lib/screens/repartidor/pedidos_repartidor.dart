@@ -15,6 +15,7 @@ import 'package:medrush/utils/debug_helpers.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/pagination_helper.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -613,20 +614,15 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
   Future<void> _abrirNavegacion(Pedido pedido) async {
     final lat = pedido.latitudEntrega;
     final lng = pedido.longitudEntrega;
-    final Uri uri = Uri.parse(
-      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        NotificationService.showError(
-          AppLocalizations.of(context).cannotOpenNavigation,
-          context: context,
-        );
-      }
+    if (lat == null || lng == null) {
+      return;
     }
+    await UrlLauncherHelper.openGoogleMapsDirection(
+      lat,
+      lng,
+      context: mounted ? context : null,
+      errorMessage: AppLocalizations.of(context).cannotOpenNavigation,
+    );
   }
 
   Future<void> _llamarCliente(Pedido pedido) async {

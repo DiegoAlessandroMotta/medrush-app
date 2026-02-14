@@ -14,6 +14,7 @@ import 'package:medrush/screens/repartidor/entregar_repartidor.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PedidoDetalleScreen extends StatefulWidget {
@@ -315,45 +316,26 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
     if (_pedido == null) {
       return;
     }
-
-    final direccionEncoded = Uri.encodeComponent(_pedido!.direccionEntrega);
-    final Uri uri = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$direccionEncoded',
+    await UrlLauncherHelper.openGoogleMapsSearch(
+      _pedido!.direccionEntrega,
+      context: mounted ? context : null,
+      errorMessage: AppLocalizations.of(context).couldNotOpenMaps,
     );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        NotificationService.showError(
-          AppLocalizations.of(context).couldNotOpenMaps,
-          context: context,
-        );
-      }
-    }
   }
 
   Future<void> _abrirNavegacion() async {
-    if (_pedido == null) {
+    final pedido = _pedido;
+    if (pedido == null ||
+        pedido.latitudEntrega == null ||
+        pedido.longitudEntrega == null) {
       return;
     }
-
-    final lat = _pedido!.latitudEntrega;
-    final lng = _pedido!.longitudEntrega;
-    final Uri uri = Uri.parse(
-      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+    await UrlLauncherHelper.openGoogleMapsDirection(
+      pedido.latitudEntrega!,
+      pedido.longitudEntrega!,
+      context: mounted ? context : null,
+      errorMessage: AppLocalizations.of(context).cannotOpenNavigation,
     );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        NotificationService.showError(
-          AppLocalizations.of(context).cannotOpenNavigation,
-          context: context,
-        );
-      }
-    }
   }
 
   @override

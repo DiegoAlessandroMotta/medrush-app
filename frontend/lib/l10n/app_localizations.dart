@@ -3830,6 +3830,18 @@ abstract class AppLocalizations {
   /// **'Select a driver to assign to the order'**
   String get selectDriverForOrderHint;
 
+  /// No description provided for @driversAvailableTapToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} drivers available - Tap to search'**
+  String driversAvailableTapToSearch(Object count);
+
+  /// No description provided for @driversAvailableCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} available'**
+  String driversAvailableCount(Object count);
+
   /// No description provided for @buildingAccessCodeHelper.
   ///
   /// In en, this message translates to:

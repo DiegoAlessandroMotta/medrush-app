@@ -1312,8 +1312,8 @@ class _EntregasFormState extends State<EntregasForm> {
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.truck),
             suffixIcon: const Icon(LucideIcons.chevronDown),
-            helperText:
-                '${_repartidores.length} repartidores disponibles - Toca para buscar',
+            helperText: AppLocalizations.of(context)
+                .driversAvailableTapToSearch(_repartidores.length),
             hintText: _repartidorSeleccionado?.nombre ?? AppLocalizations.of(context).unassigned,
           ),
           onTap: _showRepartidorSearchDialog,
@@ -1807,7 +1807,8 @@ class _RepartidorSearchDialogState extends State<_RepartidorSearchDialog> {
           Text(AppLocalizations.of(context).selectDriverTitle),
           const Spacer(),
           Text(
-            '${_filteredRepartidores.length} disponibles',
+            AppLocalizations.of(context)
+                .driversAvailableCount(_filteredRepartidores.length),
             style: const TextStyle(
               fontSize: 12,
               color: MedRushTheme.textSecondary,

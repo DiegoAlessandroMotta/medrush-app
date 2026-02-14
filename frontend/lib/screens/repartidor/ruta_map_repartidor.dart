@@ -20,9 +20,9 @@ import 'package:medrush/services/polyline_decoding.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
 import 'package:medrush/utils/status_helpers.dart';
+import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class RutaMapScreen extends StatefulWidget {
   const RutaMapScreen({super.key});
@@ -1006,23 +1006,20 @@ class _RutaMapScreenState extends State<RutaMapScreen> {
         return;
       }
 
-      // Construir URL de Google Maps
-      final url =
-          'https://www.google.com/maps/dir/?api=1&destination=$destination&travelmode=driving';
-
-      logInfo('Abriendo Google Maps para $action: $url');
-
-      final Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      logInfo('Abriendo Google Maps para $action: $destination');
+      final opened = await UrlLauncherHelper.openGoogleMapsDirectionWithDestination(
+        destination,
+        context: mounted ? context : null,
+        errorMessage: AppLocalizations.of(context).couldNotOpenMaps,
+      );
+      if (opened) {
         logInfo('Google Maps abierto exitosamente para $action');
-      } else {
-        logError('No se pudo abrir Google Maps');
-        _mostrarErrorNavegacion('No se pudo abrir Google Maps');
       }
     } catch (e) {
       logError('Error en navegación', e);
-      _mostrarErrorNavegacion('Error al abrir la navegación');
+      if (mounted) {
+        _mostrarErrorNavegacion(AppLocalizations.of(context).cannotOpenNavigation);
+      }
     }
   }
 

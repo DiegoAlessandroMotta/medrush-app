@@ -2037,6 +2037,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select a driver to assign to the order';
 
   @override
+  String driversAvailableTapToSearch(Object count) {
+    return '$count drivers available - Tap to search';
+  }
+
+  @override
+  String driversAvailableCount(Object count) {
+    return '$count available';
+  }
+
+  @override
   String get buildingAccessCodeHelper =>
       'Code to access building or condominium';
 
