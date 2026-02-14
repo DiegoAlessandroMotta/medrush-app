@@ -15,14 +15,19 @@ class UserSeeder extends Seeder
    */
   public function run(): void
   {
+    $email = config('custom.admin.email');
     /** @var User $user */
-    $user = User::create([
-      'name' => 'Administrador',
-      'email' => config('custom.admin.email'),
-      'password' =>  Hash::make(config('custom.admin.password'))
-    ]);
+    $user = User::firstOrCreate(
+      ['email' => $email],
+      [
+        'name' => 'Administrador',
+        'password' => Hash::make(config('custom.admin.password')),
+      ]
+    );
 
-    $user->assignRole(RolesEnum::ADMINISTRADOR);
+    if (!$user->hasRole(RolesEnum::ADMINISTRADOR)) {
+      $user->assignRole(RolesEnum::ADMINISTRADOR);
+    }
 
     if (!App::isProduction()) {
       User::factory()
