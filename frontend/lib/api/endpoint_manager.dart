@@ -179,7 +179,6 @@ class EndpointManager {
 
   // Endpoints de repartidores
   static String repartidorById(String id) => '$repartidores/$id';
-  static String repartidorDniId(String id) => '$repartidores/$id/dni-id';
   static String repartidorLicencia(String id) => '$repartidores/$id/licencia';
   static String repartidorSeguroVehiculo(String id) =>
       '$repartidores/$id/seguro-vehiculo';

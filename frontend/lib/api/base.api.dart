@@ -778,8 +778,6 @@ abstract class BaseApi {
   static String _getFieldNameForEndpoint(String endpoint) {
     if (endpoint.contains('/user/') && endpoint.contains('/foto')) {
       return 'avatar';
-    } else if (endpoint.contains('/dni-id')) {
-      return 'foto_dni_id';
     } else if (endpoint.contains('/licencia')) {
       return 'foto_licencia';
     } else if (endpoint.contains('/seguro-vehiculo')) {

@@ -69,8 +69,6 @@ class UserFactory extends Factory
           'id' => $user->id,
           'farmacia_id' => null,
           'codigo_iso_pais' => CodigosIsoPaisEnum::PERU,
-          'dni_id_numero' => $faker->numerify('########'),
-          // 'dni_id_imagen_url' => $faker->imageUrl(640, 480, 'document'),
           'telefono' => '+51' . $faker->numerify('#########'),
           'licencia_numero' => 'Q' . $faker->numerify('#######'),
           'licencia_vencimiento' => $faker->dateTimeBetween('+1 year', '+5 years'),

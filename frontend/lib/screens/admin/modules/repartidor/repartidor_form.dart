@@ -52,7 +52,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
-  final TextEditingController _dniIdNumeroController = TextEditingController();
   final TextEditingController _licenciaNumeroController =
       TextEditingController();
   final TextEditingController _vehiculoPlacaController =
@@ -72,7 +71,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
   DateTime? _licenciaVencimiento;
   bool _activo = true;
   String? _fotoUrl;
-  String? _fotoDniUrl;
   String? _fotoLicenciaUrl;
   String? _fotoSeguroVehiculoUrl;
 
@@ -98,11 +96,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
         }
       }
 
-      _dniIdNumeroController.text = usuario.dniIdNumero ?? '';
       _fotoUrl = usuario.foto;
-      _fotoDniUrl = usuario.dniIdImagenUrl;
       _fotoLicenciaUrl = usuario.licenciaImagenUrl;
-      _licenciaNumeroController.text = usuario.licenciaNumero ?? '';
+      _licenciaNumeroController.text = usuario.licenciaNumero ?? usuario.dniIdNumero ?? '';
       _vehiculoPlacaController.text = usuario.vehiculoPlaca ?? '';
       _vehiculoMarcaController.text = usuario.vehiculoMarca ?? '';
       _vehiculoModeloController.text = usuario.vehiculoModelo ?? '';
@@ -120,21 +116,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
     setState(() {
       _fotoUrl = imageUrl;
     });
-    // Hacer GET por ID para obtener las URLs oficiales actualizadas
-    if (widget.initialData?.id != null) {
-      await _refreshRepartidorData();
-    }
-
-    // Notificar al padre que se actualizó una imagen
-    widget.onImageUpdated?.call();
-  }
-
-  Future<void> _onDniImageChanged(String? imageUrl) async {
-    // Actualizar inmediatamente con la URL del upload
-    setState(() {
-      _fotoDniUrl = imageUrl;
-    });
-
     // Hacer GET por ID para obtener las URLs oficiales actualizadas
     if (widget.initialData?.id != null) {
       await _refreshRepartidorData();
@@ -174,7 +155,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
         setState(() {
           _fotoUrl = usuario.foto;
-          _fotoDniUrl = usuario.dniIdImagenUrl;
           _fotoLicenciaUrl = usuario.licenciaImagenUrl;
           _fotoSeguroVehiculoUrl =
               usuario.fotoSeguroVehiculo ?? usuario.seguroVehiculoUrl;
@@ -354,9 +334,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
             ? null
             : Validators.formatPhoneToE164(_telefonoController.text.trim()),
         foto: _fotoUrl,
-        dniIdNumero: _dniIdNumeroController.text.trim().isEmpty
-            ? null
-            : _dniIdNumeroController.text.trim(),
         licenciaNumero: _licenciaNumeroController.text.trim().isEmpty
             ? null
             : _licenciaNumeroController.text.trim(),
@@ -478,7 +455,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
     _emailController.dispose();
     _passwordController.dispose();
     _telefonoController.dispose();
-    _dniIdNumeroController.dispose();
     _licenciaNumeroController.dispose();
     _vehiculoPlacaController.dispose();
     _vehiculoMarcaController.dispose();
@@ -766,15 +742,15 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           _buildTelefonoField(),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
-                          // ID
+                          // Licencia / ID (opcional; un solo campo)
                           TextFormField(
-                            controller: _dniIdNumeroController,
+                            controller: _licenciaNumeroController,
                             decoration: InputDecoration(
-                              labelText: 'ID (Driver’s License o State ID)',
+                              labelText: AppLocalizations.of(context).licenseOrIdNumberOptionalLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.idCard),
                               helperText:
-                                  AppLocalizations.of(context).idHelper,
+                                  AppLocalizations.of(context).licenseFormatHelper,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             inputFormatters: [
@@ -783,56 +759,18 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   Validators.getAlphanumericInputPattern()),
                             ],
                             validator: (value) {
-                              if (value != null && value.isNotEmpty) {
-                                if (value.length < 5) {
-                                  return AppLocalizations.of(context).idMin5Chars;
-                                }
-                                if (!Validators.isAlphanumericOnly(value)) {
-                                  return AppLocalizations.of(context).alphanumericOnly;
-                                }
+                              if (value == null || value.isEmpty) {
+                                return null;
+                              }
+                              if (value.length < 5) {
+                                return AppLocalizations.of(context).idMin5Chars;
+                              }
+                              if (!Validators.isAlphanumericOnly(value)) {
+                                return AppLocalizations.of(context).alphanumericOnly;
                               }
                               return null;
                             },
-                            onChanged: (value) {
-                              setState(() {});
-                            },
-                          ),
-                          const SizedBox(height: MedRushTheme.spacingLg),
-
-                          // Información de Licencia
-                          _buildSectionTitle(
-                              AppLocalizations.of(context).sectionLicenseInfo),
-                          const SizedBox(height: MedRushTheme.spacingMd),
-
-                          // Número de licencia
-                          TextFormField(
-                            controller: _licenciaNumeroController,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context)
-                                  .licenseNumberLabel,
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(LucideIcons.idCard),
-                              helperText:
-                                  AppLocalizations.of(context).licenseFormatHelper,
-                            ),
-                            textCapitalization: TextCapitalization.characters,
-                            validator: (value) {
-                              if (value != null && value.isNotEmpty) {
-                                if (value.length < 5) {
-                                  return AppLocalizations.of(context)
-                                      .licenseMin5Chars;
-                                }
-                                if (!Validators.isUppercaseAndNumbersOnly(
-                                    value)) {
-                                  return AppLocalizations.of(context)
-                                      .uppercaseAndNumbersOnly;
-                                }
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              setState(() {});
-                            },
+                            onChanged: (value) => setState(() {}),
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -1009,30 +947,6 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             ),
                             child: Column(
                               children: [
-                                // Foto de ID
-                                _buildDocumentPhoto(
-                                  title: AppLocalizations.of(context).photoIdTitle,
-                                  subtitle:
-                                      AppLocalizations.of(context).photoIdSubtitle,
-                                  icon: LucideIcons.idCard,
-                                  imageUrl: _fotoDniUrl,
-                                  onImageChanged: _onDniImageChanged,
-                                  uploadEndpoint:
-                                      '/user/repartidores/${widget.initialData?.id ?? 'temp'}/dni-id',
-                                  key: 'dni_${_fotoDniUrl ?? 'empty'}',
-                                ),
-
-                                const SizedBox(height: MedRushTheme.spacingLg),
-
-                                // Divider
-                                Container(
-                                  height: 1,
-                                  color: MedRushTheme.textSecondary
-                                      .withValues(alpha: 0.2),
-                                ),
-
-                                const SizedBox(height: MedRushTheme.spacingLg),
-
                                 // Foto de Licencia
                                 _buildDocumentPhoto(
                                   title: AppLocalizations.of(context)

@@ -13,8 +13,6 @@ class PerfilRepartidorResource extends JsonResource
     return [
       'farmacia_id' => $this->farmacia_id,
       'codigo_iso_pais' => $this->codigo_iso_pais,
-      'dni_id_numero' => $this->dni_id_numero,
-      'foto_dni_id' => PrivateUploadsDiskService::getSignedUrl($this->foto_dni_id_path),
       'telefono' => $this->telefono,
       'licencia_numero' => $this->licencia_numero,
       'licencia_vencimiento' => $this->licencia_vencimiento,

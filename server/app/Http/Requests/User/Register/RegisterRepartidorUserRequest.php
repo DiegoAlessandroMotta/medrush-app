@@ -11,7 +11,6 @@ class RegisterRepartidorUserRequest extends RegisterBaseUserRequest
 {
   protected const REPARTIDOR_USER_FIELDS = [
     'codigo_iso_pais',
-    'dni_id_numero',
     'telefono',
     'licencia_numero',
     'licencia_vencimiento',
@@ -31,7 +30,6 @@ class RegisterRepartidorUserRequest extends RegisterBaseUserRequest
     return array_merge(parent::rules(), [
       // 'farmacia_id' => ['required', 'uuid', Rule::exists(Farmacia::class, 'id')],
       'codigo_iso_pais' => ['required', 'string', Rule::in(CodigosIsoPaisEnum::cases())],
-      'dni_id_numero' => ['sometimes', 'nullable', 'string', 'max:20'],
       'telefono' => ['sometimes', 'nullable', new PhoneNumberE164],
       'licencia_numero' => ['sometimes', 'nullable', 'string', 'max:20'],
       'licencia_vencimiento' => ['sometimes', 'nullable', 'date', 'after:today'],

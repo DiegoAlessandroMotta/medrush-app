@@ -271,17 +271,6 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                             children: [
                               _buildInfoSection(
                                   AppLocalizations.of(context).documentsSection, [
-                                if (widget.repartidor.dniIdNumero != null)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context).idLabel
-                                          .trimRight(),
-                                      widget.repartidor.dniIdNumero!,
-                                      icon: LucideIcons.idCard),
-                                if (widget.repartidor.fotoDniId != null)
-                                  _buildDocumentRow(
-                                      AppLocalizations.of(context).photoIdLabel,
-                                      widget.repartidor.fotoDniId!,
-                                      LucideIcons.idCard),
                                 if (widget.repartidor.firmaDigital != null)
                                   _buildDocumentRow(
                                       AppLocalizations.of(context)
@@ -755,9 +744,7 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
 
   // Métodos para manejar estados del repartidor
   bool _hasDocumentInfo() {
-    return widget.repartidor.dniIdNumero != null ||
-        widget.repartidor.fotoDniId != null ||
-        widget.repartidor.firmaDigital != null;
+    return widget.repartidor.firmaDigital != null;
   }
 
   bool _hasLicenseInfo() {

@@ -213,7 +213,8 @@ class _EntregasFormState extends State<EntregasForm> {
 
       // Cargar farmacias y repartidores en paralelo usando helpers centralizados
       final farmaciasFuture = FarmaciaRepository.loadFarmaciasWithState(
-        errorMessage: AppLocalizations.of(context).errorLoadingPharmaciesForForm,
+        errorMessage:
+            AppLocalizations.of(context).errorLoadingPharmaciesForForm,
       );
       final repartidorRepo = RepartidorRepository();
       final repartidoresFuture = repartidorRepo.getRepartidoresActivos();
@@ -417,6 +418,7 @@ class _EntregasFormState extends State<EntregasForm> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _kMaxDesktopSheetWidth),
         child: Material(
+          color: MedRushTheme.surface,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -455,8 +457,10 @@ class _EntregasFormState extends State<EntregasForm> {
                               children: [
                                 Text(
                                   widget.initialData != null
-                                      ? AppLocalizations.of(context).editDelivery
-                                      : AppLocalizations.of(context).newDelivery,
+                                      ? AppLocalizations.of(context)
+                                          .editDelivery
+                                      : AppLocalizations.of(context)
+                                          .newDelivery,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeTitleLarge,
                                     fontWeight: MedRushTheme.fontWeightBold,
@@ -467,7 +471,8 @@ class _EntregasFormState extends State<EntregasForm> {
                                 Text(
                                   widget.initialData != null
                                       ? '${AppLocalizations.of(context).orderIdShort}${widget.initialData!.id}'
-                                      : AppLocalizations.of(context).creatingNewDelivery,
+                                      : AppLocalizations.of(context)
+                                          .creatingNewDelivery,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodySmall,
                                     color: MedRushTheme.textSecondary,
@@ -540,7 +545,8 @@ class _EntregasFormState extends State<EntregasForm> {
                               TextFormField(
                                 controller: _observacionesController,
                                 decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context).observationsOptionalLabel,
+                                  labelText: AppLocalizations.of(context)
+                                      .observationsOptionalLabel,
                                   border: const OutlineInputBorder(),
                                   prefixIcon: const Icon(LucideIcons.fileText),
                                 ),
@@ -562,7 +568,8 @@ class _EntregasFormState extends State<EntregasForm> {
                                     : const Icon(LucideIcons.save),
                                 label: Text(_isLoading
                                     ? AppLocalizations.of(context).saving
-                                    : AppLocalizations.of(context).saveDelivery),
+                                    : AppLocalizations.of(context)
+                                        .saveDelivery),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: MedRushTheme.primaryGreen,
                                   foregroundColor: MedRushTheme.textInverse,
@@ -925,7 +932,8 @@ class _EntregasFormState extends State<EntregasForm> {
         TextFormField(
           controller: _direccionLinea2Controller,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context).deliveryAddressLine2OptionalLabel,
+            labelText:
+                AppLocalizations.of(context).deliveryAddressLine2OptionalLabel,
             helperText: AppLocalizations.of(context).addressLine2HelperText,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.mapPin),
@@ -1032,7 +1040,8 @@ class _EntregasFormState extends State<EntregasForm> {
                   ),
                 ),
                 Text(
-                  StatusHelpers.estadoPedidoTexto(_estadoSeleccionado, AppLocalizations.of(context)),
+                  StatusHelpers.estadoPedidoTexto(
+                      _estadoSeleccionado, AppLocalizations.of(context)),
                   style: TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     fontWeight: MedRushTheme.fontWeightBold,
@@ -1080,7 +1089,9 @@ class _EntregasFormState extends State<EntregasForm> {
                   ),
                 ),
                 Text(
-                  _requiereFirmaEspecial ? AppLocalizations.of(context).yes : AppLocalizations.of(context).no,
+                  _requiereFirmaEspecial
+                      ? AppLocalizations.of(context).yes
+                      : AppLocalizations.of(context).no,
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodySmall,
                     color: MedRushTheme.textSecondary,
@@ -1169,14 +1180,17 @@ class _EntregasFormState extends State<EntregasForm> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _medicamentos[index]['nombre'] ?? AppLocalizations.of(context).medicationDefaultName,
+                          _medicamentos[index]['nombre'] ??
+                              AppLocalizations.of(context)
+                                  .medicationDefaultName,
                           style: const TextStyle(
                             fontWeight: MedRushTheme.fontWeightMedium,
                             color: MedRushTheme.textPrimary,
                           ),
                         ),
                         Text(
-                          AppLocalizations.of(context).quantityLabelShort(_medicamentos[index]['cantidad'] ?? 1),
+                          AppLocalizations.of(context).quantityLabelShort(
+                              _medicamentos[index]['cantidad'] ?? 1),
                           style: const TextStyle(
                             color: MedRushTheme.textSecondary,
                             fontSize: MedRushTheme.fontSizeBodySmall,
@@ -1314,7 +1328,8 @@ class _EntregasFormState extends State<EntregasForm> {
             suffixIcon: const Icon(LucideIcons.chevronDown),
             helperText: AppLocalizations.of(context)
                 .driversAvailableTapToSearch(_repartidores.length),
-            hintText: _repartidorSeleccionado?.nombre ?? AppLocalizations.of(context).unassigned,
+            hintText: _repartidorSeleccionado?.nombre ??
+                AppLocalizations.of(context).unassigned,
           ),
           onTap: _showRepartidorSearchDialog,
         ),
@@ -1414,7 +1429,8 @@ class _EntregasFormState extends State<EntregasForm> {
                 items: _isFarmaciasLoading
                     ? [
                         DropdownMenuItem(
-                          child: Text(AppLocalizations.of(context).loadingPharmacies),
+                          child: Text(
+                              AppLocalizations.of(context).loadingPharmacies),
                         )
                       ]
                     : _farmacias.map((farmacia) {
@@ -1454,7 +1470,8 @@ class _EntregasFormState extends State<EntregasForm> {
               child: TextFormField(
                 controller: _clienteController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).clientNameRequiredLabel,
+                  labelText:
+                      AppLocalizations.of(context).clientNameRequiredLabel,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(LucideIcons.user),
                 ),
@@ -1490,7 +1507,8 @@ class _EntregasFormState extends State<EntregasForm> {
         TextFormField(
           controller: _codigoAccesoController,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context).buildingAccessCodeOptionalLabel,
+            labelText:
+                AppLocalizations.of(context).buildingAccessCodeOptionalLabel,
             helperText: AppLocalizations.of(context).buildingAccessCodeHelper,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.key),
@@ -1511,7 +1529,8 @@ class _EntregasFormState extends State<EntregasForm> {
               child: DropdownButtonFormField<TipoPedido>(
                 initialValue: _tipoSeleccionado,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).orderTypeRequiredLabel,
+                  labelText:
+                      AppLocalizations.of(context).orderTypeRequiredLabel,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(LucideIcons.pill),
                 ),
@@ -1519,7 +1538,8 @@ class _EntregasFormState extends State<EntregasForm> {
                   return DropdownMenuItem<TipoPedido>(
                     value: tipo,
                     child: Builder(
-                      builder: (context) => Text(StatusHelpers.tipoPedidoTexto(tipo, AppLocalizations.of(context))),
+                      builder: (context) => Text(StatusHelpers.tipoPedidoTexto(
+                          tipo, AppLocalizations.of(context))),
                     ),
                   );
                 }).toList(),
@@ -1619,7 +1639,8 @@ class _EntregasFormState extends State<EntregasForm> {
         TextFormField(
           controller: _codigoAccesoController,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context).buildingAccessCodeOptionalLabel,
+            labelText:
+                AppLocalizations.of(context).buildingAccessCodeOptionalLabel,
             helperText: AppLocalizations.of(context).buildingAccessCodeHelper,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.key),
@@ -1643,7 +1664,8 @@ class _EntregasFormState extends State<EntregasForm> {
             return DropdownMenuItem<TipoPedido>(
               value: tipo,
               child: Builder(
-                builder: (context) => Text(StatusHelpers.tipoPedidoTexto(tipo, AppLocalizations.of(context))),
+                builder: (context) => Text(StatusHelpers.tipoPedidoTexto(
+                    tipo, AppLocalizations.of(context))),
               ),
             );
           }).toList(),
@@ -1693,7 +1715,8 @@ class _MedicamentoDialogState extends State<_MedicamentoDialog> {
             TextFormField(
               controller: _nombreController,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).medicationNameRequiredLabel,
+                labelText:
+                    AppLocalizations.of(context).medicationNameRequiredLabel,
                 border: const OutlineInputBorder(),
               ),
               validator: (value) {
@@ -1713,7 +1736,8 @@ class _MedicamentoDialogState extends State<_MedicamentoDialog> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return AppLocalizations.of(context).medicationQuantityRequired;
+                  return AppLocalizations.of(context)
+                      .medicationQuantityRequired;
                 }
                 final cantidad = int.tryParse(value);
                 if (cantidad == null || cantidad <= 0) {
@@ -1843,8 +1867,8 @@ class _RepartidorSearchDialogState extends State<_RepartidorSearchDialog> {
                     return ListTile(
                       leading: const Icon(LucideIcons.userX),
                       title: Text(AppLocalizations.of(context).unassigned),
-                      subtitle:
-                          Text(AppLocalizations.of(context).unassignDriverOption),
+                      subtitle: Text(
+                          AppLocalizations.of(context).unassignDriverOption),
                       selected: _selectedRepartidor == null,
                       onTap: () {
                         setState(() {

@@ -10,7 +10,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\List\IndexRepartidorUserRequest;
 use App\Http\Requests\User\Register\RegisterRepartidorUserRequest;
 use App\Http\Requests\User\Update\UpdateRepartidorUserRequest;
-use App\Http\Requests\User\UploadFiles\UploadFotoDniIdRequest;
 use App\Http\Requests\User\UploadFiles\UploadFotoLicenciaRequest;
 use App\Http\Requests\User\UploadFiles\UploadFotoSeguroVehiculoRequest;
 use App\Http\Resources\UserResource;
@@ -562,116 +561,6 @@ class RepartidorUserController extends Controller
 
   /**
    * @OA\Post(
-   *     path="/api/users/repartidores/{perfilRepartidorId}/documentos/dni",
-   *     operationId="repartidorUploadFotoDni",
-   *     tags={"User","PerfilRepartidor"},
-   *     summary="Subir foto de documento de identidad",
-   *     description="Carga la foto del documento de identidad del repartidor. Reemplaza la anterior si existe.",
-   *     security={{"sanctum":{}}},
-   *     @OA\Parameter(
-   *         name="perfilRepartidorId",
-   *         in="path",
-   *         required=true,
-   *         description="UUID del perfil de repartidor",
-   *         @OA\Schema(type="string", format="uuid"),
-   *     ),
-   *     @OA\RequestBody(
-   *         required=true,
-   *         description="Archivo de imagen",
-   *         @OA\MediaType(
-   *             mediaType="multipart/form-data",
-   *             @OA\Schema(
-   *                 type="object",
-   *                 required={"foto_dni_id"},
-   *                 @OA\Property(
-   *                     property="foto_dni_id",
-   *                     type="string",
-   *                     format="binary",
-   *                     description="Imagen JPEG/PNG del documento"
-   *                 )
-   *             )
-   *         )
-   *     ),
-   *     @OA\Response(
-   *         response=200,
-   *         description="Documento subido exitosamente",
-   *         @OA\JsonContent(
-   *             @OA\Property(property="status", type="string", enum={"success"}),
-   *             @OA\Property(property="message", type="string", example="La foto de su documento de identidad ha sido actualizada correctamente."),
-   *             @OA\Property(property="data", type="object",
-   *                 @OA\Property(property="url", type="string", format="url", description="URL firmada para descargar la imagen"),
-   *             ),
-   *         ),
-   *     ),
-   *     @OA\Response(
-   *         response=401,
-   *         description="No autenticado",
-   *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedResponse")
-   *     ),
-   *     @OA\Response(
-   *         response=422,
-   *         description="Archivo inválido o no enviado",
-   *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
-   *     ),
-   *     @OA\Response(
-   *         response=500,
-   *         description="Error al guardar el archivo",
-   *         @OA\JsonContent(ref="#/components/schemas/ServerErrorResponse")
-   *     ),
-   * )
-   */
-  public function uploadFotoDniId(UploadFotoDniIdRequest $request, PerfilRepartidor $perfilRepartidor)
-  {
-    if (!$request->hasFile('foto_dni_id')) {
-      throw CustomException::validationException(errors: [
-        'foto_dni_id' => 'Debe adjuntar una foto de su documento de identidad'
-      ]);
-    }
-
-    $oldFotoDniIdPath = $perfilRepartidor->foto_dni_id_path;
-    $fotoDniIdFile = $request->file('foto_dni_id');
-    $newFotoDniIdPath = null;
-
-    try {
-      $newFotoDniIdPath = PrivateUploadsDiskService::saveImage(
-        imgPath: $fotoDniIdFile->getRealPath(),
-        prefix: 'di-',
-        width: 1000,
-        height: 1000,
-      );
-
-      if ($newFotoDniIdPath === null) {
-        throw CustomException::internalServer('Error inesperado al intentar guardar la foto del documento.');
-      }
-
-      $perfilRepartidor->update([
-        'foto_dni_id_path' => $newFotoDniIdPath,
-      ]);
-
-      if ($oldFotoDniIdPath !== null) {
-        PrivateUploadsDiskService::delete($oldFotoDniIdPath);
-      }
-
-      return ApiResponder::success(
-        message: 'La foto de su documento de identidad ha sido actualizada correctamente.',
-        data: [
-          'url' => PrivateUploadsDiskService::getSignedUrl($newFotoDniIdPath)
-        ],
-      );
-    } catch (\Throwable $e) {
-      if ($newFotoDniIdPath !== null) {
-        PrivateUploadsDiskService::delete($newFotoDniIdPath);
-      }
-
-      throw CustomException::internalServer(
-        'Error inesperado al intentar actualizar la foto del documento de identidad.',
-        $e,
-      );
-    }
-  }
-
-  /**
-   * @OA\Post(
    *     path="/api/users/repartidores/{perfilRepartidorId}/documentos/licencia",
    *     operationId="repartidorUploadFotoLicencia",
    *     tags={"User","PerfilRepartidor"},
@@ -733,9 +622,7 @@ class RepartidorUserController extends Controller
   public function uploadFotoLicencia(UploadFotoLicenciaRequest $request, PerfilRepartidor $perfilRepartidor)
   {
     if (!$request->hasFile('foto_licencia')) {
-      throw CustomException::validationException(errors: [
-        'foto_licencia' => 'Debe adjuntar una foto de su licencia de conducir'
-      ]);
+      return ApiResponder::success(message: 'Sin cambios (no se envió archivo).', data: ['url' => null]);
     }
 
     $oldLicenciaPath = $perfilRepartidor->foto_licencia_path;
@@ -843,9 +730,7 @@ class RepartidorUserController extends Controller
   public function uploadFotoSeguroVehiculo(UploadFotoSeguroVehiculoRequest $request, PerfilRepartidor $perfilRepartidor)
   {
     if (!$request->hasFile('foto_seguro_vehiculo')) {
-      throw CustomException::validationException(errors: [
-        'foto_seguro_vehiculo' => 'Debe adjuntar una foto del seguro de su vehículo'
-      ]);
+      return ApiResponder::success(message: 'Sin cambios (no se envió archivo).', data: ['url' => null]);
     }
 
     $oldSeguroVehiculoPath = $perfilRepartidor->foto_seguro_vehiculo_path;

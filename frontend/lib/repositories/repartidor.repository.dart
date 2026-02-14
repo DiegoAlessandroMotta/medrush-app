@@ -272,26 +272,6 @@ class RepartidorRepository extends BaseRepository {
     }, errorMessage: 'Error al subir foto de perfil');
   }
 
-  /// Sube foto de DNI/ID del repartidor
-  Future<RepositoryResult<String?>> uploadFotoDniId(
-      String repartidorId, XFile imageFile) {
-    return execute<String?>(() async {
-      validateId(repartidorId, 'ID de repartidor');
-      logInfo('Subiendo foto de DNI/ID para repartidor: $repartidorId');
-
-      final url =
-          await RepartidoresApi.uploadFotoDniId(repartidorId, imageFile);
-
-      if (url != null) {
-        logInfo('Foto de DNI/ID subida exitosamente: $url');
-      } else {
-        logError('Error al subir foto de DNI/ID');
-      }
-
-      return url;
-    }, errorMessage: 'Error al subir foto de DNI/ID');
-  }
-
   /// Sube foto de licencia del repartidor
   Future<RepositoryResult<String?>> uploadFotoLicencia(
       String repartidorId, XFile imageFile) {

@@ -84,10 +84,6 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::post('/', [RepartidorUserController::class, 'register'])
         ->can('register', PerfilRepartidor::class);
 
-      Route::post('/{perfilRepartidor}/dni-id', [RepartidorUserController::class, 'uploadFotoDniId'])
-        ->whereUuid('perfilRepartidor')
-        ->can('update', 'perfilRepartidor');
-
       Route::post('/{perfilRepartidor}/licencia', [RepartidorUserController::class, 'uploadFotoLicencia'])
         ->whereUuid('perfilRepartidor')
         ->can('update', 'perfilRepartidor');

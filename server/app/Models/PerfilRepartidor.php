@@ -15,8 +15,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $id
  * @property string|null $farmacia_id
  * @property CodigosIsoPaisEnum $codigo_iso_pais
- * @property string|null $dni_id_numero
- * @property string|null $foto_dni_id_path
  * @property string|null $telefono
  * @property string|null $licencia_numero
  * @property \Illuminate\Support\Carbon|null $licencia_vencimiento
@@ -65,10 +63,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereCodigoIsoPais($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereDniIdNumero($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereEstado($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereFarmaciaId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereFotoDniIdPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereFotoLicenciaPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereFotoSeguroVehiculoPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PerfilRepartidor whereId($value)
@@ -96,8 +92,6 @@ class PerfilRepartidor extends Model
     'id',
     'farmacia_id',
     'codigo_iso_pais',
-    'dni_id_numero',
-    'foto_dni_id_path',
     'telefono',
     'licencia_numero',
     'licencia_vencimiento',

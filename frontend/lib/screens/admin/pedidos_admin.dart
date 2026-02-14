@@ -209,6 +209,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                   context: context,
                   expand: true,
                   backgroundColor: Colors.transparent,
+                  elevation: 0,
                   builder: (context) => EntregasForm(
                     onSave: (pedido) async {
                       Navigator.of(context).pop();

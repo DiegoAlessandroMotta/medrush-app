@@ -125,7 +125,6 @@ class RepartidoresApi extends BaseApi {
 
           // Campos específicos del repartidor (según RegisterRepartidorUserRequest)
           'codigo_iso_pais': 'USA', // Código ISO para Estados Unidos
-          'dni_id_numero': repartidor.dniIdNumero,
           'telefono': telefonoProcesado,
           'licencia_numero': repartidor.licenciaNumero,
           'licencia_vencimiento': licenciaVencimientoProcesada,
@@ -207,9 +206,6 @@ class RepartidoresApi extends BaseApi {
             if (repartidor.farmaciaId != null)
               'farmacia_id': repartidor.farmaciaId,
             'codigo_iso_pais': 'USA', // Código ISO para Estados Unidos
-            // Campos opcionales: solo enviar si tienen valor
-            if (repartidor.dniIdNumero != null)
-              'dni_id_numero': repartidor.dniIdNumero,
             if (repartidor.telefono != null) 'telefono': repartidor.telefono,
             if (repartidor.licenciaNumero != null)
               'licencia_numero': repartidor.licenciaNumero,
@@ -273,26 +269,6 @@ class RepartidoresApi extends BaseApi {
         return response;
       },
       operationName: 'Subiendo foto de perfil',
-    );
-  }
-
-  /// Sube foto de DNI/ID del repartidor
-  static Future<String?> uploadFotoDniId(String repartidorId, XFile imageFile) {
-    return ApiHelper.executeWithLogging(
-      () async {
-        final response = await BaseApi.uploadFile<Map<String, dynamic>>(
-          EndpointManager.repartidorDniId(repartidorId),
-          filePath: imageFile.path,
-          fieldName: 'foto_dni_id',
-        );
-
-        if (response.statusCode == 200 &&
-            response.data?['status'] == 'success') {
-          return response.data?['data']?['url'] as String?;
-        }
-        return null;
-      },
-      operationName: 'Subiendo foto de DNI/ID para repartidor: $repartidorId',
     );
   }
 

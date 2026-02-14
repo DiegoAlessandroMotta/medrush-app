@@ -1175,16 +1175,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get min5Characters => 'Must be at least 5 characters';
 
   @override
-  String get photoIdTitle => 'ID Photo';
-
-  @override
-  String get photoIdSubtitle => 'Identity document';
-
-  @override
   String get photoLicenseTitle => 'Driver\'s License Photo';
 
   @override
   String get photoLicenseSubtitle => 'Valid driver\'s license';
+
+  @override
+  String get photoLicenseOrIdOptionalLabel =>
+      'Driver\'s License / ID (optional)';
+
+  @override
+  String get licenseOrIdNumberOptionalLabel => 'License / ID (optional)';
 
   @override
   String get photoInsuranceTitle => 'Vehicle Insurance Photo';
@@ -1236,9 +1237,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expiryLabel => 'Expiry';
-
-  @override
-  String get photoIdLabel => 'ID Photo';
 
   @override
   String get photoLicenseLabel => 'License Photo';

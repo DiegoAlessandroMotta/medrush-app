@@ -2228,18 +2228,6 @@ abstract class AppLocalizations {
   /// **'Must be at least 5 characters'**
   String get min5Characters;
 
-  /// No description provided for @photoIdTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'ID Photo'**
-  String get photoIdTitle;
-
-  /// No description provided for @photoIdSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Identity document'**
-  String get photoIdSubtitle;
-
   /// No description provided for @photoLicenseTitle.
   ///
   /// In en, this message translates to:
@@ -2251,6 +2239,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Valid driver\'s license'**
   String get photoLicenseSubtitle;
+
+  /// No description provided for @photoLicenseOrIdOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s License / ID (optional)'**
+  String get photoLicenseOrIdOptionalLabel;
+
+  /// No description provided for @licenseOrIdNumberOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'License / ID (optional)'**
+  String get licenseOrIdNumberOptionalLabel;
 
   /// No description provided for @photoInsuranceTitle.
   ///
@@ -2353,12 +2353,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expiry'**
   String get expiryLabel;
-
-  /// No description provided for @photoIdLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'ID Photo'**
-  String get photoIdLabel;
 
   /// No description provided for @photoLicenseLabel.
   ///
@@ -2465,7 +2459,7 @@ abstract class AppLocalizations {
   /// No description provided for @rucLabel.
   ///
   /// In en, this message translates to:
-  /// **'RUC'**
+  /// **'EIN'**
   String get rucLabel;
 
   /// No description provided for @cadenaLabel.
@@ -2691,6 +2685,9 @@ abstract class AppLocalizations {
   String get rucRequiredLabel;
 
   /// No description provided for @rucEinOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'EIN (optional)'**
   String get rucEinOptionalLabel;
 
   /// No description provided for @cityRequiredLabel.

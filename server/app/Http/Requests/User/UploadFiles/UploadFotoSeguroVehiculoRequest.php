@@ -9,7 +9,7 @@ class UploadFotoSeguroVehiculoRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'foto_seguro_vehiculo' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+      'foto_seguro_vehiculo' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
     ];
   }
 }

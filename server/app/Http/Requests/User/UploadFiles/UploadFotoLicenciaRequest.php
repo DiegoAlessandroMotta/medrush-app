@@ -9,7 +9,7 @@ class UploadFotoLicenciaRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'foto_licencia' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+      'foto_licencia' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
     ];
   }
 }

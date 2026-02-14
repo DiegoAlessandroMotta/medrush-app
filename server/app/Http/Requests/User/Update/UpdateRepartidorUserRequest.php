@@ -13,7 +13,6 @@ class UpdateRepartidorUserRequest extends UpdateBaseUserRequest
   protected const REPARTIDOR_FIELDS = [
     'farmacia_id',
     'codigo_iso_pais',
-    'dni_id_numero',
     'telefono',
     'licencia_numero',
     'licencia_vencimiento',
@@ -28,8 +27,6 @@ class UpdateRepartidorUserRequest extends UpdateBaseUserRequest
     return array_merge(parent::rules(), [
       'farmacia_id' => ['sometimes', 'required', 'uuid', Rule::exists(Farmacia::class, 'id')],
       'codigo_iso_pais' => ['sometimes', 'required', 'string', Rule::in(CodigosIsoPaisEnum::cases())],
-      'dni_id_numero' => ['sometimes', 'nullable', 'string', 'max:20'],
-      // 'dni_id_imagen' => ['sometimes', 'nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
       'telefono' => ['sometimes', 'nullable', new PhoneNumberE164],
       'licencia_numero' => ['sometimes', 'nullable', 'string', 'max:20'],
       'licencia_vencimiento' => ['sometimes', 'nullable', 'date', 'after:today'],
