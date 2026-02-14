@@ -165,10 +165,11 @@ class EndpointManager {
           ? '${uri.host}:${uri.port}'
           : uri.host;
     }
+    // En web (Edge, Chrome, etc.) usar siempre backend en producción
+    if (kIsWeb) {
+      return _prodDomain;
+    }
     if (_isLocal) {
-      if (kIsWeb) {
-        return 'localhost:4000';
-      }
       final isEmulator = _isAndroidEmulator;
       if (isEmulator) {
         return '10.0.2.2:$_localPort';
@@ -184,9 +185,10 @@ class EndpointManager {
           ? _apiBaseUrlFromEnv
           : '$_apiBaseUrlFromEnv/api';
     }
-    return _isLocal
-        ? 'http://$serverDomain/api'
-        : 'https://$serverDomain/api';
+    // traefik.me usa HTTP; dominio propio podría usar HTTPS
+    final useHttps = !kIsWeb && !_isLocal;
+    final scheme = useHttps ? 'https' : 'http';
+    return '$scheme://$serverDomain/api';
   }
 
   static String get serverWebSocketUrl {
@@ -198,7 +200,8 @@ class EndpointManager {
       final rest = base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
       return '$scheme://$rest/ws';
     }
-    return _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
+    final useWss = !kIsWeb && !_isLocal;
+    return useWss ? 'wss://$serverDomain/ws' : 'ws://$serverDomain/ws';
   }
 
   // Configuración de URLs

@@ -8,13 +8,15 @@ return [
 
   'allowed_origins' => ['*'],
 
-  'allowed_origins_patterns' => [],
+  // Permitir localhost en cualquier puerto (Flutter web desde dev)
+  'allowed_origins_patterns' => [
+    '#^https?://localhost(:\d+)?$#',
+    '#^https?://127\.0\.0\.1(:\d+)?$#',
+  ],
 
   'allowed_headers' => ['*'],
 
   'exposed_headers' => [],
-
-  // 'allowed_methods' => ['GET', 'OPTIONS'],
 
   'max_age' => 60 * 60,
 
