@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
     if (!App::isProduction()) {
       $this->call([
         FarmaciaSeeder::class,
-        PedidoRutaSeeder::class,
         UbicacionRepartidorSeeder::class,
       ]);
     }
