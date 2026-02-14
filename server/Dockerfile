@@ -23,10 +23,13 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY . .
-RUN composer dump-autoload --optimize
 
-# Generate key at runtime if missing (set APP_KEY in Dokploy env)
+# Entrypoint: migrate + seed + serve (todo listo al arrancar)
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN composer dump-autoload --optimize
 RUN php artisan config:clear || true
 
 EXPOSE 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+ENTRYPOINT ["/entrypoint.sh"]
