@@ -997,12 +997,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               AppLocalizations.of(context).sectionSettings),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
-                          // Estado del repartidor
+                          // Estado del repartidor (opcional al crear; por defecto Disponible)
                           DropdownButtonFormField<EstadoRepartidor>(
                             initialValue: _estadoSeleccionado,
                             decoration: InputDecoration(
                               labelText:
-                                  AppLocalizations.of(context).stateRequired,
+                                  AppLocalizations.of(context).driverStatusLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.assignment),
                             ),

@@ -46,7 +46,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>GMSApiKey</key>
-	<string>AIzaSyAI3-xUAMIIkAaQWGif4b_iLVq4h0zMJz8</string>
+	<string>AIzaSyBquo-0Ex1O2hHcSkcgOUdGo2FQ44LtcOA</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Esta aplicación necesita acceso a la ubicación para mostrar tu posición en el mapa.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

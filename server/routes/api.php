@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\DirectionsController;
 use App\Http\Controllers\Api\GeocodingController;
+use App\Http\Controllers\Api\GoogleServicesHealthController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\Download\DownloadController;
@@ -377,6 +378,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/client-errors/report', [ClientErrorController::class, 'report'])
   ->middleware('throttle:client-errors-report');
+
+Route::get('/health/google-services', GoogleServicesHealthController::class);
 
 Route::middleware('signed')->group(function () {
   Route::prefix('downloads')->group(function () {

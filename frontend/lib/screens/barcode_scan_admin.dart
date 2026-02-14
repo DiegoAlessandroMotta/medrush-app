@@ -229,6 +229,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
         MobileScanner(
           controller: cameraController,
           onDetect: _onDetect,
+          errorBuilder: _buildScannerError,
         ),
 
         // Overlay con marco de escaneo
@@ -344,6 +345,59 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
               );
             }),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScannerError(BuildContext context, MobileScannerException error) {
+    final isUnsupported = error.errorCode == MobileScannerErrorCode.unsupported;
+    return ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.camera_alt_outlined,
+                size: 64,
+                color: MedRushTheme.textSecondary.withValues(alpha: 0.7),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).scannerErrorTitle,
+                style: const TextStyle(
+                  fontSize: MedRushTheme.fontSizeTitleMedium,
+                  fontWeight: MedRushTheme.fontWeightBold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).scannerErrorMessage,
+                style: const TextStyle(
+                  fontSize: MedRushTheme.fontSizeBodyMedium,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (kIsWeb || isUnsupported) ...[
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context).scannerWebHint,
+                  style: const TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: Colors.white54,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

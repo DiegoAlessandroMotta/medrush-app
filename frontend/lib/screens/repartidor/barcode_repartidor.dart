@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/l10n/app_localizations.dart';
@@ -143,8 +144,9 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
       children: [
         // Cámara del escáner ocupando toda la pantalla
         MobileScanner(
-          controller: _scannerController,
+          controller: _scannerController!,
           onDetect: _onBarcodeDetected,
+          errorBuilder: _buildScannerError,
         ),
 
         // Overlay profesional de escaneo (minimalista B/N)
@@ -172,6 +174,59 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
 
         // Texto de ayuda inferior removido
       ],
+    );
+  }
+
+  Widget _buildScannerError(BuildContext context, MobileScannerException error) {
+    final isUnsupported = error.errorCode == MobileScannerErrorCode.unsupported;
+    return ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.camera_alt_outlined,
+                size: 64,
+                color: MedRushTheme.textSecondary.withValues(alpha: 0.7),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).scannerErrorTitle,
+                style: const TextStyle(
+                  fontSize: MedRushTheme.fontSizeTitleMedium,
+                  fontWeight: MedRushTheme.fontWeightBold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).scannerErrorMessage,
+                style: const TextStyle(
+                  fontSize: MedRushTheme.fontSizeBodyMedium,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (kIsWeb || isUnsupported) ...[
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context).scannerWebHint,
+                  style: const TextStyle(
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    color: Colors.white54,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 

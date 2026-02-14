@@ -2270,6 +2270,12 @@ abstract class AppLocalizations {
   /// **'Status *'**
   String get stateRequired;
 
+  /// No description provided for @driverStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get driverStatusLabel;
+
   /// No description provided for @userTypeLabel.
   ///
   /// In en, this message translates to:
@@ -4789,6 +4795,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code scanned successfully'**
   String get successScanned;
+
+  /// No description provided for @scannerErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera error'**
+  String get scannerErrorTitle;
+
+  /// No description provided for @scannerErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start the camera. Check camera permission in settings or use the app from a mobile device.'**
+  String get scannerErrorMessage;
+
+  /// No description provided for @scannerWebHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner is not available on PWA/Web. Open the app from your phone to scan.'**
+  String get scannerWebHint;
 
   /// No description provided for @flashTooltip.
   ///

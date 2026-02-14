@@ -1197,6 +1197,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stateRequired => 'Status *';
 
   @override
+  String get driverStatusLabel => 'Status';
+
+  @override
   String get userTypeLabel => 'User Type';
 
   @override
@@ -2576,6 +2579,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get successScanned => 'Code scanned successfully';
+
+  @override
+  String get scannerErrorTitle => 'Camera error';
+
+  @override
+  String get scannerErrorMessage =>
+      'Could not start the camera. Check camera permission in settings or use the app from a mobile device.';
+
+  @override
+  String get scannerWebHint =>
+      'Scanner is not available on PWA/Web. Open the app from your phone to scan.';
 
   @override
   String get flashTooltip => 'Flash';

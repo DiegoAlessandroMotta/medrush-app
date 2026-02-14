@@ -1,10 +1,8 @@
 import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:medrush/utils/loggers.dart';
-
-import 'env_https_check_stub.dart'
-    if (dart.library.html) 'env_https_check_web.dart' as https_check;
 
 class EndpointManager {
   static const String _apiBaseUrlFromEnv =
@@ -61,18 +59,14 @@ class EndpointManager {
     return _prodDomain;
   }
 
-  /// URL base del API. Si no se define API_BASE_URL: en web con página HTTPS
-  /// se usa https:// para evitar Mixed Content; en local (HTTP) se usa http://.
+  /// URL base del API. Sin API_BASE_URL se usa https://api.medrush.cc (producción con SSL).
   static String get serverUrl {
     if (_apiBaseUrlFromEnv.isNotEmpty) {
       return _apiBaseUrlFromEnv.endsWith('/api')
           ? _apiBaseUrlFromEnv
           : '$_apiBaseUrlFromEnv/api';
     }
-    // Sin API_BASE_URL: en web si la app está en HTTPS usamos HTTPS para el API.
-    final useHttps = kIsWeb && https_check.isWebPageHttps();
-    final scheme = useHttps ? 'https' : 'http';
-    return '$scheme://$serverDomain/api';
+    return 'https://$serverDomain/api';
   }
 
   static String get serverWebSocketUrl {
@@ -85,9 +79,7 @@ class EndpointManager {
           base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
       return '$scheme://$rest/ws';
     }
-    final useWss = kIsWeb && https_check.isWebPageHttps();
-    final scheme = useWss ? 'wss' : 'ws';
-    return '$scheme://$serverDomain/ws';
+    return 'wss://$serverDomain/ws';
   }
 
   // Configuración de URLs
@@ -119,7 +111,7 @@ class EndpointManager {
 
   // API Key de Google Maps
   static const String googleMapsApiKey =
-      'AIzaSyAMgHYDRMHOOLGXWvMUBZWieIhsW3bb6Rg';
+      'AIzaSyBquo-0Ex1O2hHcSkcgOUdGo2FQ44LtcOA';
 
   // Configuración de CSV
   static const List<String> csvHeaders = [

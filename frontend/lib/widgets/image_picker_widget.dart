@@ -86,14 +86,13 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage({ImageSource source = ImageSource.gallery}) async {
     try {
       setState(() {
         _isUploading = true;
       });
 
-      // Usar BaseApi en lugar de StorageService
-      final XFile? imageFile = await BaseApi.pickImage();
+      final XFile? imageFile = await BaseApi.pickImage(source: source);
 
       if (imageFile != null && widget.userId != null) {
         // Subir imagen usando BaseApi
@@ -210,7 +209,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                 title: Text(AppLocalizations.of(context).camera),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _pickImage();
+                  _pickImage(source: ImageSource.camera);
                 },
               ),
             ],
