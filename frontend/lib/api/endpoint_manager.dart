@@ -4,17 +4,11 @@ import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:medrush/utils/loggers.dart';
 
 class EndpointManager {
-  // ===== CONFIGURACIÓN DE RED =====
-  //
-  // Producción (Docker/Dokploy): pasar en el build:
-  //   flutter build web --dart-define=API_BASE_URL=https://tu-backend.traefik.me
-  // Si API_BASE_URL está definido, se usa; si no, se usa _prodDomain.
-
   static const String _apiBaseUrlFromEnv =
       String.fromEnvironment('API_BASE_URL');
 
   static const String _prodDomain =
-      'medrush-backend-naqsru-3320d9-212-28-188-207.traefik.me';
+      'medrush-backend-naqsru-d2552a-212-28-188-207.traefik.me';
 
   /// Inicializa la detección del emulador (Android). No-op en web.
   static Future<void> initializeEmulatorDetection() async {
@@ -35,8 +29,7 @@ class EndpointManager {
       final brand = androidInfo.brand.toLowerCase();
       final manufacturer = androidInfo.manufacturer.toLowerCase();
       final device = androidInfo.device.toLowerCase();
-      final isEmulator =
-          model.contains('sdk') ||
+      final isEmulator = model.contains('sdk') ||
           model.contains('emulator') ||
           model.contains('google_sdk') ||
           model.contains('gphone') ||
@@ -71,7 +64,7 @@ class EndpointManager {
           ? _apiBaseUrlFromEnv
           : '$_apiBaseUrlFromEnv/api';
     }
-    // traefik.me no soporta SSL/HTTPS; usar HTTP/WS
+    // traefik.me solo soporta HTTP (no SSL)
     return 'http://$serverDomain/api';
   }
 
@@ -81,7 +74,8 @@ class EndpointManager {
           ? _apiBaseUrlFromEnv.substring(0, _apiBaseUrlFromEnv.length - 4)
           : _apiBaseUrlFromEnv;
       final scheme = base.startsWith('https') ? 'wss' : 'ws';
-      final rest = base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
+      final rest =
+          base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
       return '$scheme://$rest/ws';
     }
     return 'ws://$serverDomain/ws';
