@@ -5,11 +5,18 @@ import 'package:medrush/utils/loggers.dart';
 
 class EndpointManager {
   // ===== CONFIGURACIÓN DE RED =====
+  //
+  // Producción (Docker/Dokploy): pasar en el build:
+  //   flutter build web --dart-define=API_BASE_URL=http://tu-backend.traefik.me
+  // Si API_BASE_URL está definido, se usa y se ignora _isLocal / _prodDomain.
 
-  // Detectar entorno local (simple flag para desarrollo)
+  static const String _apiBaseUrlFromEnv =
+      String.fromEnvironment('API_BASE_URL');
+
+  // Detectar entorno local (solo cuando no se usa API_BASE_URL)
   static const bool _isLocal = true;
 
-  // URLs del servidor de producción
+  // URLs del servidor de producción (fallback si no hay dart-define)
   static const String _prodDomain = 'medrush.ksdemosapps.com';
 
   // IP local para dispositivos físicos (cambiar según tu red)
@@ -151,26 +158,47 @@ class EndpointManager {
   }
 
   static String get serverDomain {
+    if (_apiBaseUrlFromEnv.isNotEmpty) {
+      final uri = Uri.parse(_apiBaseUrlFromEnv);
+      return uri.port != 80 && uri.port != 443
+          ? '${uri.host}:${uri.port}'
+          : uri.host;
+    }
     if (_isLocal) {
       if (kIsWeb) {
         return 'localhost:4000';
       }
-      // Si es emulador, usar 10.0.2.2 (IP especial del emulador)
-      // Si es dispositivo físico, usar la IP local de la máquina
       final isEmulator = _isAndroidEmulator;
       if (isEmulator) {
         return '10.0.2.2:$_localPort';
       }
-      // Dispositivo físico: usar IP local configurada
       return '$_localIp:$_localPort';
     }
     return _prodDomain;
   }
 
-  static String get serverUrl =>
-      _isLocal ? 'http://$serverDomain/api' : 'https://$serverDomain/api';
-  static String get serverWebSocketUrl =>
-      _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
+  static String get serverUrl {
+    if (_apiBaseUrlFromEnv.isNotEmpty) {
+      return _apiBaseUrlFromEnv.endsWith('/api')
+          ? _apiBaseUrlFromEnv
+          : '$_apiBaseUrlFromEnv/api';
+    }
+    return _isLocal
+        ? 'http://$serverDomain/api'
+        : 'https://$serverDomain/api';
+  }
+
+  static String get serverWebSocketUrl {
+    if (_apiBaseUrlFromEnv.isNotEmpty) {
+      final base = _apiBaseUrlFromEnv.endsWith('/api')
+          ? _apiBaseUrlFromEnv.substring(0, _apiBaseUrlFromEnv.length - 4)
+          : _apiBaseUrlFromEnv;
+      final scheme = base.startsWith('https') ? 'wss' : 'ws';
+      final rest = base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
+      return '$scheme://$rest/ws';
+    }
+    return _isLocal ? 'ws://$serverDomain/ws' : 'wss://$serverDomain/ws';
+  }
 
   // Configuración de URLs
   static String get baseUrl => serverUrl;
