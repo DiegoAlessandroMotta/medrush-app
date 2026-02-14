@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -29,8 +29,8 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Inicializar detección del emulador (para configuración de red correcta)
-  if (Platform.isAndroid) {
+  // Inicializar detección del emulador solo en móvil (Platform no existe en web)
+  if (!kIsWeb) {
     await EndpointManager.initializeEmulatorDetection();
   }
 

@@ -16,8 +16,9 @@ class EndpointManager {
   // Detectar entorno local (solo cuando no se usa API_BASE_URL)
   static const bool _isLocal = true;
 
-  // URLs del servidor de producción (fallback si no hay dart-define)
-  static const String _prodDomain = 'medrush.ksdemosapps.com';
+  // Backend en producción (fallback si no se usa API_BASE_URL en el build)
+  static const String _prodDomain =
+      'medrush-backend-naqsru-3320d9-212-28-188-207.traefik.me';
 
   // IP local para dispositivos físicos (cambiar según tu red)
   // Usa la IP de tu adaptador Wi-Fi o Ethernet activo
