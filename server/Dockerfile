@@ -1,15 +1,18 @@
 # Backend Laravel - MedRush API
 FROM php:8.2-cli
 
-# System deps + PHP extensions for Laravel
+# System deps + PHP extensions for Laravel (gd para milon/barcode, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
     libzip-dev \
     libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring xml zip bcmath \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring xml zip bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Composer
