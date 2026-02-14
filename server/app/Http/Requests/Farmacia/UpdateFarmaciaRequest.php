@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Farmacia;
 
 use App\Enums\CodigosIsoPaisEnum;
+use App\Enums\EstadosFarmaciaEnum;
 use App\Helpers\PrepareData;
 use App\Rules\LocationArray;
 use App\Rules\PhoneNumberE164;
@@ -37,6 +38,7 @@ class UpdateFarmaciaRequest extends FormRequest
       'cadena' => ['sometimes', 'nullable', 'string', 'max:255'],
       'horario_atencion' => ['sometimes', 'nullable', 'string'],
       'delivery_24h' => ['sometimes', 'boolean'],
+      'estado' => ['sometimes', 'required', 'string', Rule::in(array_map(fn (EstadosFarmaciaEnum $e) => $e->value, EstadosFarmaciaEnum::cases()))],
     ];
   }
 
