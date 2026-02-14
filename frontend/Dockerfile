@@ -1,5 +1,6 @@
 # Stage 1: Build Flutter web
-# En Dokploy: Build Args → API_BASE_URL = http://medrush-backend-xxx.traefik.me
+# Producción: pasar API_BASE_URL con HTTPS si el frontend es HTTPS (evita Mixed Content).
+# Ejemplo: API_BASE_URL=https://medrush-backend-xxx.traefik.me/api
 FROM ghcr.io/cirruslabs/flutter:stable AS builder
 ARG API_BASE_URL
 ENV API_BASE_URL=${API_BASE_URL}

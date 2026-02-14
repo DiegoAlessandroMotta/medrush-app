@@ -3,6 +3,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:medrush/utils/loggers.dart';
 
+import 'env_https_check_stub.dart'
+    if (dart.library.html) 'env_https_check_web.dart' as https_check;
+
 class EndpointManager {
   static const String _apiBaseUrlFromEnv =
       String.fromEnvironment('API_BASE_URL');
@@ -58,14 +61,18 @@ class EndpointManager {
     return _prodDomain;
   }
 
+  /// URL base del API. Si no se define API_BASE_URL: en web con página HTTPS
+  /// se usa https:// para evitar Mixed Content; en local (HTTP) se usa http://.
   static String get serverUrl {
     if (_apiBaseUrlFromEnv.isNotEmpty) {
       return _apiBaseUrlFromEnv.endsWith('/api')
           ? _apiBaseUrlFromEnv
           : '$_apiBaseUrlFromEnv/api';
     }
-    // traefik.me solo soporta HTTP (no SSL)
-    return 'http://$serverDomain/api';
+    // Sin API_BASE_URL: en web si la app está en HTTPS usamos HTTPS para el API.
+    final useHttps = kIsWeb && https_check.isWebPageHttps();
+    final scheme = useHttps ? 'https' : 'http';
+    return '$scheme://$serverDomain/api';
   }
 
   static String get serverWebSocketUrl {
@@ -78,7 +85,9 @@ class EndpointManager {
           base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
       return '$scheme://$rest/ws';
     }
-    return 'ws://$serverDomain/ws';
+    final useWss = kIsWeb && https_check.isWebPageHttps();
+    final scheme = useWss ? 'wss' : 'ws';
+    return '$scheme://$serverDomain/ws';
   }
 
   // Configuración de URLs
