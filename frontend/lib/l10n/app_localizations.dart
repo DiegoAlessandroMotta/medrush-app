@@ -2690,6 +2690,9 @@ abstract class AppLocalizations {
   /// **'RUC *'**
   String get rucRequiredLabel;
 
+  /// No description provided for @rucEinOptionalLabel.
+  String get rucEinOptionalLabel;
+
   /// No description provided for @cityRequiredLabel.
   ///
   /// In en, this message translates to:

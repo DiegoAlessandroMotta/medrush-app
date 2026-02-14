@@ -125,10 +125,11 @@ class FarmaciaDetalleBottomSheet extends StatelessWidget {
                                 AppLocalizations.of(context).razonSocialLabel,
                                 farmacia.razonSocial,
                                 LucideIcons.building),
-                            _buildIconRow(
-                                AppLocalizations.of(context).rucLabel,
-                                farmacia.ruc,
-                                LucideIcons.shield),
+                            if (farmacia.ruc.isNotEmpty)
+                              _buildIconRow(
+                                  AppLocalizations.of(context).rucLabel,
+                                  farmacia.ruc,
+                                  LucideIcons.shield),
                             if (farmacia.cadena != null)
                               _buildIconRow(
                                   AppLocalizations.of(context).cadenaLabel,

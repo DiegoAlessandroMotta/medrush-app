@@ -21,6 +21,7 @@ class StoreFarmaciaRequest extends FormRequest
     return [
       'nombre' => ['required', 'string', 'max:255'],
       'razon_social' => ['sometimes', 'nullable', 'string', 'max:255'],
+      // EIN (Employer Identification Number), opcional
       'ruc_ein' => ['sometimes', 'nullable', 'string', 'max:255', 'unique:farmacias'],
       'direccion_linea_1' => ['required', 'string', 'max:255'],
       'direccion_linea_2' => ['sometimes', 'nullable', 'string', 'max:255'],

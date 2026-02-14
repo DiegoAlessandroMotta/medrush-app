@@ -228,7 +228,7 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
               ? AppLocalizations.of(context).updatingPharmacy
               : AppLocalizations.of(context).creatingPharmacy);
 
-      // El backend maneja la validación de RUC único automáticamente
+      // EIN opcional; el backend valida unicidad si se envía
 
       final farmacia = Farmacia(
         id: widget.initialData?.id ?? '',
@@ -538,21 +538,16 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
         const SizedBox(height: MedRushTheme.spacingMd),
 
-        // Cuarta fila: RUC (campo completo)
+        // Cuarta fila: EIN (opcional)
         TextFormField(
           controller: _rucController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context).rucRequiredLabel,
+            labelText: AppLocalizations.of(context).rucEinOptionalLabel,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.shield),
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return AppLocalizations.of(context).pleaseEnterRuc;
-            }
-            return null;
-          },
+          validator: (value) => null,
         ),
 
         const SizedBox(height: MedRushTheme.spacingMd),
@@ -871,21 +866,16 @@ class _FarmaciaFormState extends State<FarmaciaForm> {
 
         const SizedBox(height: MedRushTheme.spacingMd),
 
-        // 6. Campo RUC
+        // 6. Campo EIN (opcional)
         TextFormField(
           controller: _rucController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: AppLocalizations.of(context).rucRequiredLabel,
+            labelText: AppLocalizations.of(context).rucEinOptionalLabel,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(LucideIcons.shield),
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return AppLocalizations.of(context).pleaseEnterRuc;
-            }
-            return null;
-          },
+          validator: (value) => null,
         ),
 
         const SizedBox(height: MedRushTheme.spacingMd),

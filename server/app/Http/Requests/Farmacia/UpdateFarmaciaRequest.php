@@ -21,6 +21,7 @@ class UpdateFarmaciaRequest extends FormRequest
     return [
       'nombre' => ['sometimes', 'required', 'string', 'max:255'],
       'razon_social' => ['sometimes', 'nullable', 'string', 'max:255'],
+      // EIN, opcional
       'ruc_ein' => ['sometimes', 'nullable', 'string', 'max:255', Rule::unique('farmacias')->ignore($this->route('farmacia'))],
       'direccion_linea_1' => ['sometimes', 'required', 'string', 'max:255'],
       'direccion_linea_2' => ['sometimes', 'nullable', 'string', 'max:255'],

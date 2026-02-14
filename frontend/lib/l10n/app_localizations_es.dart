@@ -1306,7 +1306,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get razonSocialLabel => 'Razón Social';
 
   @override
-  String get rucLabel => 'RUC';
+  String get rucLabel => 'EIN';
 
   @override
   String get cadenaLabel => 'Cadena';
@@ -1424,6 +1424,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rucRequiredLabel => 'RUC *';
+
+  @override
+  String get rucEinOptionalLabel => 'EIN (opcional)';
 
   @override
   String get cityRequiredLabel => 'Ciudad *';
