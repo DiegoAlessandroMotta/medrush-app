@@ -10,8 +10,8 @@ class EndpointManager {
   static const String _apiBaseUrlFromEnv =
       String.fromEnvironment('API_BASE_URL');
 
-  static const String _prodDomain =
-      'medrush-backend-naqsru-d2552a-212-28-188-207.traefik.me';
+  /// Dominio del backend en producción (api.medrush.cc con HTTPS en Dokploy).
+  static const String _prodDomain = 'api.medrush.cc';
 
   /// Inicializa la detección del emulador (Android). No-op en web.
   static Future<void> initializeEmulatorDetection() async {
