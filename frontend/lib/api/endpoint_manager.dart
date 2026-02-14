@@ -7,132 +7,35 @@ class EndpointManager {
   // ===== CONFIGURACIÓN DE RED =====
   //
   // Producción (Docker/Dokploy): pasar en el build:
-  //   flutter build web --dart-define=API_BASE_URL=http://tu-backend.traefik.me
-  // Si API_BASE_URL está definido, se usa y se ignora _isLocal / _prodDomain.
+  //   flutter build web --dart-define=API_BASE_URL=https://tu-backend.traefik.me
+  // Si API_BASE_URL está definido, se usa; si no, se usa _prodDomain.
 
   static const String _apiBaseUrlFromEnv =
       String.fromEnvironment('API_BASE_URL');
 
-  // Detectar entorno local (solo cuando no se usa API_BASE_URL)
-  static const bool _isLocal = true;
-
-  // Backend en producción (fallback si no se usa API_BASE_URL en el build)
   static const String _prodDomain =
       'medrush-backend-naqsru-3320d9-212-28-188-207.traefik.me';
 
-  // IP local para dispositivos físicos (cambiar según tu red)
-  // Usa la IP de tu adaptador Wi-Fi o Ethernet activo
-  // Ejemplo: '192.168.1.3' (Wi-Fi) o '192.168.1.40' (Ethernet)
-  static const String _localIp = '192.168.1.3';
-  static const int _localPort = 4000;
-
-  // Cache para la detección del emulador
-  static bool? _isEmulatorCache;
-
-  /// Detecta si está ejecutándose en un emulador de Android
-  /// Usa múltiples métodos para mayor confiabilidad
-  static bool get _isAndroidEmulator {
-    if (!Platform.isAndroid) {
-      return false;
-    }
-    
-    // Usar cache si está disponible
-    if (_isEmulatorCache != null) {
-      return _isEmulatorCache!;
-    }
-    
-    bool isEmulator = false;
-    
-    // Método 1: Verificar variable de entorno ANDROID_SERIAL
-    final androidSerial = Platform.environment['ANDROID_SERIAL'];
-    if (androidSerial != null && androidSerial.startsWith('emulator')) {
-      isEmulator = true;
-    }
-    
-    // Método 2: Verificar modelo del dispositivo (emuladores suelen tener nombres específicos)
-    if (!isEmulator) {
-      final model = Platform.environment['ANDROID_MODEL'];
-      if (model != null) {
-        final modelLower = model.toLowerCase();
-        if (modelLower.contains('sdk') || 
-            modelLower.contains('emulator') ||
-            modelLower.contains('google_sdk') ||
-            modelLower.contains('gphone')) {
-          isEmulator = true;
-        }
-      }
-    }
-    
-    // Método 3: Verificar marca del dispositivo
-    if (!isEmulator) {
-      final brand = Platform.environment['ANDROID_BRAND'];
-      if (brand != null) {
-        final brandLower = brand.toLowerCase();
-        if (brandLower.contains('generic') || brandLower.contains('unknown')) {
-          isEmulator = true;
-        }
-      }
-    }
-    
-    // Método 4: Verificar hardware (emuladores suelen tener "goldfish" o "ranchu")
-    if (!isEmulator) {
-      final hardware = Platform.environment['ANDROID_HARDWARE'];
-      if (hardware != null) {
-        final hardwareLower = hardware.toLowerCase();
-        if (hardwareLower.contains('goldfish') || 
-            hardwareLower.contains('ranchu') ||
-            hardwareLower.contains('vbox')) {
-          isEmulator = true;
-        }
-      }
-    }
-    
-    // Método 5: Usar device_info_plus de forma síncrona si es posible
-    // Nota: Esto requiere una llamada asíncrona, pero podemos intentar detectar
-    // basándonos en el nombre del dispositivo que aparece en los logs
-    // "google sdk_gphone64_x86_64" contiene "sdk" y "gphone"
-    
-    // Cachear el resultado
-    _isEmulatorCache = isEmulator;
-    
-    if (kDebugMode && Platform.isAndroid) {
-      logDebug('[EndpointManager] Detección de emulador: $isEmulator');
-      logDebug('[EndpointManager] ANDROID_SERIAL: ${Platform.environment['ANDROID_SERIAL']}');
-      logDebug('[EndpointManager] ANDROID_MODEL: ${Platform.environment['ANDROID_MODEL']}');
-      logDebug('[EndpointManager] ANDROID_BRAND: ${Platform.environment['ANDROID_BRAND']}');
-      logDebug('[EndpointManager] ANDROID_HARDWARE: ${Platform.environment['ANDROID_HARDWARE']}');
-    }
-    
-    return isEmulator;
-  }
-  
-  /// Inicializa la detección del emulador de forma asíncrona
-  /// Debe llamarse al inicio de la app para mejorar la detección
+  /// Inicializa la detección del emulador (Android). No-op en web.
   static Future<void> initializeEmulatorDetection() async {
     if (!Platform.isAndroid) {
       return;
     }
     await _isAndroidEmulatorAsync();
   }
-  
-  /// Detecta el emulador de forma asíncrona usando device_info_plus
-  /// Este método es más confiable pero requiere async
+
   static Future<bool> _isAndroidEmulatorAsync() async {
     if (!Platform.isAndroid) {
       return false;
     }
-    
     try {
       final deviceInfo = DeviceInfoPlugin();
       final androidInfo = await deviceInfo.androidInfo;
-      
-      // Verificar características comunes de emuladores
       final model = androidInfo.model.toLowerCase();
       final brand = androidInfo.brand.toLowerCase();
       final manufacturer = androidInfo.manufacturer.toLowerCase();
       final device = androidInfo.device.toLowerCase();
-      
-      bool isEmulator = 
+      final isEmulator =
           model.contains('sdk') ||
           model.contains('emulator') ||
           model.contains('google_sdk') ||
@@ -140,15 +43,9 @@ class EndpointManager {
           brand.contains('generic') ||
           manufacturer.contains('unknown') ||
           device.contains('generic');
-      
-      // Actualizar cache
-      _isEmulatorCache = isEmulator;
-      
       if (kDebugMode) {
-        logDebug('[EndpointManager] Async detección: $isEmulator');
-        logDebug('[EndpointManager] Model: $model, Brand: $brand, Device: $device, Manufacturer: $manufacturer');
+        logDebug('[EndpointManager] Async detección emulador: $isEmulator');
       }
-      
       return isEmulator;
     } catch (e) {
       if (kDebugMode) {
@@ -165,17 +62,6 @@ class EndpointManager {
           ? '${uri.host}:${uri.port}'
           : uri.host;
     }
-    // En web (Edge, Chrome, etc.) usar siempre backend en producción
-    if (kIsWeb) {
-      return _prodDomain;
-    }
-    if (_isLocal) {
-      final isEmulator = _isAndroidEmulator;
-      if (isEmulator) {
-        return '10.0.2.2:$_localPort';
-      }
-      return '$_localIp:$_localPort';
-    }
     return _prodDomain;
   }
 
@@ -185,10 +71,8 @@ class EndpointManager {
           ? _apiBaseUrlFromEnv
           : '$_apiBaseUrlFromEnv/api';
     }
-    // traefik.me usa HTTP; dominio propio podría usar HTTPS
-    final useHttps = !kIsWeb && !_isLocal;
-    final scheme = useHttps ? 'https' : 'http';
-    return '$scheme://$serverDomain/api';
+    // traefik.me no soporta SSL/HTTPS; usar HTTP/WS
+    return 'http://$serverDomain/api';
   }
 
   static String get serverWebSocketUrl {
@@ -200,8 +84,7 @@ class EndpointManager {
       final rest = base.contains('://') ? base.substring(base.indexOf('://') + 3) : base;
       return '$scheme://$rest/ws';
     }
-    final useWss = !kIsWeb && !_isLocal;
-    return useWss ? 'wss://$serverDomain/ws' : 'ws://$serverDomain/ws';
+    return 'ws://$serverDomain/ws';
   }
 
   // Configuración de URLs
