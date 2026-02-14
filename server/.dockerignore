@@ -9,3 +9,6 @@ storage/framework/sessions/*
 storage/framework/views/*
 .git
 *.md
+# No incluir credenciales en la imagen
+/storage/services/google/*.json
+neat-episode-*.json

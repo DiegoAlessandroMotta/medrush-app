@@ -24,3 +24,7 @@ Homestead.yaml
 Thumbs.db
 _ide_helper.php
 .temp
+
+# Service account JSON (no subir a GitHub)
+/storage/services/google/service-account.json
+neat-episode-*.json

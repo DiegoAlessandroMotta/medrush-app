@@ -1,6 +1,17 @@
 #!/bin/sh
 set -e
 
+# Si las credenciales de Route Optimization vienen por env (producción), escribirlas al archivo
+if [ -n "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" ]; then
+  mkdir -p storage/services/google
+  if echo "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" | base64 -d > storage/services/google/service-account.json 2>/dev/null; then
+    echo ">>> Google Route Optimization: credenciales inyectadas desde env (base64)."
+  else
+    echo "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" > storage/services/google/service-account.json
+    echo ">>> Google Route Optimization: credenciales inyectadas desde env (JSON)."
+  fi
+fi
+
 echo ">>> MedRush backend: waiting for database..."
 max_attempts=30
 attempt=0
