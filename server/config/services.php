@@ -37,7 +37,7 @@ return [
 
   'google' => [
     'route_optimization' => [
-      'credentials' => env('GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS', 'GOOGLE_APPLICATION_CREDENTIALS'),
+      'credentials' => env('GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS', 'storage/services/google/service-account.json')),
       'project_id' => env('GOOGLE_ROUTE_OPTIMIZATION_PROJECT_ID'),
     ],
     'geocoding' => [
