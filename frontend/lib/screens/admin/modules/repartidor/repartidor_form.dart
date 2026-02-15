@@ -623,9 +623,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 borderRadius: BorderRadius.circular(72),
                                 child: GestureDetector(
                                   onTap: _pickProfileImage,
-                                  child: _fotoUrl != null
+                                  child: BaseApi.imageUrlForDisplay(_fotoUrl) != null
                                       ? Image.network(
-                                          _fotoUrl!,
+                                          BaseApi.imageUrlForDisplay(_fotoUrl)!,
                                           width: 150,
                                           height: 150,
                                           fit: BoxFit.cover,
@@ -954,7 +954,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   subtitle: AppLocalizations.of(context)
                                       .photoLicenseSubtitle,
                                   icon: LucideIcons.idCard,
-                                  imageUrl: _fotoLicenciaUrl,
+                                  imageUrl: BaseApi.imageUrlForDisplay(_fotoLicenciaUrl) ?? _fotoLicenciaUrl,
                                   onImageChanged: _onLicenciaImageChanged,
                                   uploadEndpoint:
                                       '/user/repartidores/${widget.initialData?.id ?? 'temp'}/licencia',
@@ -980,7 +980,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   subtitle: AppLocalizations.of(context)
                                       .photoInsuranceSubtitle,
                                   icon: LucideIcons.shield,
-                                  imageUrl: _fotoSeguroVehiculoUrl,
+                                  imageUrl: BaseApi.imageUrlForDisplay(_fotoSeguroVehiculoUrl) ?? _fotoSeguroVehiculoUrl,
                                   onImageChanged: _onSeguroVehiculoImageChanged,
                                   uploadEndpoint:
                                       '/user/repartidores/${widget.initialData?.id ?? 'temp'}/seguro-vehiculo',

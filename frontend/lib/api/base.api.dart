@@ -1068,12 +1068,33 @@ abstract class BaseApi {
     return validExtensions.any(lowerUrl.contains);
   }
 
-  /// Obtiene la URL de una imagen con fallback
-  static String getImageUrl(String? imageUrl, {String fallback = ''}) {
-    if (isValidImageUrl(imageUrl)) {
-      return imageUrl!;
+  /// URLs HTTP del mismo host que la API se convierten a HTTPS para que carguen
+  /// (mixed content en HTTPS, o API solo accesible por HTTPS en producción).
+  static String? imageUrlForDisplay(String? url) {
+    if (url == null || url.isEmpty) {
+      return null;
     }
-    return fallback;
+    if (!url.startsWith('http://')) {
+      return url;
+    }
+    try {
+      final uri = Uri.parse(url);
+      final apiHost = EndpointManager.serverDomain;
+      final isApiUrl = uri.host == apiHost || apiHost.contains(uri.host);
+      if (kIsWeb && (Uri.base.scheme == 'https' || isApiUrl)) {
+        return url.replaceFirst('http://', 'https://');
+      }
+    } catch (_) {}
+    return url;
+  }
+
+  /// Obtiene la URL de una imagen con fallback (usa HTTPS en web cuando la app es HTTPS)
+  static String getImageUrl(String? imageUrl, {String fallback = ''}) {
+    if (!isValidImageUrl(imageUrl)) {
+      return fallback;
+    }
+    final normalized = imageUrlForDisplay(imageUrl);
+    return normalized ?? imageUrl!;
   }
 
   /// Genera una URL permanente para una imagen usando el nombre del archivo
