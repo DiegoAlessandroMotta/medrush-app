@@ -45,7 +45,7 @@ dependencies:
   google_polyline_algorithm: ^3.1.0
 
   # Escáner de códigos de barras
-  mobile_scanner: ^7.0.1
+  mobile_scanner: ^7.1.4
 
   # Firma digital
   signature: ^6.3.0
