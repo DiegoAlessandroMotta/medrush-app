@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# Directorios para guardar imágenes y archivos (avatars, fotos entrega, firmas, licencias, etc.)
+mkdir -p storage/app/private_uploads storage/app/private storage/temp
+chmod -R 775 storage/app/private_uploads storage/app/private storage/temp 2>/dev/null || true
+
 # Si las credenciales de Route Optimization vienen por env (producción), escribirlas al archivo
 if [ -n "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" ]; then
   mkdir -p storage/services/google

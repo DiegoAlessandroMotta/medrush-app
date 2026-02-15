@@ -9,6 +9,8 @@ use Gate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +27,20 @@ class AppServiceProvider extends ServiceProvider
   {
     $this->configureRateLimiters();
     $this->configureGates();
+    $this->configurePrivateUploadsTemporaryUrls();
+  }
+
+  protected function configurePrivateUploadsTemporaryUrls(): void
+  {
+    Storage::disk(\App\Services\Disk\PrivateUploadsDiskService::DISK_NAME)->buildTemporaryUrlsUsing(
+      function (string $path, \DateTimeInterface $expiration, array $options) {
+        return URL::temporarySignedRoute(
+          'private_uploads.temp',
+          $expiration,
+          array_merge($options, ['path' => $path])
+        );
+      }
+    );
   }
 
   protected function configureGates(): void

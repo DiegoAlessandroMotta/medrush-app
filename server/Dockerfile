@@ -1,7 +1,9 @@
 # Backend Laravel - MedRush API
+# En VPS: montar volumen persistente para imágenes/archivos/firmas, ej.:
+#   -v /ruta/en/vps/medrush-storage:/var/www/html/storage
 FROM php:8.2-cli
 
-# System deps + PHP extensions for Laravel (gd para milon/barcode, etc.)
+# System deps + PHP extensions (gd con WebP para avatares, fotos entrega, firmas, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
@@ -9,9 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
+    libwebp-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring xml zip bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 

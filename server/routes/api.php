@@ -385,6 +385,9 @@ Route::middleware('signed')->group(function () {
   Route::prefix('downloads')->group(function () {
     Route::get('/templates/csv/{lang}/{templateKey}', [DownloadController::class, 'csvTemplates'])
       ->name('downloads.csv_template.download');
+
+    Route::get('/private-uploads', [DownloadController::class, 'servePrivateUpload'])
+      ->name('private_uploads.temp');
   });
 });
 

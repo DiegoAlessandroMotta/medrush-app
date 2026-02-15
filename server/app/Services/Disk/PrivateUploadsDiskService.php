@@ -32,8 +32,25 @@ class PrivateUploadsDiskService
     ?int $height = null,
     bool $crop = false
   ): ?string {
+    $result = self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'imagick');
+    if ($result !== null) {
+      return $result;
+    }
+    return self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'gd');
+  }
+
+  private static function saveImageWithDriver(
+    string $imgPath,
+    string $prefix,
+    ?string $name,
+    ?int $width,
+    ?int $height,
+    bool $crop,
+    string $driver
+  ): ?string {
     try {
-      $image = ImageManager::imagick()->read($imgPath);
+      $manager = $driver === 'imagick' ? ImageManager::imagick() : ImageManager::gd();
+      $image = $manager->read($imgPath);
 
       $originalWidth = $image->width();
       $originalHeight = $image->height();
@@ -61,8 +78,8 @@ class PrivateUploadsDiskService
       }
 
       return null;
-    } catch (\Exception $e) {
-      \Log::error('Error saving image: ' . $e->getMessage());
+    } catch (\Throwable $e) {
+      \Log::warning("Error saving image with driver [{$driver}]: " . $e->getMessage());
       return null;
     }
   }

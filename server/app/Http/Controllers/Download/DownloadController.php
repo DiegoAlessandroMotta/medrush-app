@@ -6,6 +6,7 @@ use App\Console\Commands\GenerateCsvTemplates;
 use App\Exceptions\CustomException;
 use App\Helpers\ApiResponder;
 use App\Http\Controllers\Controller;
+use App\Services\Disk\PrivateUploadsDiskService;
 use Illuminate\Http\Request;
 use Storage;
 use URL;
@@ -178,5 +179,24 @@ class DownloadController extends Controller
     }
 
     return Storage::download($filePath);
+  }
+
+  /**
+   * Sirve un archivo del disco private_uploads mediante URL firmada.
+   * Ruta usada por buildTemporaryUrlsUsing para el disco private_uploads.
+   */
+  public function servePrivateUpload(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+  {
+    $path = (string) $request->query('path');
+    if ($path === '' || str_contains($path, '..')) {
+      throw CustomException::notFound('Archivo no encontrado.');
+    }
+
+    $disk = Storage::disk(PrivateUploadsDiskService::DISK_NAME);
+    if (!$disk->exists($path)) {
+      throw CustomException::notFound('Archivo no encontrado.');
+    }
+
+    return $disk->response($path);
   }
 }
