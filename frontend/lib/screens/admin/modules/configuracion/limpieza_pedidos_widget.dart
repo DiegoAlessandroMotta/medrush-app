@@ -15,7 +15,10 @@ class LimpiezaPedidosWidget extends StatefulWidget {
 class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
   bool _isLoading = false;
   int _semanasSeleccionadas = 3;
+  int _semanasGuardadas = 3;
   final PedidoRepository _pedidoRepository = PedidoRepository();
+
+  bool get _hasPendingChanges => _semanasSeleccionadas != _semanasGuardadas;
 
   String _getMonthsReference(BuildContext context, int weeks) {
     final months = (weeks / 4.33).round(); // 4.33 semanas promedio por mes
@@ -85,12 +88,8 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Selector de semanas
+          // Selector de semanas y botón Guardar al lado
           _buildSemanasSelector(),
-          const SizedBox(height: 24),
-
-          // Botón de acción
-          _buildBotonAccion(),
         ],
       ),
     );
@@ -159,93 +158,110 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
           ),
         ),
         const SizedBox(height: 12),
-        // Selector de semanas
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [1, 2, 3, 4, 6, 8, 12, 24, 52].map((semanas) {
-            final isSelected = _semanasSeleccionadas == semanas;
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _semanasSeleccionadas = semanas;
-                });
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? MedRushTheme.primaryGreen
-                      : MedRushTheme.backgroundSecondary,
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusSm),
-                  border: Border.all(
-                    color: isSelected
-                        ? MedRushTheme.primaryGreen
-                        : MedRushTheme.borderLight,
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$semanas ${l10n.weekShortLabel}',
-                      style: TextStyle(
-                        fontSize: MedRushTheme.fontSizeBodySmall,
-                        fontWeight: isSelected
-                            ? MedRushTheme.fontWeightMedium
-                            : MedRushTheme.fontWeightRegular,
+        // Selector de semanas y botón Guardar al lado
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [1, 2, 3, 4, 6, 8, 12, 24, 52].map((semanas) {
+                  final isSelected = _semanasSeleccionadas == semanas;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _semanasSeleccionadas = semanas;
+                      });
+                    },
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? MedRushTheme.textInverse
-                            : MedRushTheme.textPrimary,
+                            ? MedRushTheme.primaryGreen
+                            : MedRushTheme.backgroundSecondary,
+                        borderRadius:
+                            BorderRadius.circular(MedRushTheme.borderRadiusSm),
+                        border: Border.all(
+                          color: isSelected
+                              ? MedRushTheme.primaryGreen
+                              : MedRushTheme.borderLight,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$semanas ${l10n.weekShortLabel}',
+                            style: TextStyle(
+                              fontSize: MedRushTheme.fontSizeBodySmall,
+                              fontWeight: isSelected
+                                  ? MedRushTheme.fontWeightMedium
+                                  : MedRushTheme.fontWeightRegular,
+                              color: isSelected
+                                  ? MedRushTheme.textInverse
+                                  : MedRushTheme.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            _getMonthsReference(context, semanas),
+                            style: TextStyle(
+                              fontSize: MedRushTheme.fontSizeLabelSmall,
+                              fontWeight: MedRushTheme.fontWeightRegular,
+                              color: isSelected
+                                  ? MedRushTheme.textInverse.withValues(alpha: 0.8)
+                                  : MedRushTheme.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      _getMonthsReference(context, semanas),
-                      style: TextStyle(
-                        fontSize: MedRushTheme.fontSizeLabelSmall,
-                        fontWeight: MedRushTheme.fontWeightRegular,
-                        color: isSelected
-                            ? MedRushTheme.textInverse.withValues(alpha: 0.8)
-                            : MedRushTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                }).toList(),
               ),
-            );
-          }).toList(),
+            ),
+            const SizedBox(width: 12),
+            _buildBotonGuardar(),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildBotonAccion() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: _isLoading ? null : _mostrarDialogoConfirmacion,
-        icon: _isLoading
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : const Icon(LucideIcons.x, color: Colors.white, size: 16),
-        label: Text(_isLoading ? AppLocalizations.of(context).processing : AppLocalizations.of(context).saveConfiguration),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: MedRushTheme.warning,
-          foregroundColor: MedRushTheme.textInverse,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
-          ),
-          elevation: 0,
+  Widget _buildBotonGuardar() {
+    final enabled = _hasPendingChanges && !_isLoading;
+    return ElevatedButton.icon(
+      onPressed: enabled ? _mostrarDialogoConfirmacion : null,
+      icon: _isLoading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Icon(
+              LucideIcons.save,
+              size: 16,
+              color: enabled ? MedRushTheme.textInverse : MedRushTheme.textSecondary,
+            ),
+      label: Text(
+        _isLoading
+            ? AppLocalizations.of(context).processing
+            : AppLocalizations.of(context).saveConfiguration,
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: enabled ? MedRushTheme.warning : MedRushTheme.borderLight,
+        foregroundColor: enabled ? MedRushTheme.textInverse : MedRushTheme.textSecondary,
+        disabledBackgroundColor: MedRushTheme.backgroundSecondary,
+        disabledForegroundColor: MedRushTheme.textSecondary,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
         ),
+        elevation: 0,
       ),
     );
   }
@@ -342,6 +358,9 @@ class _LimpiezaPedidosWidgetState extends State<LimpiezaPedidosWidget> {
 
       if (resultado.success && resultado.data == true) {
         if (mounted) {
+          setState(() {
+            _semanasGuardadas = _semanasSeleccionadas;
+          });
           NotificationService.showSuccess(
             AppLocalizations.of(context).cleanupStartedSuccess,
             context: context,
