@@ -169,14 +169,62 @@ class ReportePdf extends Model
       return null;
     }
 
-    return self::getDiskInstance()->temporaryUrl($filePath, now()->addMinutes(60));
+    try {
+      $disk = self::getDiskInstance();
+      
+      // Verificar si el disco soporta temporaryUrl
+      if (method_exists($disk, 'temporaryUrl')) {
+        return $disk->temporaryUrl($filePath, now()->addMinutes(60));
+      }
+      
+      // Fallback: construir URL directa si el disco tiene URL configurada
+      if (method_exists($disk, 'url')) {
+        return $disk->url($filePath);
+      }
+      
+      // Último fallback: construir URL manualmente
+      $basePath = str_replace('\\', '/', storage_path('app/private'));
+      $fullPath = str_replace('\\', '/', storage_path('app/private/' . $filePath));
+      
+      if (file_exists($fullPath)) {
+        // En producción, deberías usar una ruta de descarga firmada o un endpoint específico
+        // Por ahora, retornamos null si no hay método disponible
+        return null;
+      }
+      
+      return null;
+    } catch (\Exception $e) {
+      \Log::warning('Error generando URL firmada para PDF', [
+        'reporte_id' => $this->id,
+        'file_path' => $filePath,
+        'error' => $e->getMessage(),
+      ]);
+      return null;
+    }
   }
 
   public static function saveToDisk(string $fileName, $content): ?string
   {
     $filePath = "reportes/pdf/{$fileName}";
-
-    return self::getDiskInstance()->put($filePath, $content) ? $filePath : null;
+    $disk = self::getDiskInstance();
+    
+    // Asegurar que el directorio existe
+    $directory = dirname($filePath);
+    if (!$disk->exists($directory)) {
+      $disk->makeDirectory($directory);
+    }
+    
+    $saved = $disk->put($filePath, $content);
+    
+    if (!$saved) {
+      \Log::error('No se pudo guardar archivo PDF', [
+        'file_path' => $filePath,
+        'file_name' => $fileName,
+      ]);
+      return null;
+    }
+    
+    return $filePath;
   }
 
   public static function getDiskInstance()

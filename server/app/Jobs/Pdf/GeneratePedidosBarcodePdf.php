@@ -60,30 +60,106 @@ class GeneratePedidosBarcodePdf implements ShouldQueue
       $totalPaginas = 0;
 
       foreach ($pedidos as $pedido) {
-        $pagesData[] = [
-          'id' => $pedido->id,
-          'codigo_barra' => $pedido->codigo_barra,
-          'paciente_nombre' => $pedido->paciente_nombre,
-          'direccion_entrega_linea_1' => $pedido->direccion_entrega_linea_1,
-          'nombre_repartidor' => $pedido->repartidor?->user?->name ?? '',
-          'codigo_barra_url' => 'data:image/png;base64,' . DNS1DFacade::getBarcodePNG($pedido->codigo_barra, 'C128', 2, 60),
-        ];
-        $totalPaginas++;
+        try {
+          $barcodePng = DNS1DFacade::getBarcodePNG($pedido->codigo_barra, 'C128', 2, 60);
+          $pagesData[] = [
+            'id' => $pedido->id,
+            'codigo_barra' => $pedido->codigo_barra,
+            'paciente_nombre' => $pedido->paciente_nombre,
+            'direccion_entrega_linea_1' => $pedido->direccion_entrega_linea_1,
+            'nombre_repartidor' => $pedido->repartidor?->user?->name ?? '',
+            'codigo_barra_url' => 'data:image/png;base64,' . $barcodePng,
+          ];
+          $totalPaginas++;
+        } catch (Throwable $barcodeError) {
+          Log::error('Error generando código de barras para pedido', [
+            'pedido_id' => $pedido->id,
+            'codigo_barra' => $pedido->codigo_barra,
+            'error' => $barcodeError->getMessage(),
+            'trace' => $barcodeError->getTraceAsString(),
+          ]);
+          throw new JobException(
+            message: "Error al generar código de barras para el pedido {$pedido->codigo_barra}",
+            details: [
+              'pedido_id' => $pedido->id,
+              'error' => $barcodeError->getMessage(),
+            ],
+            previous: $barcodeError
+          );
+        }
       }
 
-      $pdf = Pdf::loadView('pdf.pedido-page', ['pagesData' => $pagesData])
-        ->setPaper($reportePdf->page_size->value, 'portrait');
+      try {
+        $pdf = Pdf::loadView('pdf.pedido-page', ['pagesData' => $pagesData])
+          ->setPaper($reportePdf->page_size->value, 'portrait');
+      } catch (Throwable $pdfError) {
+        Log::error('Error cargando vista PDF', [
+          'reporte_id' => $reportePdf->id,
+          'error' => $pdfError->getMessage(),
+          'trace' => $pdfError->getTraceAsString(),
+        ]);
+        throw new JobException(
+          message: 'Error al generar el PDF desde la vista',
+          details: [
+            'reporte_id' => $reportePdf->id,
+            'error' => $pdfError->getMessage(),
+          ],
+          previous: $pdfError
+        );
+      }
 
-      $filePath = ReportePdf::saveToDisk($reportePdf->nombre, $pdf->output());
-      $fileSize = ReportePdf::getDiskInstance()->size($filePath);
+      try {
+        $pdfOutput = $pdf->output();
+        $filePath = ReportePdf::saveToDisk($reportePdf->nombre, $pdfOutput);
+        
+        if ($filePath === null) {
+          throw new JobException(
+            message: 'No se pudo guardar el archivo PDF en disco',
+            details: [
+              'reporte_id' => $reportePdf->id,
+              'nombre' => $reportePdf->nombre,
+            ]
+          );
+        }
+
+        $fileSize = ReportePdf::getDiskInstance()->size($filePath);
+      } catch (Throwable $saveError) {
+        Log::error('Error guardando PDF en disco', [
+          'reporte_id' => $reportePdf->id,
+          'error' => $saveError->getMessage(),
+          'trace' => $saveError->getTraceAsString(),
+        ]);
+        throw new JobException(
+          message: 'Error al guardar el PDF en disco',
+          details: [
+            'reporte_id' => $reportePdf->id,
+            'error' => $saveError->getMessage(),
+          ],
+          previous: $saveError
+        );
+      }
 
       $reportePdf->markAsCreated($filePath, $fileSize, $totalPaginas);
 
       $this->sendSuccessNotification($user, $reportePdf);
     } catch (Throwable $e) {
       if ($filePath !== null && ReportePdf::getDiskInstance()->exists($filePath)) {
-        ReportePdf::getDiskInstance()->delete($filePath);
+        try {
+          ReportePdf::getDiskInstance()->delete($filePath);
+        } catch (Throwable $deleteError) {
+          Log::warning('No se pudo eliminar archivo temporal después de error', [
+            'file_path' => $filePath,
+            'error' => $deleteError->getMessage(),
+          ]);
+        }
       }
+
+      Log::error('Error en GeneratePedidosBarcodePdf::handle()', [
+        'reporte_id' => $this->reportePdfId,
+        'error_message' => $e->getMessage(),
+        'error_class' => get_class($e),
+        'trace' => $e->getTraceAsString(),
+      ]);
 
       if ($e instanceof JobException) {
         throw $e;
@@ -93,6 +169,7 @@ class GeneratePedidosBarcodePdf implements ShouldQueue
         message: 'Error inesperado al generar el PDF',
         details: [
           'reporte_id' => $this->reportePdfId,
+          'error' => $e->getMessage(),
         ],
         previous: $e
       );
