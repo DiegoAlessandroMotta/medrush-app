@@ -195,23 +195,6 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                   tooltip: AppLocalizations.of(context).flashTooltip,
                 ),
               ),
-              const SizedBox(width: MedRushTheme.spacingSm),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusLg),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.flip_camera_ios,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  onPressed: _switchCamera,
-                  tooltip: AppLocalizations.of(context).switchCameraTooltip,
-                ),
-              ),
               if (_scannerController != null) ...[
                 const SizedBox(width: MedRushTheme.spacingSm),
                 DecoratedBox(
@@ -672,14 +655,6 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
 
   void _toggleFlash() {
     _scannerController?.toggleTorch();
-  }
-
-  void _switchCamera() {
-    _scannerController?.switchCamera();
-    // Al cambiar de cámara (ej. a la frontal), resetear zoom
-    setState(() {
-      _currentZoom = 0.0;
-    });
   }
 
   void _toggleZoom() {
