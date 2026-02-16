@@ -38,6 +38,10 @@ else
   echo ">>> Seed already applied, skipping."
 fi
 
+# Verificar configuración de cola
+QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
+echo ">>> Queue connection: $QUEUE_CONNECTION"
+
 # Función para limpiar procesos al salir
 cleanup() {
   echo ">>> Shutting down..."
@@ -48,37 +52,29 @@ cleanup() {
 }
 trap cleanup SIGTERM SIGINT
 
-# Verificar si QUEUE_CONNECTION está configurado como 'database'
-QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
-echo ">>> Queue connection: $QUEUE_CONNECTION"
-
+# Solo iniciar worker si QUEUE_CONNECTION es 'database'
 if [ "$QUEUE_CONNECTION" = "database" ]; then
   echo ">>> Starting Laravel queue worker in background..."
-  # Desactivar set -e temporalmente para iniciar el worker
   set +e
   php artisan queue:work --queue=default --tries=2 --timeout=300 > /dev/null 2>&1 &
   WORKER_PID=$!
   set -e
   echo ">>> Queue worker started with PID: $WORKER_PID"
-  sleep 2
-  # Verificar que el worker sigue corriendo
-  if ! kill -0 $WORKER_PID 2>/dev/null; then
-    echo ">>> WARNING: Queue worker may have failed to start"
-  fi
+  sleep 1
 else
-  echo ">>> Queue connection is '$QUEUE_CONNECTION' - worker not needed"
+  echo ">>> Using '$QUEUE_CONNECTION' queue - jobs will run synchronously"
 fi
 
-echo ">>> Starting Laravel server..."
-echo ">>> PHP version: $(php -v | head -n 1)"
-echo ">>> Laravel version: $(php artisan --version)"
-echo ">>> Listening on 0.0.0.0:8000"
-
 # Verificar que Laravel puede ejecutarse
+echo ">>> Verifying Laravel installation..."
 if ! php artisan --version >/dev/null 2>&1; then
   echo ">>> ERROR: Laravel artisan command failed!"
   exit 1
 fi
 
-# Iniciar el servidor
+echo ">>> PHP version: $(php -v | head -n 1 | cut -d' ' -f1-3)"
+echo ">>> Laravel version: $(php artisan --version)"
+echo ">>> Starting Laravel server on 0.0.0.0:8000..."
+
+# Iniciar el servidor (esto debe ser el último comando y usar exec)
 exec php artisan serve --host=0.0.0.0 --port=8000
