@@ -1,11 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-# Directorios para guardar imágenes y archivos (avatars, fotos entrega, firmas, licencias, etc.)
+# Directorios para guardar imagenes y archivos (avatars, fotos entrega, firmas, licencias, etc.)
 mkdir -p storage/app/private_uploads storage/app/private storage/temp
-chmod -R 775 storage/app/private_uploads storage/app/private storage/temp 2>/dev/null || true
+mkdir -p storage/framework/{cache,sessions,views}
+mkdir -p storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-# Si las credenciales de Route Optimization vienen por env (producción), escribirlas al archivo
+# Si las credenciales de Route Optimization vienen por env (produccion), escribirlas al archivo
 if [ -n "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" ]; then
   mkdir -p storage/services/google
   if echo "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" | base64 -d > storage/services/google/service-account.json 2>/dev/null; then
@@ -15,6 +18,11 @@ if [ -n "$GOOGLE_ROUTE_OPTIMIZATION_CREDENTIALS_JSON" ]; then
     echo ">>> Google Route Optimization: credenciales inyectadas desde env (JSON)."
   fi
 fi
+
+# Limpiar cache de configuracion
+php artisan config:clear 2>/dev/null || true
+php artisan route:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
 
 echo ">>> MedRush backend: waiting for database..."
 max_attempts=30
@@ -38,43 +46,17 @@ else
   echo ">>> Seed already applied, skipping."
 fi
 
-# Verificar configuración de cola
-QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
-echo ">>> Queue connection: $QUEUE_CONNECTION"
+# Cache para produccion
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
 
-# Función para limpiar procesos al salir
-cleanup() {
-  echo ">>> Shutting down..."
-  if [ -n "$WORKER_PID" ]; then
-    kill $WORKER_PID 2>/dev/null || true
-  fi
-  exit 0
-}
-trap cleanup SIGTERM SIGINT
-
-# Solo iniciar worker si QUEUE_CONNECTION es 'database'
-if [ "$QUEUE_CONNECTION" = "database" ]; then
-  echo ">>> Starting Laravel queue worker in background..."
-  set +e
-  php artisan queue:work --queue=default --tries=2 --timeout=300 > /dev/null 2>&1 &
-  WORKER_PID=$!
-  set -e
-  echo ">>> Queue worker started with PID: $WORKER_PID"
-  sleep 1
-else
-  echo ">>> Using '$QUEUE_CONNECTION' queue - jobs will run synchronously"
-fi
-
-# Verificar que Laravel puede ejecutarse
-echo ">>> Verifying Laravel installation..."
-if ! php artisan --version >/dev/null 2>&1; then
-  echo ">>> ERROR: Laravel artisan command failed!"
-  exit 1
-fi
+# Storage link
+php artisan storage:link 2>/dev/null || true
 
 echo ">>> PHP version: $(php -v | head -n 1 | cut -d' ' -f1-3)"
 echo ">>> Laravel version: $(php artisan --version)"
-echo ">>> Starting Laravel server on 0.0.0.0:8000..."
+echo ">>> Starting Nginx + PHP-FPM via Supervisor..."
 
-# Iniciar el servidor (esto debe ser el último comando y usar exec)
-exec php artisan serve --host=0.0.0.0 --port=8000
+# Supervisor gestiona Nginx y PHP-FPM
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
