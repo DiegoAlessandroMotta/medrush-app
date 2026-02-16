@@ -30,6 +30,7 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
   bool _isScanning = true;
   bool _isProcessing = false;
   Pedido? _pedidoEncontrado;
+  double _currentZoom = 0.0;
 
   @override
   void initState() {
@@ -172,12 +173,78 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
           ),
         ),
 
-        // Texto de ayuda inferior removido
+        // Botones de acción superiores (Flash y Cámara)
+        Positioned(
+          top: MediaQuery.of(context).padding.top + MedRushTheme.spacingMd,
+          right: MedRushTheme.spacingMd,
+          child: Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius:
+                      BorderRadius.circular(MedRushTheme.borderRadiusLg),
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.flash_on,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: _toggleFlash,
+                  tooltip: AppLocalizations.of(context).flashTooltip,
+                ),
+              ),
+              const SizedBox(width: MedRushTheme.spacingSm),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius:
+                      BorderRadius.circular(MedRushTheme.borderRadiusLg),
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.flip_camera_ios,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: _switchCamera,
+                  tooltip: AppLocalizations.of(context).switchCameraTooltip,
+                ),
+              ),
+              if (_scannerController != null) ...[
+                const SizedBox(width: MedRushTheme.spacingSm),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius:
+                        BorderRadius.circular(MedRushTheme.borderRadiusLg),
+                  ),
+                  child: TextButton(
+                    onPressed: _toggleZoom,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(40, 40),
+                    ),
+                    child: Text(
+                      _currentZoom == 0.0 ? '1x' : '2x',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildScannerError(BuildContext context, MobileScannerException error) {
+  Widget _buildScannerError(
+      BuildContext context, MobileScannerException error) {
     final isUnsupported = error.errorCode == MobileScannerErrorCode.unsupported;
     return ColoredBox(
       color: Colors.black,
@@ -351,7 +418,8 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                         ),
                         Text(
                           StatusHelpers.estadoPedidoTexto(
-                              _pedidoEncontrado!.estado, AppLocalizations.of(context)),
+                              _pedidoEncontrado!.estado,
+                              AppLocalizations.of(context)),
                           style: TextStyle(
                             fontSize: MedRushTheme.fontSizeBodySmall,
                             color: StatusHelpers.estadoPedidoColor(
@@ -374,14 +442,14 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                             size: 16,
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
-                            Text(
-                              AppLocalizations.of(context).assignedTo,
-                              style: const TextStyle(
-                                fontSize: MedRushTheme.fontSizeBodySmall,
-                                color: MedRushTheme.textSecondary,
-                                fontWeight: MedRushTheme.fontWeightMedium,
-                              ),
+                          Text(
+                            AppLocalizations.of(context).assignedTo,
+                            style: const TextStyle(
+                              fontSize: MedRushTheme.fontSizeBodySmall,
+                              color: MedRushTheme.textSecondary,
+                              fontWeight: MedRushTheme.fontWeightMedium,
                             ),
+                          ),
                           Flexible(
                             child: Text(
                               _pedidoEncontrado!.repartidor?.nombre ??
@@ -436,7 +504,8 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
                           Text(
-                            AppLocalizations.of(context).requiresSpecialSignature,
+                            AppLocalizations.of(context)
+                                .requiresSpecialSignature,
                             style: const TextStyle(
                               fontSize: MedRushTheme.fontSizeBodySmall,
                               color: Colors.orange,
@@ -599,6 +668,25 @@ class _BarcodeRepartidorScreenState extends State<BarcodeRepartidorScreen>
         });
       }
     }
+  }
+
+  void _toggleFlash() {
+    _scannerController?.toggleTorch();
+  }
+
+  void _switchCamera() {
+    _scannerController?.switchCamera();
+    // Al cambiar de cámara (ej. a la frontal), resetear zoom
+    setState(() {
+      _currentZoom = 0.0;
+    });
+  }
+
+  void _toggleZoom() {
+    setState(() {
+      _currentZoom = _currentZoom == 0.0 ? 0.5 : 0.0;
+    });
+    _scannerController?.setZoomScale(_currentZoom);
   }
 
   void _verDetallePedido() {
