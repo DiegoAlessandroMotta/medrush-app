@@ -658,7 +658,7 @@ class PedidoController extends Controller
       $fullPath,
       $user->id,
       $farmaciaId,
-      $codigoIsoPaisEntrega,
+      $codigoIsoPaisEntrega?->value ?? $codigoIsoPaisEntrega,
       $ubicacionRecojo,
     );
 
