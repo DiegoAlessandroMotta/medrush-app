@@ -75,7 +75,13 @@
   @foreach ($pagesData as $index => $page)
     <div class="page">
       <div class="medrush-logo">
-        <img src="storage/img/logo.jpg" alt="Medrush">
+        @php
+          $logoPath = public_path('storage/img/logo.jpg');
+          $logoExists = file_exists($logoPath);
+        @endphp
+        @if($logoExists)
+          <img src="{{ $logoPath }}" alt="Medrush">
+        @endif
       </div>
 
       <div>

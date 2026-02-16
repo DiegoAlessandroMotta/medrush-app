@@ -14,7 +14,15 @@ class DeleteExpiredNotificationTokens
 
       $report = Arr::get($event->data, 'report');
 
+      if ($report === null) {
+        return;
+      }
+
       $target = $report->target();
+
+      if ($target === null) {
+        return;
+      }
 
       $event->notifiable->fcmDeviceTokens()
         ->where('token', $target->value())

@@ -32,7 +32,8 @@ COPY . .
 
 # Entrypoint: migrate + seed + serve (todo listo al arrancar)
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/entrypoint-worker.sh /entrypoint-worker.sh
+RUN chmod +x /entrypoint.sh /entrypoint-worker.sh
 
 RUN composer dump-autoload --optimize
 RUN php artisan config:clear || true
