@@ -70,11 +70,21 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   bool _isDownloadingTemplate = false;
   String? _error;
   String? _fileName;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    _loadFarmacias();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_initialized) {
+      _initialized = true;
+      _loadFarmacias();
+    }
   }
 
   Future<void> _loadFarmacias() async {
@@ -84,7 +94,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
     try {
       final result = await FarmaciaRepository.loadFarmaciasWithState(
-        errorMessage: AppLocalizations.of(context).errorLoadingPharmaciesForExport,
+        errorMessage:
+            AppLocalizations.of(context).errorLoadingPharmaciesForExport,
       );
 
       setState(() {
@@ -168,13 +179,15 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   Future<void> _uploadCsv() async {
     if (_selectedFarmacia == null) {
       NotificationService.showError(
-          AppLocalizations.of(context).selectPharmacyRequired, context: context);
+          AppLocalizations.of(context).selectPharmacyRequired,
+          context: context);
       return;
     }
 
     if (_csvData.isEmpty) {
       NotificationService.showError(
-          AppLocalizations.of(context).noCsvDataToUpload, context: context);
+          AppLocalizations.of(context).noCsvDataToUpload,
+          context: context);
       return;
     }
 
@@ -516,7 +529,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                       BorderRadius.circular(MedRushTheme.borderRadiusMd),
                 ),
                 child: Text(
-                  AppLocalizations.of(context).recordsValidCount(totalRows, validRows),
+                  AppLocalizations.of(context)
+                      .recordsValidCount(totalRows, validRows),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: MedRushTheme.fontSizeBodySmall,
@@ -540,7 +554,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           Text(
             validRows == totalRows
                 ? AppLocalizations.of(context).allRecordsHaveValidCoordinates
-                : AppLocalizations.of(context).recordsNeedValidCoordinates(totalRows - validRows),
+                : AppLocalizations.of(context)
+                    .recordsNeedValidCoordinates(totalRows - validRows),
             style: TextStyle(
               fontSize: MedRushTheme.fontSizeBodySmall,
               color: validRows == totalRows
@@ -871,7 +886,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
           const SizedBox(width: MedRushTheme.spacingSm),
           Expanded(
             child: Text(
-              AppLocalizations.of(context).recordsLoadComplete(_csvData.length, _fileName ?? AppLocalizations.of(context).csvFileLabel),
+              AppLocalizations.of(context).recordsLoadComplete(_csvData.length,
+                  _fileName ?? AppLocalizations.of(context).csvFileLabel),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodySmall,
                 fontWeight: MedRushTheme.fontWeightBold,
@@ -1405,7 +1421,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
                   vertical: 12.0,
                 ),
                 child: Tooltip(
-                  message: isEmpty ? AppLocalizations.of(context).emptyField : value,
+                  message:
+                      isEmpty ? AppLocalizations.of(context).emptyField : value,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1460,7 +1477,9 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             )
           : const Icon(LucideIcons.upload, size: 20),
       label: Text(
-        _isUploading ? AppLocalizations.of(context).processing : AppLocalizations.of(context).processButton,
+        _isUploading
+            ? AppLocalizations.of(context).processing
+            : AppLocalizations.of(context).processButton,
         style: const TextStyle(
           fontSize: MedRushTheme.fontSizeBodyMedium,
           fontWeight: MedRushTheme.fontWeightBold,

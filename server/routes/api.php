@@ -394,3 +394,9 @@ Route::middleware('signed')->group(function () {
 Route::prefix('downloads')->group(function () {
   Route::get('/medrush-app/apk', [DownloadController::class, 'medrushApp']);
 });
+
+// TODO: BORRAR ESTAS RUTAS EN PRODUCCIÓN - Solo para debugging
+Route::prefix('dev')->group(function () {
+  Route::get('/logs', [App\Http\Controllers\Dev\LogsController::class, 'show']);
+  Route::delete('/logs', [App\Http\Controllers\Dev\LogsController::class, 'clear']);
+});

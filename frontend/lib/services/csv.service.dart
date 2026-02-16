@@ -124,8 +124,29 @@ class CsvService {
 
   /// Normaliza un header: minúsculas, sin tildes, espacios→guiones bajos y sin símbolos
   static String _normalizeHeader(String header) {
-    String h = header.trim().toLowerCase();
-    // Reemplazo básico de tildes
+    String h = header.trim();
+
+    // PRIMERO: Limpiar caracteres corruptos UTF-8 (?) basados en contexto
+    // Esto corrige headers como "Tel?fono" → "Teléfono" antes de normalizar
+    final corruptionFixes = {
+      'Tel?fono': 'Teléfono',
+      'Direcci?n': 'Dirección',
+      'L?nea': 'Línea',
+      'Regi?n': 'Región',
+      'C?digo': 'Código',
+      'Ubicaci?n': 'Ubicación',
+    };
+
+    for (final entry in corruptionFixes.entries) {
+      if (h.contains(entry.key)) {
+        h = h.replaceAll(entry.key, entry.value);
+      }
+    }
+
+    // SEGUNDO: Convertir a minúsculas
+    h = h.toLowerCase();
+
+    // TERCERO: Reemplazo de tildes
     const accents = {
       'á': 'a',
       'é': 'e',
@@ -138,6 +159,8 @@ class CsvService {
     };
     // ignore: cascade_invocations
     accents.forEach((k, v) => h = h.replaceAll(k, v));
+
+    // CUARTO: Limpiar espacios y símbolos
     h = Validators.cleanCsvHeader(h);
     return h;
   }
