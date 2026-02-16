@@ -38,22 +38,28 @@ else
   echo ">>> Seed already applied, skipping."
 fi
 
+# Función para limpiar procesos al salir
+cleanup() {
+  echo ">>> Shutting down..."
+  if [ -n "$WORKER_PID" ]; then
+    kill $WORKER_PID 2>/dev/null || true
+  fi
+  exit 0
+}
+trap cleanup SIGTERM SIGINT
+
 # Verificar si QUEUE_CONNECTION está configurado como 'database'
 QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
 
 if [ "$QUEUE_CONNECTION" = "database" ]; then
   echo ">>> Starting Laravel queue worker in background..."
-  php artisan queue:work --queue=default --tries=2 --timeout=300 &
+  # Desactivar set -e solo para iniciar el worker (para que no detenga el script si falla)
+  set +e
+  php artisan queue:work --queue=default --tries=2 --timeout=300 > /dev/null 2>&1 &
   WORKER_PID=$!
+  set -e
   echo ">>> Queue worker started with PID: $WORKER_PID"
-  
-  # Función para limpiar procesos al salir
-  cleanup() {
-    echo ">>> Shutting down..."
-    kill $WORKER_PID 2>/dev/null || true
-    exit 0
-  }
-  trap cleanup SIGTERM SIGINT
+  sleep 2
 else
   echo ">>> Queue connection is '$QUEUE_CONNECTION' - worker not needed"
 fi
