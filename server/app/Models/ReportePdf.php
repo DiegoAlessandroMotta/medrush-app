@@ -7,7 +7,6 @@ use App\Enums\PageSizeEnum;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Storage;
 
 /**
@@ -180,7 +179,7 @@ class ReportePdf extends Model
     return self::getDiskInstance()->put($filePath, $content) ? $filePath : null;
   }
 
-  public static function getDiskInstance(): LocalFilesystemAdapter
+  public static function getDiskInstance()
   {
     return Storage::disk();
   }
