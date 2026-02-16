@@ -220,8 +220,7 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                         // Información Personal
                         _buildInfoSection(
                             AppLocalizations.of(context).personalInfo, [
-                          _buildInfoRow(
-                              AppLocalizations.of(context).name,
+                          _buildInfoRow(AppLocalizations.of(context).name,
                               widget.repartidor.nombre,
                               icon: LucideIcons.user),
                           _buildInfoRow(
@@ -229,13 +228,11 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                               _getTipoUsuarioDisplayName(context),
                               icon: LucideIcons.user),
                           if (widget.repartidor.telefono != null)
-                            _buildInfoRow(
-                                AppLocalizations.of(context).phone,
+                            _buildInfoRow(AppLocalizations.of(context).phone,
                                 widget.repartidor.telefono!,
                                 icon: LucideIcons.phone),
                           if (widget.repartidor.codigoIsoPais != null)
-                            _buildInfoRow(
-                                AppLocalizations.of(context).country,
+                            _buildInfoRow(AppLocalizations.of(context).country,
                                 widget.repartidor.codigoIsoPais!,
                                 icon: LucideIcons.flag),
                           if (widget.repartidor.verificado != null)
@@ -270,14 +267,15 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                           Column(
                             children: [
                               _buildInfoSection(
-                                  AppLocalizations.of(context).documentsSection, [
-                                if (widget.repartidor.firmaDigital != null)
-                                  _buildDocumentRow(
-                                      AppLocalizations.of(context)
-                                          .digitalSignatureLabel,
-                                      widget.repartidor.firmaDigital!,
-                                      Icons.draw),
-                              ]),
+                                  AppLocalizations.of(context).documentsSection,
+                                  [
+                                    if (widget.repartidor.firmaDigital != null)
+                                      _buildDocumentRow(
+                                          AppLocalizations.of(context)
+                                              .digitalSignatureLabel,
+                                          widget.repartidor.firmaDigital!,
+                                          Icons.draw),
+                                  ]),
                               const SizedBox(height: MedRushTheme.spacingLg),
                             ],
                           ),
@@ -287,39 +285,49 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                           Column(
                             children: [
                               _buildInfoSection(
-                                  AppLocalizations.of(context).sectionLicenseInfo, [
-                                if (widget.repartidor.licenciaNumero != null)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context)
-                                          .licenseNumberLabel,
-                                      widget.repartidor.licenciaNumero!,
-                                      icon: LucideIcons.idCard),
-                                if (widget.repartidor.licenciaVencimiento !=
-                                    null)
-                                  _buildInfoRow(
-                                    AppLocalizations.of(context).expiryLabel,
-                                    _formatDate(context,
-                                        widget.repartidor.licenciaVencimiento!),
-                                    isExpiring: _isLicenseExpiring(),
-                                    icon: LucideIcons.calendar,
-                                  ),
-                                if (widget.repartidor.fotoLicencia != null)
-                                  _buildDocumentRow(
-                                      AppLocalizations.of(context)
-                                          .photoLicenseLabel,
-                                      widget.repartidor.fotoLicencia!,
-                                      LucideIcons.idCard),
-                                if ((widget.repartidor.fotoSeguroVehiculo ??
-                                        widget.repartidor.seguroVehiculoUrl) !=
-                                    null)
-                                  _buildDocumentRow(
-                                    AppLocalizations.of(context)
-                                        .photoInsuranceTitle,
-                                    (widget.repartidor.fotoSeguroVehiculo ??
-                                        widget.repartidor.seguroVehiculoUrl)!,
-                                    LucideIcons.shield,
-                                  ),
-                              ]),
+                                  AppLocalizations.of(context)
+                                      .sectionLicenseInfo,
+                                  [
+                                    if (widget.repartidor.licenciaNumero !=
+                                        null)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context)
+                                              .licenseNumberLabel,
+                                          widget.repartidor.licenciaNumero!,
+                                          icon: LucideIcons.idCard),
+                                    if (widget.repartidor.licenciaVencimiento !=
+                                        null)
+                                      _buildInfoRow(
+                                        AppLocalizations.of(context)
+                                            .expiryLabel,
+                                        _formatDate(
+                                            context,
+                                            widget.repartidor
+                                                .licenciaVencimiento!),
+                                        isExpiring: _isLicenseExpiring(),
+                                        icon: LucideIcons.calendar,
+                                      ),
+                                    if (widget.repartidor.fotoLicencia != null)
+                                      _buildDocumentRow(
+                                          AppLocalizations.of(context)
+                                              .photoLicenseLabel,
+                                          BaseApi.getImageUrl(
+                                              widget.repartidor.fotoLicencia),
+                                          LucideIcons.idCard),
+                                    if ((widget.repartidor.fotoSeguroVehiculo ??
+                                            widget.repartidor
+                                                .seguroVehiculoUrl) !=
+                                        null)
+                                      _buildDocumentRow(
+                                        AppLocalizations.of(context)
+                                            .photoInsuranceTitle,
+                                        BaseApi.getImageUrl(widget.repartidor
+                                                .fotoSeguroVehiculo ??
+                                            widget
+                                                .repartidor.seguroVehiculoUrl),
+                                        LucideIcons.shield,
+                                      ),
+                                  ]),
                               const SizedBox(height: MedRushTheme.spacingLg),
                             ],
                           ),
@@ -329,34 +337,39 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                           Column(
                             children: [
                               _buildInfoSection(
-                                  AppLocalizations.of(context).sectionVehicleInfo, [
-                                if (widget.repartidor.vehiculoPlaca != null)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context)
-                                          .vehiclePlateLabel,
-                                      widget.repartidor.vehiculoPlaca!,
-                                      icon: LucideIcons.mapPin),
-                                if (widget.repartidor.vehiculoMarca != null)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context)
-                                          .vehicleBrandLabel,
-                                      widget.repartidor.vehiculoMarca!,
-                                      icon: LucideIcons.car),
-                                if (widget.repartidor.vehiculoModelo != null)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context)
-                                          .vehicleModelLabel,
-                                      widget.repartidor.vehiculoModelo!,
-                                      icon: LucideIcons.car),
-                                if (widget.repartidor.vehiculoCodigoRegistro !=
-                                    null)
-                                  _buildInfoRow(
-                                    AppLocalizations.of(context)
-                                        .vehicleRegistrationLabel,
-                                    widget.repartidor.vehiculoCodigoRegistro!,
-                                    icon: LucideIcons.badge,
-                                  ),
-                              ]),
+                                  AppLocalizations.of(context)
+                                      .sectionVehicleInfo,
+                                  [
+                                    if (widget.repartidor.vehiculoPlaca != null)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context)
+                                              .vehiclePlateLabel,
+                                          widget.repartidor.vehiculoPlaca!,
+                                          icon: LucideIcons.mapPin),
+                                    if (widget.repartidor.vehiculoMarca != null)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context)
+                                              .vehicleBrandLabel,
+                                          widget.repartidor.vehiculoMarca!,
+                                          icon: LucideIcons.car),
+                                    if (widget.repartidor.vehiculoModelo !=
+                                        null)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context)
+                                              .vehicleModelLabel,
+                                          widget.repartidor.vehiculoModelo!,
+                                          icon: LucideIcons.car),
+                                    if (widget.repartidor
+                                            .vehiculoCodigoRegistro !=
+                                        null)
+                                      _buildInfoRow(
+                                        AppLocalizations.of(context)
+                                            .vehicleRegistrationLabel,
+                                        widget
+                                            .repartidor.vehiculoCodigoRegistro!,
+                                        icon: LucideIcons.badge,
+                                      ),
+                                  ]),
                               const SizedBox(height: MedRushTheme.spacingLg),
                             ],
                           ),
@@ -364,9 +377,10 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                         // Asignación de Farmacia
                         _buildInfoSection(
                             AppLocalizations.of(context)
-                                .pharmacyAssignmentSection, [
-                          _buildFarmaciaInfo(),
-                        ]),
+                                .pharmacyAssignmentSection,
+                            [
+                              _buildFarmaciaInfo(),
+                            ]),
 
                         const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -374,15 +388,18 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
                         _buildInfoSection(
                             AppLocalizations.of(context).systemInfoSection, [
                           _buildInfoRow(
-                              AppLocalizations.of(context).registrationDateLabel,
+                              AppLocalizations.of(context)
+                                  .registrationDateLabel,
                               widget.repartidor.createdAt != null
-                                  ? _formatDate(context, widget.repartidor.createdAt!)
+                                  ? _formatDate(
+                                      context, widget.repartidor.createdAt!)
                                   : AppLocalizations.of(context).notAvailable,
                               icon: Icons.event),
                           if (widget.repartidor.updatedAt != null)
                             _buildInfoRow(
                               AppLocalizations.of(context).lastActivityLabel,
-                              _formatDateTime(context, widget.repartidor.updatedAt!),
+                              _formatDateTime(
+                                  context, widget.repartidor.updatedAt!),
                               icon: Icons.access_time,
                             ),
                         ]),
@@ -724,19 +741,15 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow(
-            AppLocalizations.of(context).name,
-            _farmacia!.nombre,
+        _buildInfoRow(AppLocalizations.of(context).name, _farmacia!.nombre,
             icon: LucideIcons.pill),
         if (_farmacia!.direccion.isNotEmpty)
           _buildInfoRow(
-              AppLocalizations.of(context).address,
-              _farmacia!.direccion,
+              AppLocalizations.of(context).address, _farmacia!.direccion,
               icon: LucideIcons.mapPin),
         if (_farmacia!.telefono != null && _farmacia!.telefono!.isNotEmpty)
           _buildInfoRow(
-              AppLocalizations.of(context).phone,
-              _farmacia!.telefono!,
+              AppLocalizations.of(context).phone, _farmacia!.telefono!,
               icon: LucideIcons.phone),
       ],
     );
@@ -904,8 +917,8 @@ class _RepartidorDetallesState extends State<RepartidorDetalles> {
   // Widget para mostrar preview de imagen (base64 o URL)
   Widget _buildImagePreview(String imageData) {
     return GestureDetector(
-      onTap: () => _showImageZoom(
-          imageData, AppLocalizations.of(context).documentTitle),
+      onTap: () =>
+          _showImageZoom(imageData, AppLocalizations.of(context).documentTitle),
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border.all(color: MedRushTheme.borderLight),

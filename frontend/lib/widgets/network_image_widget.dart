@@ -99,12 +99,14 @@ class _NetworkImageWidgetState extends State<NetworkImageWidget> {
         logWarning('⚠️ URL firmada próxima a expirar: $imageUrl');
       }
 
+      // Sanitizar URL (forzar HTTPS si es necesario)
+      String finalUrl = BaseApi.imageUrlForDisplay(imageUrl) ?? imageUrl;
+
       // Para Web, agregar timestamp para forzar recarga si es necesario
-      String finalUrl = imageUrl;
       if (kIsWeb && _retryCount > 0) {
-        final separator = imageUrl.contains('?') ? '&' : '?';
+        final separator = finalUrl.contains('?') ? '&' : '?';
         finalUrl =
-            '$imageUrl${separator}t=${DateTime.now().millisecondsSinceEpoch}';
+            '$finalUrl${separator}t=${DateTime.now().millisecondsSinceEpoch}';
         logInfo('🔄 Forzando recarga con timestamp: $finalUrl');
       }
 
@@ -173,6 +175,14 @@ class _NetworkImageWidgetState extends State<NetworkImageWidget> {
       },
       errorBuilder: (context, error, stackTrace) {
         logError('❌ Error al cargar imagen en Image.network: $error');
+
+        // En Web, si falla Image.network por CORS (statusCode 0),
+        // podríamos usar un placeholder o informar al usuario.
+        if (kIsWeb) {
+          logWarning(
+              '⚠️ Posible error de CORS detectado en Web. Asegurar que el backend permita el origen de la app.');
+        }
+
         widget.onImageError?.call();
         return _buildErrorWidget();
       },

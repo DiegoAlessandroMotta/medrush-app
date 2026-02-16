@@ -62,7 +62,8 @@ abstract class BaseApi {
     logInfo(
         '${ConsoleColor.cyan}Server Domain: $serverDomain${ConsoleColor.reset}');
     if (kDebugMode) {
-      logInfo('${ConsoleColor.cyan}Debug Info: ${EndpointManager.debugInfo}${ConsoleColor.reset}');
+      logInfo(
+          '${ConsoleColor.cyan}Debug Info: ${EndpointManager.debugInfo}${ConsoleColor.reset}');
     }
 
     final dio = Dio(BaseOptions(
@@ -792,9 +793,9 @@ abstract class BaseApi {
   /// Selecciona una imagen desde la galería o cámara
   static Future<XFile?> pickImage({
     ImageSource source = ImageSource.gallery,
-    int maxWidth = 800,
-    int maxHeight = 800,
-    int imageQuality = 80,
+    double? maxWidth = 1800,
+    double? maxHeight = 1800,
+    int? imageQuality = 90,
   }) async {
     try {
       logInfo('📸 Seleccionando imagen desde ${source.name}');
@@ -802,8 +803,8 @@ abstract class BaseApi {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        maxWidth: maxWidth.toDouble(),
-        maxHeight: maxHeight.toDouble(),
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
         imageQuality: imageQuality,
       );
 
@@ -907,17 +908,6 @@ abstract class BaseApi {
     }
   }
 
-  /// Sube una imagen de avatar
-  static Future<String?> uploadAvatar({
-    required XFile imageFile,
-    required String userId,
-  }) {
-    return uploadImage(
-      imageFile: imageFile,
-      userId: userId,
-    );
-  }
-
   /// Sube o elimina foto de perfil del usuario
   static Future<RepositoryResult<String?>> uploadProfilePicture(
     String userId,
@@ -990,42 +980,6 @@ abstract class BaseApi {
     }
   }
 
-  /// Sube una imagen de firma digital (se envía como texto SVG en el endpoint de entrega)
-  static Future<String?> uploadSignature({
-    required XFile imageFile,
-    required String userId,
-    int? pedidoId,
-  }) {
-    // Las firmas se envían como texto SVG, no como archivo
-    logWarning(
-        '⚠️ uploadSignature: Las firmas se envían como texto SVG, no como archivo');
-    return Future.value();
-  }
-
-  /// Sube una foto de evidencia (para entregas de pedidos)
-  static Future<String?> uploadPhoto({
-    required XFile imageFile,
-    required String userId,
-    String? context,
-  }) {
-    // Las fotos de evidencia se suben a través del endpoint de entrega
-    logWarning(
-        '⚠️ uploadPhoto: Usar el endpoint de entrega de pedidos para fotos de evidencia');
-    return Future.value();
-  }
-
-  /// Sube una imagen de licencia de repartidor
-  static Future<String?> uploadLicense({
-    required XFile imageFile,
-    required String repartidorId,
-  }) {
-    return uploadImage(
-      imageFile: imageFile,
-      userId: repartidorId,
-      endpoint: '/user/repartidores/$repartidorId/licencia',
-    );
-  }
-
   /// Elimina una imagen del backend (solo para foto de perfil)
   static Future<bool> deleteImage(String imageUrl,
       {String endpoint = '/user/foto'}) async {
@@ -1080,8 +1034,12 @@ abstract class BaseApi {
     try {
       final uri = Uri.parse(url);
       final apiHost = EndpointManager.serverDomain;
-      final isApiUrl = uri.host == apiHost || apiHost.contains(uri.host);
-      if (kIsWeb && (Uri.base.scheme == 'https' || isApiUrl)) {
+      final isApiUrl = uri.host == apiHost ||
+          apiHost.contains(uri.host) ||
+          url.contains('api.medrush.cc');
+
+      // Forzar HTTPS si es el dominio de la API o si estamos en web con HTTPS
+      if (isApiUrl || (kIsWeb && Uri.base.scheme == 'https')) {
         return url.replaceFirst('http://', 'https://');
       }
     } catch (_) {}
@@ -1105,15 +1063,22 @@ abstract class BaseApi {
 
     // Si ya es una URL completa, extraer el nombre del archivo
     if (signedUrl.startsWith('http://') || signedUrl.startsWith('https://')) {
-      // Extraer el nombre del archivo de la URL firmada
-      // Ej: http://138.68.38.65/uploads/img/pfp-uuid.webp?expires=...&signature=...
-      // -> pfp-uuid.webp
-      final uri = Uri.parse(signedUrl);
+      // Forzar HTTPS para el dominio de la API
+      String workingUrl = signedUrl;
+      if (signedUrl.contains('api.medrush.cc') &&
+          signedUrl.startsWith('http://')) {
+        workingUrl = signedUrl.replaceFirst('http://', 'https://');
+      }
+
+      final uri = Uri.parse(workingUrl);
       final pathSegments = uri.pathSegments;
       if (pathSegments.isNotEmpty) {
         final fileName = pathSegments.last;
-        // Generar URL permanente sin parámetros de expiración
-        return '${EndpointManager.currentBaseUrl.replaceAll('/api', '')}/uploads/img/$fileName';
+        // Generar URL permanente sin parámetros de expiración (Usando HTTPS)
+        final baseUrlPrefix = EndpointManager.currentBaseUrl
+            .replaceAll('/api', '')
+            .replaceFirst('http://', 'https://');
+        return '$baseUrlPrefix/uploads/img/$fileName';
       }
     }
 
@@ -1126,14 +1091,21 @@ abstract class BaseApi {
       return '';
     }
 
-    // Si es una URL firmada, usar directamente (el backend maneja la expiración)
+    // Si ya es una URL completa, asegurar HTTPS para el dominio de la API
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      if (imageUrl.contains('api.medrush.cc') &&
+          imageUrl.startsWith('http://')) {
+        return imageUrl.replaceFirst('http://', 'https://');
+      }
       return imageUrl;
     }
 
-    // Si es solo un nombre de archivo, construir la URL completa
+    // Si es solo un nombre de archivo, construir la URL completa (Forzando HTTPS)
     if (!imageUrl.contains('/')) {
-      return '${EndpointManager.currentBaseUrl.replaceAll('/api', '')}/uploads/img/$imageUrl';
+      final baseUrlPrefix = EndpointManager.currentBaseUrl
+          .replaceAll('/api', '')
+          .replaceFirst('http://', 'https://');
+      return '$baseUrlPrefix/uploads/img/$imageUrl';
     }
 
     return imageUrl;

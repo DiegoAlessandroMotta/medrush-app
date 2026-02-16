@@ -1979,7 +1979,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'Phone Number'**
+  /// **'Phone Number (optional)'**
   String get phoneNumberLabel;
 
   /// No description provided for @phoneMustBe10Digits.
@@ -2129,7 +2129,7 @@ abstract class AppLocalizations {
   /// No description provided for @licenseExpiryLabel.
   ///
   /// In en, this message translates to:
-  /// **'License Expiry'**
+  /// **'License Expiry (optional)'**
   String get licenseExpiryLabel;
 
   /// No description provided for @selectDate.
@@ -2141,7 +2141,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehiclePlateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vehicle Plate'**
+  /// **'Vehicle Plate (optional)'**
   String get vehiclePlateLabel;
 
   /// No description provided for @vehiclePlateFormat.
@@ -2165,7 +2165,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleBrandLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vehicle Brand'**
+  /// **'Vehicle Brand (optional)'**
   String get vehicleBrandLabel;
 
   /// No description provided for @vehicleBrandHelper.
@@ -2189,7 +2189,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleModelLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vehicle Model'**
+  /// **'Vehicle Model (optional)'**
   String get vehicleModelLabel;
 
   /// No description provided for @vehicleModelHelper.
@@ -2213,7 +2213,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleRegistrationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vehicle Registration Code'**
+  /// **'Vehicle Registration Code (optional)'**
   String get vehicleRegistrationLabel;
 
   /// No description provided for @vehicleRegistrationHelper.

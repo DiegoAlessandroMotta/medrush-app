@@ -16,8 +16,8 @@ use App\Http\Resources\UserResource;
 use App\Models\PerfilRepartidor;
 use App\Models\User;
 use App\Services\Disk\PrivateUploadsDiskService;
-use DB;
-use Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -633,8 +633,9 @@ class RepartidorUserController extends Controller
       $newFotoLicenciaPath = PrivateUploadsDiskService::saveImage(
         imgPath: $fotoLicenciaFile->getRealPath(),
         prefix: 'l-',
-        width: 1000,
-        height: 1000,
+        width: 2000,
+        height: 2000,
+        quality: 95,
       );
 
       if ($newFotoLicenciaPath === null) {
@@ -741,8 +742,9 @@ class RepartidorUserController extends Controller
       $newFotoSeguroVehiculoPath = PrivateUploadsDiskService::saveImage(
         imgPath: $fotoSeguroVehiculoFile->getRealPath(),
         prefix: 'sv-',
-        width: 1000,
-        height: 1000,
+        width: 2000,
+        height: 2000,
+        quality: 95,
       );
 
       if ($newFotoSeguroVehiculoPath === null) {

@@ -2,9 +2,10 @@
 
 namespace App\Services\Disk;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
-use Storage;
-use Str;
 
 class PrivateUploadsDiskService
 {
@@ -30,13 +31,14 @@ class PrivateUploadsDiskService
     ?string $name = null,
     ?int $width = null,
     ?int $height = null,
-    bool $crop = false
+    bool $crop = false,
+    int $quality = 85
   ): ?string {
-    $result = self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'imagick');
+    $result = self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'imagick', $quality);
     if ($result !== null) {
       return $result;
     }
-    return self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'gd');
+    return self::saveImageWithDriver($imgPath, $prefix, $name, $width, $height, $crop, 'gd', $quality);
   }
 
   private static function saveImageWithDriver(
@@ -46,7 +48,8 @@ class PrivateUploadsDiskService
     ?int $width,
     ?int $height,
     bool $crop,
-    string $driver
+    string $driver,
+    int $quality
   ): ?string {
     try {
       $manager = $driver === 'imagick' ? ImageManager::imagick() : ImageManager::gd();
@@ -64,7 +67,7 @@ class PrivateUploadsDiskService
         $image->scaleDown($width, $height);
       }
 
-      $webpImage = $image->toWebp(75);
+      $webpImage = $image->toWebp($quality);
 
       $fileName = $name;
       if ($fileName === null) {
@@ -79,7 +82,7 @@ class PrivateUploadsDiskService
 
       return null;
     } catch (\Throwable $e) {
-      \Log::warning("Error saving image with driver [{$driver}]: " . $e->getMessage());
+      Log::warning("Error saving image with driver [{$driver}]: " . $e->getMessage());
       return null;
     }
   }

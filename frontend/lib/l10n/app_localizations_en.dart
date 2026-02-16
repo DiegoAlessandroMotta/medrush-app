@@ -1047,7 +1047,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get phoneNumberLabel => 'Phone Number';
+  String get phoneNumberLabel => 'Phone Number (optional)';
 
   @override
   String get phoneMustBe10Digits => 'Phone must be exactly 10 digits';
@@ -1122,13 +1122,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uppercaseAndNumbersOnly => 'Uppercase letters and numbers only';
 
   @override
-  String get licenseExpiryLabel => 'License Expiry';
+  String get licenseExpiryLabel => 'License Expiry (optional)';
 
   @override
   String get selectDate => 'Select date';
 
   @override
-  String get vehiclePlateLabel => 'Vehicle Plate';
+  String get vehiclePlateLabel => 'Vehicle Plate (optional)';
 
   @override
   String get vehiclePlateFormat => 'Format: ABC-123 or ABC123';
@@ -1141,7 +1141,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Uppercase letters, numbers and hyphens only';
 
   @override
-  String get vehicleBrandLabel => 'Vehicle Brand';
+  String get vehicleBrandLabel => 'Vehicle Brand (optional)';
 
   @override
   String get vehicleBrandHelper => 'E.g.: Toyota, Honda, Ford';
@@ -1153,7 +1153,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lettersAndSpacesOnly => 'Letters and spaces only';
 
   @override
-  String get vehicleModelLabel => 'Vehicle Model';
+  String get vehicleModelLabel => 'Vehicle Model (optional)';
 
   @override
   String get vehicleModelHelper => 'E.g.: Corolla, Civic, Focus';
@@ -1166,7 +1166,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Letters, numbers, spaces and hyphens only';
 
   @override
-  String get vehicleRegistrationLabel => 'Vehicle Registration Code';
+  String get vehicleRegistrationLabel => 'Vehicle Registration Code (optional)';
 
   @override
   String get vehicleRegistrationHelper => 'Alphanumeric; e.g.: ABC123456';

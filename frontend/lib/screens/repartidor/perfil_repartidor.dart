@@ -12,7 +12,6 @@ import 'package:medrush/screens/repartidor/modules/perfil/perfl_token.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/loggers.dart';
-import 'package:medrush/utils/status_helpers.dart';
 import 'package:medrush/widgets/network_image_widget.dart';
 import 'package:medrush/widgets/web_smooth_scroll_wrapper.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +53,12 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarPerfilUsuario();
+    // Ejecutar después del primer frame para evitar errores de Localizations/InheritedWidgets
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _cargarPerfilUsuario();
+      }
+    });
   }
 
   @override
@@ -134,12 +138,22 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
   void _inicializarControladores() {
     if (_usuarioActual != null && mounted) {
-      final l10n = AppLocalizations.of(context);
+      // Intentar obtener l10n de forma segura
+      AppLocalizations? l10n;
+      try {
+        l10n = AppLocalizations.of(context);
+      } catch (_) {
+        // Si falla (ej. llamado demasiado pronto), los controladores se llenarán sin l10n parcial
+      }
+
       _nombreController.text = _usuarioActual!.nombre;
       _emailController.text = _usuarioActual!.email;
       _telefonoController.text = _usuarioActual!.telefono ?? '';
       _licenciaController.text = _usuarioActual!.licenciaNumero ?? '';
-      _vehiculoController.text = _usuarioActual!.vehiculoCompleto(l10n);
+
+      if (l10n != null) {
+        _vehiculoController.text = _usuarioActual!.vehiculoCompleto(l10n);
+      }
     }
   }
 
@@ -279,8 +293,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: source,
-        maxWidth: 800,
-        maxHeight: 800,
+        maxWidth: 1200,
+        maxHeight: 1200,
         imageQuality: 85,
       );
 
@@ -343,7 +357,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
         if (mounted) {
           NotificationService.showSuccess(
-              AppLocalizations.of(context).profilePhotoUpdated, context: context);
+              AppLocalizations.of(context).profilePhotoUpdated,
+              context: context);
         }
       } else {
         logError('❌ Error al subir foto: ${result.error}');
@@ -448,14 +463,14 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
         if (mounted) {
           NotificationService.showSuccess(
-              AppLocalizations.of(context).profilePhotoDeleted, context: context);
+              AppLocalizations.of(context).profilePhotoDeleted,
+              context: context);
         }
       } else {
         logError('❌ Error al eliminar foto: ${result.error}');
         if (mounted) {
           NotificationService.showError(
-              result.error ??
-                  AppLocalizations.of(context).errorDeletingPhoto,
+              result.error ?? AppLocalizations.of(context).errorDeletingPhoto,
               context: context);
         }
       }
@@ -595,31 +610,36 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
 
     if (passwordActual.isEmpty) {
       NotificationService.showError(
-          AppLocalizations.of(context).enterCurrentPassword, context: context);
+          AppLocalizations.of(context).enterCurrentPassword,
+          context: context);
       return false;
     }
 
     if (passwordNueva.isEmpty) {
       NotificationService.showError(
-          AppLocalizations.of(context).enterNewPassword, context: context);
+          AppLocalizations.of(context).enterNewPassword,
+          context: context);
       return false;
     }
 
     if (passwordNueva.length < 8) {
       NotificationService.showError(
-          AppLocalizations.of(context).newPasswordMin8Chars, context: context);
+          AppLocalizations.of(context).newPasswordMin8Chars,
+          context: context);
       return false;
     }
 
     if (passwordNueva != passwordConfirmacion) {
       NotificationService.showError(
-          AppLocalizations.of(context).passwordsDoNotMatch, context: context);
+          AppLocalizations.of(context).passwordsDoNotMatch,
+          context: context);
       return false;
     }
 
     if (passwordActual == passwordNueva) {
       NotificationService.showError(
-          AppLocalizations.of(context).passwordMustBeDifferent, context: context);
+          AppLocalizations.of(context).passwordMustBeDifferent,
+          context: context);
       return false;
     }
 
@@ -791,8 +811,6 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
           _buildPersonalInfoSection(),
           const SizedBox(height: MedRushTheme.spacingLg),
           _buildProfessionalInfoSection(),
-          const SizedBox(height: MedRushTheme.spacingLg),
-          _buildStatusSection(),
           const SizedBox(height: MedRushTheme.spacingLg),
           _buildPasswordSection(),
           const SizedBox(height: MedRushTheme.spacingLg),
@@ -970,37 +988,6 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     );
   }
 
-  Widget _buildStatusSection() {
-    return _buildInfoCard(
-      title: AppLocalizations.of(context).systemStatus,
-      icon: LucideIcons.settings,
-      children: [
-        _buildStatusRow(
-          label: AppLocalizations.of(context).driverStatus,
-          value: _usuarioActual!.estadoRepartidor != null
-              ? StatusHelpers.estadoRepartidorTexto(
-                  _usuarioActual!.estadoRepartidor!, AppLocalizations.of(context))
-              : AppLocalizations.of(context).notAssigned,
-          icon: StatusHelpers.estadoRepartidorIcon(
-              _usuarioActual!.estadoRepartidor),
-          color: _usuarioActual!.estadoRepartidor != null
-              ? StatusHelpers.estadoRepartidorColor(
-                  _usuarioActual!.estadoRepartidor!)
-              : MedRushTheme.textSecondary,
-        ),
-        _buildStatusRow(
-          label: AppLocalizations.of(context).activeUser,
-          value: _usuarioActual!.activo
-              ? AppLocalizations.of(context).yes
-              : AppLocalizations.of(context).no,
-          icon: _usuarioActual!.activo ? LucideIcons.check : LucideIcons.x,
-          color:
-              _usuarioActual!.activo ? MedRushTheme.primaryGreen : Colors.red,
-        ),
-      ],
-    );
-  }
-
   Widget _buildInfoCard({
     required String title,
     required IconData icon,
@@ -1114,59 +1101,6 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
     );
   }
 
-  Widget _buildStatusRow({
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: MedRushTheme.spacingMd),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
-            ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
-          ),
-          const SizedBox(width: MedRushTheme.spacingMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: MedRushTheme.fontSizeBodySmall,
-                    color: MedRushTheme.textSecondary,
-                    fontWeight: MedRushTheme.fontWeightMedium,
-                  ),
-                ),
-                const SizedBox(height: MedRushTheme.spacingXs),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: MedRushTheme.fontSizeBodyMedium,
-                    color: color,
-                    fontWeight: MedRushTheme.fontWeightMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLogoutSection() {
     return Container(
       padding: const EdgeInsets.all(MedRushTheme.spacingLg),
@@ -1257,7 +1191,8 @@ class _PerfilRepartidorScreenState extends State<PerfilRepartidorScreen> {
       logError('❌ Error al cerrar sesión', e);
       if (mounted) {
         NotificationService.showError(
-            AppLocalizations.of(context).errorLoggingOut, context: context);
+            AppLocalizations.of(context).errorLoggingOut,
+            context: context);
       }
     }
   }

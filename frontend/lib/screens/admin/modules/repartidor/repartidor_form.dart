@@ -98,7 +98,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
       _fotoUrl = usuario.foto;
       _fotoLicenciaUrl = usuario.licenciaImagenUrl;
-      _licenciaNumeroController.text = usuario.licenciaNumero ?? usuario.dniIdNumero ?? '';
+      _licenciaNumeroController.text =
+          usuario.licenciaNumero ?? usuario.dniIdNumero ?? '';
       _vehiculoPlacaController.text = usuario.vehiculoPlaca ?? '';
       _vehiculoMarcaController.text = usuario.vehiculoMarca ?? '';
       _vehiculoModeloController.text = usuario.vehiculoModelo ?? '';
@@ -227,7 +228,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                     return AppLocalizations.of(context).requiredField;
                   }
                   if (v != newPassController.text) {
-                    return AppLocalizations.of(context).passwordsDoNotMatchShort;
+                    return AppLocalizations.of(context)
+                        .passwordsDoNotMatchShort;
                   }
                   return null;
                 },
@@ -366,7 +368,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
       final repository = RepartidorRepository();
       // Guardar l10n antes del async para evitar problemas con BuildContext
       final l10n = AppLocalizations.of(context);
-      
+
       RepositoryResult<Usuario?> result;
 
       if (widget.initialData != null) {
@@ -393,14 +395,13 @@ class _RepartidorFormState extends State<RepartidorForm> {
           );
         }
       } else {
-        throw Exception(
-            result.error ??
-                l10n.errorSavingDriverUnknown);
+        throw Exception(result.error ?? l10n.errorSavingDriverUnknown);
       }
     } catch (e) {
       if (mounted) {
         NotificationService.showError(
-            AppLocalizations.of(context).errorSavingDriver(e), context: context);
+            AppLocalizations.of(context).errorSavingDriver(e),
+            context: context);
       }
     } finally {
       if (mounted) {
@@ -499,6 +500,7 @@ class _RepartidorFormState extends State<RepartidorForm> {
         // Validación en tiempo real
         setState(() {});
       },
+      autovalidateMode: AutovalidateMode.onUserInteraction,
     );
   }
 
@@ -557,8 +559,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 const SizedBox(height: 4),
                                 Text(
                                   widget.initialData != null
-                                      ? AppLocalizations.of(context).modifyingDriver
-                                      : AppLocalizations.of(context).creatingDriver,
+                                      ? AppLocalizations.of(context)
+                                          .modifyingDriver
+                                      : AppLocalizations.of(context)
+                                          .creatingDriver,
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodySmall,
                                     color: MedRushTheme.textSecondary,
@@ -623,7 +627,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 borderRadius: BorderRadius.circular(72),
                                 child: GestureDetector(
                                   onTap: _pickProfileImage,
-                                  child: BaseApi.imageUrlForDisplay(_fotoUrl) != null
+                                  child: BaseApi.imageUrlForDisplay(_fotoUrl) !=
+                                          null
                                       ? Image.network(
                                           BaseApi.imageUrlForDisplay(_fotoUrl)!,
                                           width: 150,
@@ -658,10 +663,13 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return AppLocalizations.of(context).nameRequired;
+                                return AppLocalizations.of(context)
+                                    .nameRequired;
                               }
                               return null;
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -677,10 +685,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return AppLocalizations.of(context).emailRequired;
+                                return AppLocalizations.of(context)
+                                    .emailRequired;
                               }
                               if (!Validators.isValidEmailStrict(value)) {
-                                return AppLocalizations.of(context).invalidEmail;
+                                return AppLocalizations.of(context)
+                                    .invalidEmail;
                               }
                               return null;
                             },
@@ -688,6 +698,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               // Validación en tiempo real
                               setState(() {});
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -699,8 +711,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               labelText: AppLocalizations.of(context).country,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.flag),
-                              helperText:
-                                  AppLocalizations.of(context).countryDefaultUSA,
+                              helperText: AppLocalizations.of(context)
+                                  .countryDefaultUSA,
                             ),
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
@@ -733,6 +745,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                     }
                                     return null;
                                   },
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                 ),
                                 const SizedBox(height: MedRushTheme.spacingMd),
                               ],
@@ -746,11 +760,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           TextFormField(
                             controller: _licenciaNumeroController,
                             decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).licenseOrIdNumberOptionalLabel,
+                              labelText: AppLocalizations.of(context)
+                                  .licenseOrIdNumberOptionalLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.idCard),
-                              helperText:
-                                  AppLocalizations.of(context).licenseFormatHelper,
+                              helperText: AppLocalizations.of(context)
+                                  .licenseFormatHelper,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             inputFormatters: [
@@ -766,11 +781,14 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 return AppLocalizations.of(context).idMin5Chars;
                               }
                               if (!Validators.isAlphanumericOnly(value)) {
-                                return AppLocalizations.of(context).alphanumericOnly;
+                                return AppLocalizations.of(context)
+                                    .alphanumericOnly;
                               }
                               return null;
                             },
                             onChanged: (value) => setState(() {}),
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -811,14 +829,15 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   .vehiclePlateLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.mapPin),
-                              helperText:
-                                  AppLocalizations.of(context).vehiclePlateFormat,
+                              helperText: AppLocalizations.of(context)
+                                  .vehiclePlateFormat,
                             ),
                             textCapitalization: TextCapitalization.characters,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 4) {
-                                  return AppLocalizations.of(context).plateMin4Chars;
+                                  return AppLocalizations.of(context)
+                                      .plateMin4Chars;
                                 }
                                 if (!Validators.isUppercaseNumbersAndDashesOnly(
                                     value)) {
@@ -831,6 +850,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             onChanged: (value) {
                               setState(() {});
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -842,14 +863,15 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   .vehicleBrandLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.car),
-                              helperText:
-                                  AppLocalizations.of(context).vehicleBrandHelper,
+                              helperText: AppLocalizations.of(context)
+                                  .vehicleBrandHelper,
                             ),
                             textCapitalization: TextCapitalization.words,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 2) {
-                                  return AppLocalizations.of(context).brandMin2Chars;
+                                  return AppLocalizations.of(context)
+                                      .brandMin2Chars;
                                 }
                                 if (!Validators.isLettersAndSpacesOnly(value)) {
                                   return AppLocalizations.of(context)
@@ -861,6 +883,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             onChanged: (value) {
                               setState(() {});
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingMd),
 
@@ -872,14 +896,15 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   .vehicleModelLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(LucideIcons.car),
-                              helperText:
-                                  AppLocalizations.of(context).vehicleModelHelper,
+                              helperText: AppLocalizations.of(context)
+                                  .vehicleModelHelper,
                             ),
                             textCapitalization: TextCapitalization.words,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 2) {
-                                  return AppLocalizations.of(context).modelMin2Chars;
+                                  return AppLocalizations.of(context)
+                                      .modelMin2Chars;
                                 }
                                 if (!Validators.isAlphanumericAndSpacesOnly(
                                     value)) {
@@ -892,6 +917,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             onChanged: (value) {
                               setState(() {});
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -915,10 +942,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (value.length < 5) {
-                                  return AppLocalizations.of(context).min5Characters;
+                                  return AppLocalizations.of(context)
+                                      .min5Characters;
                                 }
                                 if (!Validators.isAlphanumericOnly(value)) {
-                                  return AppLocalizations.of(context).alphanumericOnly;
+                                  return AppLocalizations.of(context)
+                                      .alphanumericOnly;
                                 }
                               }
                               return null;
@@ -926,6 +955,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                             onChanged: (value) {
                               setState(() {});
                             },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -954,7 +985,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   subtitle: AppLocalizations.of(context)
                                       .photoLicenseSubtitle,
                                   icon: LucideIcons.idCard,
-                                  imageUrl: BaseApi.imageUrlForDisplay(_fotoLicenciaUrl) ?? _fotoLicenciaUrl,
+                                  imageUrl: BaseApi.imageUrlForDisplay(
+                                          _fotoLicenciaUrl) ??
+                                      _fotoLicenciaUrl,
                                   onImageChanged: _onLicenciaImageChanged,
                                   uploadEndpoint:
                                       '/user/repartidores/${widget.initialData?.id ?? 'temp'}/licencia',
@@ -980,7 +1013,9 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   subtitle: AppLocalizations.of(context)
                                       .photoInsuranceSubtitle,
                                   icon: LucideIcons.shield,
-                                  imageUrl: BaseApi.imageUrlForDisplay(_fotoSeguroVehiculoUrl) ?? _fotoSeguroVehiculoUrl,
+                                  imageUrl: BaseApi.imageUrlForDisplay(
+                                          _fotoSeguroVehiculoUrl) ??
+                                      _fotoSeguroVehiculoUrl,
                                   onImageChanged: _onSeguroVehiculoImageChanged,
                                   uploadEndpoint:
                                       '/user/repartidores/${widget.initialData?.id ?? 'temp'}/seguro-vehiculo',
@@ -1001,8 +1036,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                           DropdownButtonFormField<EstadoRepartidor>(
                             initialValue: _estadoSeleccionado,
                             decoration: InputDecoration(
-                              labelText:
-                                  AppLocalizations.of(context).driverStatusLabel,
+                              labelText: AppLocalizations.of(context)
+                                  .driverStatusLabel,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.assignment),
                             ),
@@ -1010,8 +1045,10 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               return DropdownMenuItem<EstadoRepartidor>(
                                 value: estado,
                                 child: Builder(
-                                  builder: (context) => Text(StatusHelpers.estadoRepartidorTexto(
-                                      estado, AppLocalizations.of(context))),
+                                  builder: (context) => Text(
+                                      StatusHelpers.estadoRepartidorTexto(
+                                          estado,
+                                          AppLocalizations.of(context))),
                                 ),
                               );
                             }).toList(),
@@ -1027,9 +1064,11 @@ class _RepartidorFormState extends State<RepartidorForm> {
 
                           // Switch de activo
                           SwitchListTile(
-                            title: Text(AppLocalizations.of(context).activeUser),
+                            title:
+                                Text(AppLocalizations.of(context).activeUser),
                             subtitle: Text(_activo
-                                ? AppLocalizations.of(context).userCanAccessSystem
+                                ? AppLocalizations.of(context)
+                                    .userCanAccessSystem
                                 : AppLocalizations.of(context).userDisabled),
                             value: _activo,
                             onChanged: (bool value) async {
@@ -1058,7 +1097,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                     return;
                                   }
                                   NotificationService.showError(
-                                      AppLocalizations.of(context).couldNotUpdateActiveStatus,
+                                      AppLocalizations.of(context)
+                                          .couldNotUpdateActiveStatus,
                                       context: context);
                                 }
                               } catch (e) {
@@ -1070,7 +1110,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                   return;
                                 }
                                 NotificationService.showError(
-                                    AppLocalizations.of(context).errorUpdatingActiveStatus(e),
+                                    AppLocalizations.of(context)
+                                        .errorUpdatingActiveStatus(e),
                                     context: context);
                               }
                             },
@@ -1083,7 +1124,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                               child: TextButton.icon(
                                 onPressed: _showChangePasswordDialog,
                                 icon: const Icon(LucideIcons.lock),
-                                label: Text(AppLocalizations.of(context).changePasswordTitle),
+                                label: Text(AppLocalizations.of(context)
+                                    .changePasswordTitle),
                               ),
                             ),
                           ],
@@ -1104,7 +1146,8 @@ class _RepartidorFormState extends State<RepartidorForm> {
                                 ? AppLocalizations.of(context).saving
                                 : (widget.initialData != null
                                     ? AppLocalizations.of(context).updateLabel
-                                    : AppLocalizations.of(context).createDriver)),
+                                    : AppLocalizations.of(context)
+                                        .createDriver)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: MedRushTheme.primaryGreen,
                               foregroundColor: MedRushTheme.textInverse,
@@ -1364,7 +1407,12 @@ class _RepartidorFormState extends State<RepartidorForm> {
   Future<void> _pickDocumentImage(
       String uploadEndpoint, Function(String?) onImageChanged) async {
     try {
-      final XFile? imageFile = await BaseApi.pickImage();
+      // Usar mayor resolución y calidad para documentos que tienen texto
+      final XFile? imageFile = await BaseApi.pickImage(
+        maxWidth: 2500,
+        maxHeight: 2500,
+        imageQuality: 95,
+      );
 
       if (imageFile != null && widget.initialData?.id != null) {
         // Construir endpoint correcto
