@@ -21,6 +21,10 @@ fi
 echo ">>> MedRush backend: waiting for database..."
 max_attempts=30
 attempt=0
+# Fix migration date order
+if [ -f database/migrations/2025_02_14_000000_drop_dni_columns_from_perfiles_repartidor_table.php ]; then
+  mv database/migrations/2025_02_14_000000_drop_dni_columns_from_perfiles_repartidor_table.php database/migrations/2026_02_14_000000_drop_dni_columns_from_perfiles_repartidor_table.php
+fi
 until php artisan migrate --force 2>/dev/null; do
   attempt=$((attempt + 1))
   if [ "$attempt" -ge "$max_attempts" ]; then
