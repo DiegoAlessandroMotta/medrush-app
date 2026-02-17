@@ -134,7 +134,11 @@ class ProcessPedidosCsv implements ShouldQueue
             $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression(AsPoint::pointFromArray($this->ubicacionRecojo));
           }
 
-          $validatedData['ubicacion_entrega'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_entrega']));
+          if (isset($validatedData['ubicacion_entrega']) && $validatedData['ubicacion_entrega'] !== null) {
+            $validatedData['ubicacion_entrega'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_entrega']));
+          } else {
+            $validatedData['ubicacion_entrega'] = null;
+          }
 
           $validatedData['farmacia_id'] = $this->farmaciaId;
 
