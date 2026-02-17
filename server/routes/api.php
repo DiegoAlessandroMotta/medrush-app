@@ -395,6 +395,12 @@ Route::prefix('downloads')->group(function () {
   Route::get('/medrush-app/apk', [DownloadController::class, 'medrushApp']);
 });
 
+
+// Route for Docker Healthcheck
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 // TODO: BORRAR ESTAS RUTAS EN PRODUCCIÓN - Solo para debugging
 Route::prefix('dev')->group(function () {
   Route::get('/logs', [App\Http\Controllers\Dev\LogsController::class, 'show']);
