@@ -398,7 +398,24 @@ Route::prefix('downloads')->group(function () {
 
 // Route for Docker Healthcheck
 Route::get('/health', function () {
-    return response()->json(['status' => 'ok']);
+    try {
+        DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'ok',
+            'database' => 'connected',
+            'timestamp' => now()->toIso8601String(),
+            'server' => gethostname(),
+            'php' => phpversion(),
+            'laravel' => app()->version(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'database' => 'disconnected',
+            'message' => $e->getMessage(),
+            'timestamp' => now()->toIso8601String(),
+        ], 500);
+    }
 });
 
 // TODO: BORRAR ESTAS RUTAS EN PRODUCCIÓN - Solo para debugging
