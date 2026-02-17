@@ -347,7 +347,9 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                     .map((estado) => DropdownMenuItem<EstadoPedido?>(
                           value: estado,
                           child: Builder(
-                            builder: (context) => Text(StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context))),
+                            builder: (context) => Text(
+                                StatusHelpers.estadoPedidoTexto(
+                                    estado, AppLocalizations.of(context))),
                           ),
                         )),
               ],
@@ -487,7 +489,8 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
+                        StatusHelpers.estadoPedidoTexto(
+                            pedido.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -510,7 +513,8 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
                     const SizedBox(width: 4),
                     Text(
                       StatusHelpers
-                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido, AppLocalizations.of(context)),
+                          .obtenerFechaRelativaSegunPrioridadOptimizada(
+                              pedido, AppLocalizations.of(context)),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -626,7 +630,7 @@ class _PedidosListScreenState extends State<PedidosListScreen> {
   }
 
   Future<void> _llamarCliente(Pedido pedido) async {
-    // TODO: Agregar teléfono del cliente cuando esté disponible en el backend
+    // Teléfono del cliente (si está disponible)
     final telefono = pedido.telefonoCliente ?? 'No disponible';
 
     if (telefono == 'No disponible') {

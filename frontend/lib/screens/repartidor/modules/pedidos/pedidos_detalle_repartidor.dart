@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart'; // import
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/api/farmacias.api.dart';
 import 'package:medrush/api/pedidos.api.dart';
@@ -11,6 +12,7 @@ import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/screens/repartidor/entregar_repartidor.dart';
+import 'package:medrush/services/location_tracker.dart'; // import
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/status_helpers.dart';
@@ -150,8 +152,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: Text(AppLocalizations.of(context).confirmDeliveryTitle),
-            content: Text(
-                AppLocalizations.of(context).confirmDeliveryWithSignature),
+            content:
+                Text(AppLocalizations.of(context).confirmDeliveryWithSignature),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop('capture'),
@@ -159,7 +161,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop('deliver'),
-                child: Text(AppLocalizations.of(context).deliverWithoutSignature),
+                child:
+                    Text(AppLocalizations.of(context).deliverWithoutSignature),
               ),
             ],
           ),
@@ -188,6 +191,32 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
 
       // Llamar API específica y preferir la respuesta del servidor
       Pedido? respuesta;
+
+      // Obtener ubicación para estados que lo requieren
+      double latitud = 0.0;
+      double longitud = 0.0;
+
+      if (nuevoEstado == EstadoPedido.entregado ||
+          nuevoEstado == EstadoPedido.fallido) {
+        try {
+          final position = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              timeLimit: Duration(seconds: 5),
+            ),
+          );
+          latitud = position.latitude;
+          longitud = position.longitude;
+        } catch (e) {
+          // Intentar usar última conocida del servicio si existe
+          final last = LocationTrackerService.instance.lastPosition;
+          if (last != null) {
+            latitud = last.latitude;
+            longitud = last.longitude;
+          }
+        }
+      }
+
       switch (nuevoEstado) {
         case EstadoPedido.recogido:
           respuesta =
@@ -198,15 +227,15 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         case EstadoPedido.entregado:
           respuesta = await PedidosApi.marcarPedidoEntregado(
             _pedido!.id.toString(),
-            latitud: 0.0, // TODO: Obtener coordenadas reales del dispositivo
-            longitud: 0.0,
+            latitud: latitud,
+            longitud: longitud,
           );
         case EstadoPedido.fallido:
           respuesta = await PedidosApi.marcarPedidoFallido(
             _pedido!.id.toString(),
             motivoFallo: 'Cambio de estado manual',
-            latitud: 0.0, // TODO: Obtener coordenadas reales del dispositivo
-            longitud: 0.0,
+            latitud: latitud,
+            longitud: longitud,
           );
         case EstadoPedido.asignado:
         case EstadoPedido.pendiente:
@@ -393,7 +422,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                 ),
                                 child: Text(
                                   StatusHelpers.estadoPedidoTexto(
-                                      _pedido!.estado, AppLocalizations.of(context)),
+                                      _pedido!.estado,
+                                      AppLocalizations.of(context)),
                                   style: const TextStyle(
                                     color: MedRushTheme.textInverse,
                                     fontSize: MedRushTheme.fontSizeLabelSmall,
@@ -441,7 +471,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Estado del pedido
-                              _buildInfoSection(AppLocalizations.of(context).deliveryStatus, [
+                              _buildInfoSection(
+                                  AppLocalizations.of(context).deliveryStatus, [
                                 if (_pedido!.prioridad > 1)
                                   _buildInfoRow(
                                       AppLocalizations.of(context).priority,
@@ -452,149 +483,175 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               const SizedBox(height: MedRushTheme.spacingLg),
 
                               _buildInfoSection(
-                                  AppLocalizations.of(context).clientInformation, [
-                                _buildInfoRow(
-                                    AppLocalizations.of(context).name,
-                                    _pedido!.pacienteNombre),
-                                _buildInfoRowWithActions(
-                                  AppLocalizations.of(context).phone,
-                                  _pedido!.pacienteTelefono,
+                                  AppLocalizations.of(context)
+                                      .clientInformation,
                                   [
-                                    _buildActionButton(
-                                      icon: LucideIcons.copy,
-                                      tooltip: AppLocalizations.of(context).copyPhoneTooltip,
-                                      onPressed: _copiarTelefonoAlPortapapeles,
+                                    _buildInfoRow(
+                                        AppLocalizations.of(context).name,
+                                        _pedido!.pacienteNombre),
+                                    _buildInfoRowWithActions(
+                                      AppLocalizations.of(context).phone,
+                                      _pedido!.pacienteTelefono,
+                                      [
+                                        _buildActionButton(
+                                          icon: LucideIcons.copy,
+                                          tooltip: AppLocalizations.of(context)
+                                              .copyPhoneTooltip,
+                                          onPressed:
+                                              _copiarTelefonoAlPortapapeles,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                if (_pedido!.pacienteEmail != null &&
-                                    _pedido!.pacienteEmail!.isNotEmpty)
-                                  _buildInfoRowWithActions(
-                                    AppLocalizations.of(context).email,
-                                    _pedido!.pacienteEmail!,
-                                    [
-                                      _buildActionButton(
-                                        icon: LucideIcons.copy,
-                                        tooltip: AppLocalizations.of(context).copyEmail,
-                                        onPressed: _copiarEmailAlPortapapeles,
+                                    if (_pedido!.pacienteEmail != null &&
+                                        _pedido!.pacienteEmail!.isNotEmpty)
+                                      _buildInfoRowWithActions(
+                                        AppLocalizations.of(context).email,
+                                        _pedido!.pacienteEmail!,
+                                        [
+                                          _buildActionButton(
+                                            icon: LucideIcons.copy,
+                                            tooltip:
+                                                AppLocalizations.of(context)
+                                                    .copyEmail,
+                                            onPressed:
+                                                _copiarEmailAlPortapapeles,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                const SizedBox(height: MedRushTheme.spacingMd),
-                                // Botón grande para llamar
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: _llamarCliente,
-                                    icon:
-                                        const Icon(LucideIcons.phone, size: 22),
-                                    label: Text(AppLocalizations.of(context).callClient),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          MedRushTheme.primaryGreen,
-                                      foregroundColor: MedRushTheme.textInverse,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                    ),
-                                  ),
-                                ),
-                              ]),
-
-                              const SizedBox(height: MedRushTheme.spacingLg),
-
-                              _buildInfoSection(
-                                  AppLocalizations.of(context).deliveryLocationLabel, [
-                                _buildInfoRow(
-                                    AppLocalizations.of(context).address,
-                                    _pedido!.direccionEntrega),
-                                if (_pedido!.direccionDetalle != null &&
-                                    _pedido!.direccionDetalle!.isNotEmpty)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context).detail,
-                                      _pedido!.direccionDetalle!),
-                                _buildInfoRow(
-                                    AppLocalizations.of(context).districtLabel,
-                                    _pedido!.distritoEntrega),
-                                if (_pedido!.codigoAcceso != null &&
-                                    _pedido!.codigoAcceso!.isNotEmpty)
-                                  _buildInfoRow(
-                                      AppLocalizations.of(context).accessCode,
-                                      _pedido!.codigoAcceso!),
-                                if (_pedido!.tiempoEntregaEstimado != null ||
-                                    _pedido!.distanciaEstimada != null) ...[
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      if (_pedido!.tiempoEntregaEstimado !=
-                                          null) ...[
-                                        const Icon(LucideIcons.clock,
-                                            size: 18,
-                                            color: MedRushTheme.textSecondary),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${_pedido!.tiempoEntregaEstimado} min',
-                                          style: const TextStyle(
-                                            fontSize:
-                                                MedRushTheme.fontSizeBodyMedium,
-                                            color: MedRushTheme.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                      if (_pedido!.distanciaEstimada !=
-                                          null) ...[
-                                        const SizedBox(width: 16),
-                                        const Icon(LucideIcons.route,
-                                            size: 18,
-                                            color: MedRushTheme.textSecondary),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          StatusHelpers.formatearDistanciaKm(
-                                              _pedido!.distanciaEstimada!),
-                                          style: const TextStyle(
-                                            fontSize:
-                                                MedRushTheme.fontSizeBodyMedium,
-                                            color: MedRushTheme.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ],
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
+                                    const SizedBox(
+                                        height: MedRushTheme.spacingMd),
+                                    // Botón grande para llamar
+                                    SizedBox(
+                                      width: double.infinity,
                                       child: ElevatedButton.icon(
-                                        onPressed: _abrirMapas,
-                                        icon: const Icon(LucideIcons.map,
-                                            size: 20),
-                                        label: Text(AppLocalizations.of(context).viewMap),
+                                        onPressed: _llamarCliente,
+                                        icon: const Icon(LucideIcons.phone,
+                                            size: 22),
+                                        label: Text(AppLocalizations.of(context)
+                                            .callClient),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
                                               MedRushTheme.primaryGreen,
                                           foregroundColor:
                                               MedRushTheme.textInverse,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 14),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: _abrirNavegacion,
-                                        icon: const Icon(LucideIcons.navigation,
-                                            size: 20),
-                                        label: Text(AppLocalizations.of(context).navigate),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor:
-                                              MedRushTheme.primaryGreen,
-                                          side: const BorderSide(
-                                              color: MedRushTheme.primaryGreen),
-                                        ),
+                                  ]),
+
+                              const SizedBox(height: MedRushTheme.spacingLg),
+
+                              _buildInfoSection(
+                                  AppLocalizations.of(context)
+                                      .deliveryLocationLabel,
+                                  [
+                                    _buildInfoRow(
+                                        AppLocalizations.of(context).address,
+                                        _pedido!.direccionEntrega),
+                                    if (_pedido!.direccionDetalle != null &&
+                                        _pedido!.direccionDetalle!.isNotEmpty)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context).detail,
+                                          _pedido!.direccionDetalle!),
+                                    _buildInfoRow(
+                                        AppLocalizations.of(context)
+                                            .districtLabel,
+                                        _pedido!.distritoEntrega),
+                                    if (_pedido!.codigoAcceso != null &&
+                                        _pedido!.codigoAcceso!.isNotEmpty)
+                                      _buildInfoRow(
+                                          AppLocalizations.of(context)
+                                              .accessCode,
+                                          _pedido!.codigoAcceso!),
+                                    if (_pedido!.tiempoEntregaEstimado !=
+                                            null ||
+                                        _pedido!.distanciaEstimada != null) ...[
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          if (_pedido!.tiempoEntregaEstimado !=
+                                              null) ...[
+                                            const Icon(LucideIcons.clock,
+                                                size: 18,
+                                                color:
+                                                    MedRushTheme.textSecondary),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${_pedido!.tiempoEntregaEstimado} min',
+                                              style: const TextStyle(
+                                                fontSize: MedRushTheme
+                                                    .fontSizeBodyMedium,
+                                                color:
+                                                    MedRushTheme.textSecondary,
+                                              ),
+                                            ),
+                                          ],
+                                          if (_pedido!.distanciaEstimada !=
+                                              null) ...[
+                                            const SizedBox(width: 16),
+                                            const Icon(LucideIcons.route,
+                                                size: 18,
+                                                color:
+                                                    MedRushTheme.textSecondary),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              StatusHelpers
+                                                  .formatearDistanciaKm(_pedido!
+                                                      .distanciaEstimada!),
+                                              style: const TextStyle(
+                                                fontSize: MedRushTheme
+                                                    .fontSizeBodyMedium,
+                                                color:
+                                                    MedRushTheme.textSecondary,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
+                                    ],
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            onPressed: _abrirMapas,
+                                            icon: const Icon(LucideIcons.map,
+                                                size: 20),
+                                            label: Text(
+                                                AppLocalizations.of(context)
+                                                    .viewMap),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  MedRushTheme.primaryGreen,
+                                              foregroundColor:
+                                                  MedRushTheme.textInverse,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: OutlinedButton.icon(
+                                            onPressed: _abrirNavegacion,
+                                            icon: const Icon(
+                                                LucideIcons.navigation,
+                                                size: 20),
+                                            label: Text(
+                                                AppLocalizations.of(context)
+                                                    .navigate),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor:
+                                                  MedRushTheme.primaryGreen,
+                                              side: const BorderSide(
+                                                  color: MedRushTheme
+                                                      .primaryGreen),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ]),
+                                  ]),
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -625,7 +682,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
-                                        AppLocalizations.of(context).delivery24hLabel,
+                                        AppLocalizations.of(context)
+                                            .delivery24hLabel,
                                         style: const TextStyle(
                                           color: MedRushTheme.textInverse,
                                           fontSize:
@@ -641,133 +699,145 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               const SizedBox(height: MedRushTheme.spacingLg),
 
                               _buildInfoSection(
-                                  AppLocalizations.of(context).orderTypeSectionTitle, [
-                                Container(
-                                  padding: const EdgeInsets.all(
-                                    MedRushTheme.spacingMd,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: MedRushTheme.backgroundPrimary,
-                                    borderRadius: BorderRadius.circular(
-                                      MedRushTheme.borderRadiusMd,
+                                  AppLocalizations.of(context)
+                                      .orderTypeSectionTitle,
+                                  [
+                                    Container(
+                                      padding: const EdgeInsets.all(
+                                        MedRushTheme.spacingMd,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: MedRushTheme.backgroundPrimary,
+                                        borderRadius: BorderRadius.circular(
+                                          MedRushTheme.borderRadiusMd,
+                                        ),
+                                        border: Border.all(
+                                          color: MedRushTheme.borderLight,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: MedRushTheme.primaryGreen
+                                                  .withValues(alpha: 0.12),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Icon(
+                                              _pedido!.tipoPedido ==
+                                                      TipoPedido
+                                                          .medicamentosControlados
+                                                  ? LucideIcons.shieldAlert
+                                                  : LucideIcons.clipboardList,
+                                              size: 22,
+                                              color: _pedido!.tipoPedido ==
+                                                      TipoPedido
+                                                          .medicamentosControlados
+                                                  ? Colors.red
+                                                  : MedRushTheme.primaryGreen,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: MedRushTheme.spacingMd,
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  AppLocalizations.of(context)
+                                                      .orderTypeLabel,
+                                                  style: const TextStyle(
+                                                    fontSize: MedRushTheme
+                                                        .fontSizeTitleMedium,
+                                                    fontWeight: MedRushTheme
+                                                        .fontWeightSemiBold,
+                                                    color: MedRushTheme
+                                                        .textPrimary,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height:
+                                                      MedRushTheme.spacingXs,
+                                                ),
+                                                Text(
+                                                  StatusHelpers.tipoPedidoTexto(
+                                                      _pedido!.tipoPedido,
+                                                      AppLocalizations.of(
+                                                          context)),
+                                                  style: TextStyle(
+                                                    fontSize: MedRushTheme
+                                                        .fontSizeBodyLarge,
+                                                    fontWeight: MedRushTheme
+                                                        .fontWeightBold,
+                                                    color: _pedido!
+                                                                .tipoPedido ==
+                                                            TipoPedido
+                                                                .medicamentosControlados
+                                                        ? Colors.red
+                                                        : MedRushTheme
+                                                            .primaryGreen,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    border: Border.all(
-                                      color: MedRushTheme.borderLight,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
+                                    if (_pedido!.requiereFirmaEspecial) ...[
+                                      const SizedBox(
+                                          height: MedRushTheme.spacingMd),
                                       Container(
-                                        width: 40,
-                                        height: 40,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: MedRushTheme.spacingMd,
+                                          vertical: MedRushTheme.spacingSm,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: MedRushTheme.primaryGreen
+                                          color: MedRushTheme.specialSignature
                                               .withValues(alpha: 0.12),
                                           borderRadius:
-                                              BorderRadius.circular(10),
+                                              BorderRadius.circular(14),
+                                          border: Border.all(
+                                            color: MedRushTheme.specialSignature
+                                                .withValues(alpha: 0.3),
+                                          ),
                                         ),
-                                        child: Icon(
-                                          _pedido!.tipoPedido ==
-                                                  TipoPedido
-                                                      .medicamentosControlados
-                                              ? LucideIcons.shieldAlert
-                                              : LucideIcons.clipboardList,
-                                          size: 22,
-                                          color: _pedido!.tipoPedido ==
-                                                  TipoPedido
-                                                      .medicamentosControlados
-                                              ? Colors.red
-                                              : MedRushTheme.primaryGreen,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: MedRushTheme.spacingMd,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(
-                                              AppLocalizations.of(context).orderTypeLabel,
-                                              style: const TextStyle(
-                                                fontSize: MedRushTheme
-                                                    .fontSizeTitleMedium,
-                                                fontWeight: MedRushTheme
-                                                    .fontWeightSemiBold,
-                                                color: MedRushTheme.textPrimary,
-                                              ),
+                                            const Icon(
+                                              LucideIcons.pencil,
+                                              size: 18,
+                                              color:
+                                                  MedRushTheme.specialSignature,
                                             ),
                                             const SizedBox(
-                                              height: MedRushTheme.spacingXs,
+                                              width: MedRushTheme.spacingSm,
                                             ),
                                             Text(
-                                              StatusHelpers.tipoPedidoTexto(
-                                                  _pedido!.tipoPedido, AppLocalizations.of(context)),
-                                              style: TextStyle(
-                                                fontSize: MedRushTheme
-                                                    .fontSizeBodyLarge,
+                                              AppLocalizations.of(context)
+                                                  .requiresSpecialSignature,
+                                              style: const TextStyle(
+                                                color: MedRushTheme
+                                                    .specialSignature,
                                                 fontWeight:
                                                     MedRushTheme.fontWeightBold,
-                                                color: _pedido!.tipoPedido ==
-                                                        TipoPedido
-                                                            .medicamentosControlados
-                                                    ? Colors.red
-                                                    : MedRushTheme.primaryGreen,
+                                                fontSize: MedRushTheme
+                                                    .fontSizeBodyMedium,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                                if (_pedido!.requiereFirmaEspecial) ...[
-                                  const SizedBox(
-                                      height: MedRushTheme.spacingMd),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: MedRushTheme.spacingMd,
-                                      vertical: MedRushTheme.spacingSm,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: MedRushTheme.specialSignature
-                                          .withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                        color: MedRushTheme.specialSignature
-                                            .withValues(alpha: 0.3),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          LucideIcons.pencil,
-                                          size: 18,
-                                          color: MedRushTheme.specialSignature,
-                                        ),
-                                        const SizedBox(
-                                          width: MedRushTheme.spacingSm,
-                                        ),
-                                        Text(
-                                          AppLocalizations.of(context).requiresSpecialSignature,
-                                          style: const TextStyle(
-                                            color:
-                                                MedRushTheme.specialSignature,
-                                            fontWeight:
-                                                MedRushTheme.fontWeightBold,
-                                            fontSize:
-                                                MedRushTheme.fontSizeBodyMedium,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ]),
+                                  ]),
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -775,67 +845,77 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               if (_pedido!.firmaDigitalUrl != null &&
                                   _pedido!.firmaDigitalUrl!.isNotEmpty)
                                 _buildInfoSection(
-                                    AppLocalizations.of(context).digitalSignatureLabel, [
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(
-                                        MedRushTheme.spacingMd),
-                                    decoration: BoxDecoration(
-                                      color: MedRushTheme.backgroundPrimary,
-                                      borderRadius: BorderRadius.circular(
-                                          MedRushTheme.borderRadiusMd),
-                                      border: Border.all(
-                                          color: MedRushTheme.borderLight),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
+                                    AppLocalizations.of(context)
+                                        .digitalSignatureLabel,
+                                    [
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(
+                                            MedRushTheme.spacingMd),
+                                        decoration: BoxDecoration(
+                                          color: MedRushTheme.backgroundPrimary,
+                                          borderRadius: BorderRadius.circular(
+                                              MedRushTheme.borderRadiusMd),
+                                          border: Border.all(
+                                              color: MedRushTheme.borderLight),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            const Icon(
-                                              LucideIcons.pencil,
-                                              color: MedRushTheme.primaryGreen,
-                                              size: 18,
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  LucideIcons.pencil,
+                                                  color:
+                                                      MedRushTheme.primaryGreen,
+                                                  size: 18,
+                                                ),
+                                                const SizedBox(
+                                                    width:
+                                                        MedRushTheme.spacingSm),
+                                                Text(
+                                                  AppLocalizations.of(context)
+                                                      .signatureCaptured,
+                                                  style: const TextStyle(
+                                                    fontSize: MedRushTheme
+                                                        .fontSizeBodyMedium,
+                                                    fontWeight: MedRushTheme
+                                                        .fontWeightMedium,
+                                                    color: MedRushTheme
+                                                        .textPrimary,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             const SizedBox(
-                                                width: MedRushTheme.spacingSm),
-                                            Text(
-                                              AppLocalizations.of(context).signatureCaptured,
-                                              style: const TextStyle(
-                                                fontSize: MedRushTheme
-                                                    .fontSizeBodyMedium,
-                                                fontWeight: MedRushTheme
-                                                    .fontWeightMedium,
-                                                color: MedRushTheme.textPrimary,
+                                                height: MedRushTheme.spacingSm),
+                                            Container(
+                                              width: double.infinity,
+                                              height: 120,
+                                              decoration: BoxDecoration(
+                                                color: MedRushTheme
+                                                    .backgroundSecondary,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        MedRushTheme
+                                                            .borderRadiusSm),
+                                                border: Border.all(
+                                                    color: MedRushTheme
+                                                        .borderLight),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        MedRushTheme
+                                                            .borderRadiusSm),
+                                                child: _buildFirmaImage(),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(
-                                            height: MedRushTheme.spacingSm),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 120,
-                                          decoration: BoxDecoration(
-                                            color: MedRushTheme
-                                                .backgroundSecondary,
-                                            borderRadius: BorderRadius.circular(
-                                                MedRushTheme.borderRadiusSm),
-                                            border: Border.all(
-                                                color:
-                                                    MedRushTheme.borderLight),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                                MedRushTheme.borderRadiusSm),
-                                            child: _buildFirmaImage(),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ]),
+                                      ),
+                                    ]),
 
                               const SizedBox(height: MedRushTheme.spacingLg),
 
@@ -910,7 +990,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context).deliveryNotFoundWithId(widget.pedidoId),
+            AppLocalizations.of(context)
+                .deliveryNotFoundWithId(widget.pedidoId),
             style: const TextStyle(
               color: MedRushTheme.textSecondary,
               fontSize: MedRushTheme.fontSizeBodyMedium,

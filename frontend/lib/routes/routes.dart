@@ -6,7 +6,7 @@ import 'package:medrush/screens/admin/configuracion_admin.dart';
 import 'package:medrush/screens/admin/modules/farmacias/farmacia_detalle.dart';
 import 'package:medrush/screens/admin/modules/farmacias/farmacia_form.dart';
 import 'package:medrush/screens/login_screen.dart';
-import 'package:medrush/screens/register_screen.dart';
+
 import 'package:medrush/screens/repartidor/barcode_repartidor.dart';
 import 'package:medrush/screens/repartidor/firma_screen.dart';
 import 'package:medrush/screens/repartidor/historial_repartidor.dart';
@@ -20,7 +20,6 @@ import 'package:medrush/services/notification_service.dart';
 class AppRoutes {
   // Rutas principales
   static const String login = '/login';
-  static const String register = '/register';
 
   // Rutas de Administrador
   static const String adminDashboard = '/admin/dashboard';
@@ -50,7 +49,6 @@ class AppRoutes {
     return {
       // Ruta principal de login
       login: (context) => const LoginScreen(),
-      register: (context) => const RegisterScreen(),
 
       // Rutas de Administrador
       adminDashboard: (context) => const AdminMainScreen(),

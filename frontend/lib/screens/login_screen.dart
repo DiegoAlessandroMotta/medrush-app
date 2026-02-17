@@ -6,13 +6,12 @@ import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/endpoint_manager.dart';
 import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/providers/auth.provider.dart';
-import 'package:medrush/repositories/apk.repository.dart';
+
 import 'package:medrush/routes/routes.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
 import 'package:medrush/utils/validators.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,7 +34,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _connectionError;
 
   // Repositorio para manejo de APK
-  final _apkRepository = ApkRepository();
 
   @override
   void initState() {
@@ -111,8 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isServerConnected = false;
           _isCheckingConnection = false;
-          _connectionError =
-              AppLocalizations.of(context).connectionError(e);
+          _connectionError = AppLocalizations.of(context).connectionError(e);
         });
       }
     }
@@ -134,59 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
       // Navegar según el rol del usuario
       final userRole = authProvider.userRole;
       AppRoutes.navigateByRole(context, userRole);
-    }
-  }
-
-  Future<void> _downloadApk() async {
-    try {
-      // Mostrar indicador de carga
-      if (mounted) {
-        NotificationService.showInfo(
-          AppLocalizations.of(context).obtainingDownloadLink,
-          context: context,
-        );
-      }
-
-      // Obtener URL de descarga usando el repositorio
-      final result = await _apkRepository.getDownloadUrl();
-
-      if (!result.success) {
-        if (mounted) {
-          NotificationService.showError(
-            result.error ??
-                AppLocalizations.of(context).couldNotGetDownloadLink,
-            context: context,
-          );
-        }
-        return;
-      }
-
-      final url = Uri.parse(result.data!);
-
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-
-        if (mounted) {
-          NotificationService.showSuccess(
-            AppLocalizations.of(context).downloadStarted,
-            context: context,
-          );
-        }
-      } else {
-        if (mounted) {
-          NotificationService.showError(
-            AppLocalizations.of(context).couldNotOpenDownloadLink,
-            context: context,
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        NotificationService.showError(
-          AppLocalizations.of(context).errorDownloadingApk(e),
-          context: context,
-        );
-      }
     }
   }
 
@@ -252,29 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // ignore: prefer_const_literals_to_create_immutables
         actions: [
           // Botón de descarga APK solo visible en web
-          if (kIsWeb)
-            Padding(
-              padding: const EdgeInsets.only(right: MedRushTheme.spacingMd),
-              child: IconButton(
-                onPressed: _downloadApk,
-                icon: const Icon(
-                  LucideIcons.download,
-                  color: MedRushTheme.primaryGreen,
-                  size: 24,
-                ),
-                tooltip: l10n.downloadApkTooltip,
-                style: IconButton.styleFrom(
-                  backgroundColor:
-                      MedRushTheme.primaryGreen.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(MedRushTheme.borderRadiusMd),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
       body: DecoratedBox(
@@ -646,8 +570,8 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                AppLocalizations.of(context).connectedToServer(
-                    EndpointManager.currentBaseUrl),
+                AppLocalizations.of(context)
+                    .connectedToServer(EndpointManager.currentBaseUrl),
                 style: TextStyle(
                   color: Colors.green.shade700,
                   fontSize: MedRushTheme.fontSizeBodySmall,

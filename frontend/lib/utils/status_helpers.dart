@@ -83,7 +83,8 @@ class StatusHelpers {
   }
 
   // ===== Repartidor =====
-  static String estadoRepartidorTexto(EstadoRepartidor estado, AppLocalizations l10n) {
+  static String estadoRepartidorTexto(
+      EstadoRepartidor estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoRepartidor.disponible:
         return l10n.driverStatusAvailable;
@@ -121,7 +122,8 @@ class StatusHelpers {
   }
 
   // ===== Farmacia =====
-  static String estadoFarmaciaTexto(EstadoFarmacia estado, AppLocalizations l10n) {
+  static String estadoFarmaciaTexto(
+      EstadoFarmacia estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoFarmacia.activa:
         return l10n.pharmacyStatusActive;
@@ -275,7 +277,8 @@ class StatusHelpers {
   }
 
   /// Formatea una fecha relativa optimizada (solo muestra año si es diferente al actual)
-  static String formatearFechaRelativaOptimizada(DateTime fecha, AppLocalizations l10n) {
+  static String formatearFechaRelativaOptimizada(
+      DateTime fecha, AppLocalizations l10n) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final fechaComparar = DateTime(fecha.year, fecha.month, fecha.day);
@@ -501,7 +504,7 @@ class StatusHelpers {
   // ===== Formateo de Tiempo =====
 
   /// Formatea tiempo en minutos a horas y minutos
-  static String formatearTiempo(int minutos) {
+  static String formatearTiempo(int minutos, {AppLocalizations? l10n}) {
     // Si el tiempo es muy grande (probablemente en segundos), convertir a minutos
     int minutosFinales = minutos;
     if (minutos > 1440) {
@@ -510,10 +513,8 @@ class StatusHelpers {
     }
 
     // Validar que el tiempo sea razonable (máximo 24 horas = 1440 minutos)
-    // Nota: Este método necesita AppLocalizations pero se mantiene sin l10n por compatibilidad
-    // Se puede mejorar en el futuro para recibir l10n como parámetro
     if (minutosFinales > 1440) {
-      return 'Tiempo inválido'; // TODO: Localizar cuando se añada l10n como parámetro
+      return l10n?.invalidTime ?? 'Tiempo inválido';
     }
 
     final horas = minutosFinales ~/ 60;
@@ -633,7 +634,8 @@ class StatusHelpers {
   /// Obtiene la fecha más relevante según el sistema de prioridad:
   /// Prioridad 1: fechaEntrega > Prioridad 2: fechaRecogida > Prioridad 3: fechaAsignacion
   /// Si no hay fechas disponibles, retorna un mensaje descriptivo según el estado
-  static String obtenerFechaSegunPrioridad(Pedido pedido, AppLocalizations l10n) {
+  static String obtenerFechaSegunPrioridad(
+      Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaCompletaOptimizada(pedido.fechaEntrega!);
@@ -654,8 +656,8 @@ class StatusHelpers {
   }
 
   /// Obtiene la fecha más relevante con formato personalizado
-  static String obtenerFechaSegunPrioridadConFormato(
-      Pedido pedido, String Function(DateTime) formateador, AppLocalizations l10n) {
+  static String obtenerFechaSegunPrioridadConFormato(Pedido pedido,
+      String Function(DateTime) formateador, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formateador(pedido.fechaEntrega!);
@@ -676,7 +678,8 @@ class StatusHelpers {
   }
 
   /// Obtiene solo la fecha (sin hora) según el sistema de prioridad
-  static String obtenerFechaSegunPrioridadSoloFecha(Pedido pedido, AppLocalizations l10n) {
+  static String obtenerFechaSegunPrioridadSoloFecha(
+      Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaAPI(pedido.fechaEntrega!);
@@ -697,7 +700,8 @@ class StatusHelpers {
   }
 
   /// Obtiene la fecha relativa según el sistema de prioridad
-  static String obtenerFechaRelativaSegunPrioridad(Pedido pedido, AppLocalizations l10n) {
+  static String obtenerFechaRelativaSegunPrioridad(
+      Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaRelativaMejorada(pedido.fechaEntrega!);
@@ -718,7 +722,8 @@ class StatusHelpers {
   }
 
   /// Obtiene la fecha relativa optimizada según el sistema de prioridad (solo muestra año si es diferente al actual)
-  static String obtenerFechaRelativaSegunPrioridadOptimizada(Pedido pedido, AppLocalizations l10n) {
+  static String obtenerFechaRelativaSegunPrioridadOptimizada(
+      Pedido pedido, AppLocalizations l10n) {
     // Prioridad 1: fechaEntrega (si existe)
     if (pedido.fechaEntrega != null) {
       return formatearFechaRelativaOptimizada(pedido.fechaEntrega!, l10n);
@@ -781,7 +786,8 @@ class StatusHelpers {
   }
 
   /// Obtiene mensaje fallback según el estado del pedido
-  static String _obtenerMensajeFallbackPorEstado(EstadoPedido estado, AppLocalizations l10n) {
+  static String _obtenerMensajeFallbackPorEstado(
+      EstadoPedido estado, AppLocalizations l10n) {
     switch (estado) {
       case EstadoPedido.pendiente:
         return l10n.noDate;

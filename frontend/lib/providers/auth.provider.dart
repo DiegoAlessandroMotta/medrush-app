@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:medrush/api/auth.api.dart';
 import 'package:medrush/api/base.api.dart';
 import 'package:medrush/api/fcm.api.dart';
+import 'package:medrush/api/repartidores.api.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/services/fcm_service.dart';
 import 'package:medrush/services/location_tracker.dart';
@@ -173,11 +174,14 @@ class AuthProvider extends ChangeNotifier {
         // Guardar el email para el próximo login
         await BaseApi.storeLastUsedEmail(email);
 
-        // TODO: Implementar actualización de estado del repartidor cuando el backend lo soporte
-        // Por ahora, solo log ya que no hay endpoint para esto
         if (_usuario?.esRepartidor == true) {
-          logInfo(
-              '👤 Usuario repartidor logueado - estado no actualizado (endpoint no implementado)');
+          try {
+            await RepartidoresApi.updateEstadoRepartidor(
+                _usuario!.id, 'disponible');
+            logInfo('👤 Estado del repartidor actualizado a disponible');
+          } catch (e) {
+            logError('❌ Error al actualizar estado del repartidor', e);
+          }
         }
 
         _setState(AuthState.authenticated);
@@ -203,10 +207,14 @@ class AuthProvider extends ChangeNotifier {
       // Obtener token actual antes de limpiar
       final token = await BaseApi.getToken();
 
-      // TODO: Implementar actualización de estado del repartidor cuando el backend lo soporte
       if (_usuario?.esRepartidor == true) {
-        logInfo(
-            '👤 Usuario repartidor cerrando sesión - estado no actualizado (endpoint no implementado)');
+        try {
+          await RepartidoresApi.updateEstadoRepartidor(
+              _usuario!.id, 'desconectado');
+          logInfo('👤 Estado del repartidor actualizado a desconectado');
+        } catch (e) {
+          logError('❌ Error al actualizar estado del repartidor al salir', e);
+        }
       }
 
       // Detener tracking de ubicación
@@ -306,8 +314,25 @@ class AuthProvider extends ChangeNotifier {
         email: email,
       );
 
-      // TODO: Implementar actualización de perfil cuando el backend soporte endpoint /usuarios/{id}
-      // Por ahora, solo actualizamos localmente
+      // Si es repartidor, actualizar en el backend
+      if (_usuario!.esRepartidor) {
+        final result = await RepartidoresApi.updateRepartidor(
+          usuarioActualizado,
+          emailOriginal: _usuario!.email,
+        );
+
+        if (result != null) {
+          _usuario = result;
+          await _saveUserData(_usuario!);
+          notifyListeners();
+          return true;
+        } else {
+          _setError('No se pudo actualizar el perfil en el servidor');
+          return false;
+        }
+      }
+
+      // Por ahora, solo actualizamos localmente para no repartidores
       _usuario = usuarioActualizado;
 
       await _saveUserData(_usuario!);

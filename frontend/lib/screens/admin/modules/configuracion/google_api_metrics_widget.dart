@@ -43,6 +43,111 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
     }
   }
 
+  void _showCostInfoDialog() {
+    if (_stats == null) {
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).costPerRequest),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _stats!.services
+                .map((s) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              s.serviceName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            s.formattedCostPerRequest,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showServiceCostDetail(GoogleApiServiceDto service) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(service.serviceName, style: const TextStyle(fontSize: 18)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDetailRow(
+              AppLocalizations.of(context).requestsLabel,
+              service.totalRequests.toString(),
+            ),
+            const SizedBox(height: 4),
+            _buildDetailRow(
+              AppLocalizations.of(context).costPerRequest,
+              'x ${service.formattedCostPerRequest}',
+              color: MedRushTheme.textSecondary,
+            ),
+            const Divider(height: 16, thickness: 1),
+            _buildDetailRow(
+              AppLocalizations.of(context).totalCost,
+              service.formattedCost,
+              isBold: true,
+              color: MedRushTheme.primaryGreen,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value,
+      {bool isBold = false, Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: MedRushTheme.textPrimary,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            color: color ?? MedRushTheme.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -93,6 +198,12 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                     color: MedRushTheme.textPrimary,
                   ),
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.help_outline,
+                    size: 18, color: MedRushTheme.textSecondary),
+                onPressed: _showCostInfoDialog,
+                tooltip: AppLocalizations.of(context).costPerRequest,
               ),
               IconButton(
                 icon: const Icon(LucideIcons.refreshCw,
@@ -342,26 +453,12 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                   isMobile,
                 ),
                 const SizedBox(height: MedRushTheme.spacingSm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildServiceMetric(
-                        AppLocalizations.of(context).costPerRequest,
-                        service.formattedCostPerRequest,
-                        LucideIcons.dollarSign,
-                        isMobile,
-                      ),
-                    ),
-                    const SizedBox(width: MedRushTheme.spacingSm),
-                    Expanded(
-                      child: _buildServiceMetric(
-                        AppLocalizations.of(context).totalCost,
-                        service.formattedCost,
-                        LucideIcons.calculator,
-                        isMobile,
-                      ),
-                    ),
-                  ],
+                _buildServiceMetric(
+                  AppLocalizations.of(context).totalCost,
+                  service.formattedCost,
+                  LucideIcons.calculator,
+                  isMobile,
+                  onTap: () => _showServiceCostDetail(service),
                 ),
               ],
             )
@@ -378,18 +475,11 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                 ),
                 Expanded(
                   child: _buildServiceMetric(
-                    AppLocalizations.of(context).costPerRequest,
-                    service.formattedCostPerRequest,
-                    LucideIcons.dollarSign,
-                    isMobile,
-                  ),
-                ),
-                Expanded(
-                  child: _buildServiceMetric(
                     AppLocalizations.of(context).totalCost,
                     service.formattedCost,
                     LucideIcons.calculator,
                     isMobile,
+                    onTap: () => _showServiceCostDetail(service),
                   ),
                 ),
               ],
@@ -400,8 +490,9 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
   }
 
   Widget _buildServiceMetric(
-      String label, String value, IconData icon, bool isMobile) {
-    return Column(
+      String label, String value, IconData icon, bool isMobile,
+      {VoidCallback? onTap}) {
+    Widget content = Column(
       children: [
         Icon(icon, color: MedRushTheme.textSecondary, size: isMobile ? 14 : 16),
         SizedBox(height: isMobile ? 2 : MedRushTheme.spacingXs),
@@ -413,6 +504,9 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
                 : MedRushTheme.fontSizeBodyMedium,
             fontWeight: MedRushTheme.fontWeightMedium,
             color: MedRushTheme.textPrimary,
+            decoration: onTap != null ? TextDecoration.underline : null,
+            decorationColor: MedRushTheme.textSecondary,
+            decorationStyle: TextDecorationStyle.dotted,
           ),
         ),
         SizedBox(height: isMobile ? 2 : MedRushTheme.spacingXs),
@@ -428,6 +522,15 @@ class _GoogleApiMetricsWidgetState extends State<GoogleApiMetricsWidget> {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: content,
+      );
+    }
+    return content;
   }
 
   Widget _buildEmptyState() {

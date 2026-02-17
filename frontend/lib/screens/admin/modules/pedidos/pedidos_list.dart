@@ -1,13 +1,16 @@
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart'; // import
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/pedido.model.dart';
 import 'package:medrush/models/usuario.model.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
 import 'package:medrush/repositories/repartidor.repository.dart';
+import 'package:medrush/services/location_tracker.dart'; // import
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
+import 'package:medrush/utils/loggers.dart'; // import
 import 'package:medrush/utils/status_helpers.dart';
 import 'package:medrush/utils/url_launcher_helper.dart';
 import 'package:shimmer/shimmer.dart';
@@ -97,7 +100,8 @@ class PedidosTableView extends StatelessWidget {
             child: _buildHeaderCell(AppLocalizations.of(context).date),
           ),
           Expanded(
-            child: _buildCenteredHeaderCell(AppLocalizations.of(context).actions),
+            child:
+                _buildCenteredHeaderCell(AppLocalizations.of(context).actions),
           ),
         ],
       ),
@@ -269,7 +273,8 @@ class PedidosTableView extends StatelessWidget {
           // Texto del estado
           Builder(
             builder: (context) => Text(
-              StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+              StatusHelpers.estadoPedidoTexto(
+                  estado, AppLocalizations.of(context)),
               style: const TextStyle(
                 color: MedRushTheme.textInverse,
                 fontSize: MedRushTheme.fontSizeLabelSmall,
@@ -303,7 +308,9 @@ class PedidosTableView extends StatelessWidget {
                 onView(pedido);
               }
             },
-            tooltip: esPendiente ? AppLocalizations.of(context).assignDriver : AppLocalizations.of(context).viewDetails,
+            tooltip: esPendiente
+                ? AppLocalizations.of(context).assignDriver
+                : AppLocalizations.of(context).viewDetails,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -324,7 +331,9 @@ class PedidosTableView extends StatelessWidget {
                 onEdit(pedido);
               }
             },
-            tooltip: esPendiente ? AppLocalizations.of(context).viewDetails : AppLocalizations.of(context).edit,
+            tooltip: esPendiente
+                ? AppLocalizations.of(context).viewDetails
+                : AppLocalizations.of(context).edit,
             padding: const EdgeInsets.all(4),
             constraints: const BoxConstraints(
               minWidth: 32,
@@ -532,12 +541,14 @@ class PedidosTableView extends StatelessWidget {
   /// Obtiene la fecha correspondiente según el estado del pedido
   /// Usa el sistema de prioridad centralizado de StatusHelpers
   String _getFechaSegunEstado(Pedido pedido, BuildContext context) {
-    return StatusHelpers.obtenerFechaSegunPrioridad(pedido, AppLocalizations.of(context));
+    return StatusHelpers.obtenerFechaSegunPrioridad(
+        pedido, AppLocalizations.of(context));
   }
 
   Widget _buildFechaCell(BuildContext context, Pedido pedido) {
     final fechaTexto = _getFechaSegunEstado(pedido, context);
-    final tipoFecha = StatusHelpers.obtenerTipoFechaMostrada(pedido, AppLocalizations.of(context));
+    final tipoFecha = StatusHelpers.obtenerTipoFechaMostrada(
+        pedido, AppLocalizations.of(context));
 
     return Tooltip(
       message: AppLocalizations.of(context).dateOfType(tipoFecha),
@@ -576,9 +587,8 @@ class PedidosTableView extends StatelessWidget {
 
     // Si hay coordenadas, hacer clickeable para abrir Google Maps
     return InkWell(
-      onTap: () =>
-          UrlLauncherHelper.openGoogleMapsPlace(
-              pedido.latitudEntrega!, pedido.longitudEntrega!),
+      onTap: () => UrlLauncherHelper.openGoogleMapsPlace(
+          pedido.latitudEntrega!, pedido.longitudEntrega!),
       borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusSm),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -723,7 +733,8 @@ class PedidosTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context).confirmDeleteOrderQuestion(pedido.id),
+              AppLocalizations.of(context)
+                  .confirmDeleteOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -860,7 +871,8 @@ class PedidosTableView extends StatelessWidget {
                   Expanded(
                     child: repartidores.isEmpty
                         ? Center(
-                            child: Text(AppLocalizations.of(context).noActiveDrivers))
+                            child: Text(
+                                AppLocalizations.of(context).noActiveDrivers))
                         : ListView.builder(
                             itemCount: repartidores.length,
                             itemBuilder: (context, index) {
@@ -906,7 +918,8 @@ class PedidosTableView extends StatelessWidget {
                   }
                   if (result.success && context.mounted) {
                     NotificationService.showSuccess(
-                      AppLocalizations.of(context).orderAssignedToName(seleccionado!.nombre),
+                      AppLocalizations.of(context)
+                          .orderAssignedToName(seleccionado!.nombre),
                       context: context,
                     );
                     onRefresh();
@@ -1126,7 +1139,8 @@ class PedidosTableView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context).confirmCancelOrderQuestion(pedido.id),
+              AppLocalizations.of(context)
+                  .confirmCancelOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -1226,7 +1240,8 @@ class PedidosTableView extends StatelessWidget {
         // Mostrar mensaje de error
         if (context.mounted) {
           NotificationService.showError(
-            AppLocalizations.of(context).errorCancelingOrder(result.error ?? ''),
+            AppLocalizations.of(context)
+                .errorCancelingOrder(result.error ?? ''),
             context: context,
           );
         }
@@ -1276,7 +1291,8 @@ class PedidosTableView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context).selectFailureReasonForOrder(pedido.id),
+                  AppLocalizations.of(context)
+                      .selectFailureReasonForOrder(pedido.id),
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     color: MedRushTheme.textPrimary,
@@ -1302,7 +1318,8 @@ class PedidosTableView extends StatelessWidget {
                             size: 16,
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
-                          Text(StatusHelpers.motivoFallaTexto(motivo, AppLocalizations.of(context))),
+                          Text(StatusHelpers.motivoFallaTexto(
+                              motivo, AppLocalizations.of(context))),
                         ],
                       ),
                     );
@@ -1319,7 +1336,8 @@ class PedidosTableView extends StatelessWidget {
                 TextFormField(
                   controller: observacionesController,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).observationsOptionalLabel,
+                    labelText:
+                        AppLocalizations.of(context).observationsOptionalLabel,
                     border: const OutlineInputBorder(),
                     hintText: AppLocalizations.of(context).failureDetailsHint,
                   ),
@@ -1406,10 +1424,28 @@ class PedidosTableView extends StatelessWidget {
         ),
       );
 
-      // Obtener ubicación actual (simulada por ahora)
-      // TODO: Implementar obtención real de ubicación GPS
-      const double latitud = 26.037737; // EEUU
-      const double longitud = -80.179550;
+      // Obtener ubicación actual
+      double latitud = 26.037737; // Default fallback (EEUU)
+      double longitud = -80.179550;
+
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 5),
+          ),
+        );
+        latitud = position.latitude;
+        longitud = position.longitude;
+      } catch (e) {
+        logWarning('⚠️ No se pudo obtener ubicación GPS precisa: $e');
+        // Intentar usar última conocida del servicio si existe
+        final last = LocationTrackerService.instance.lastPosition;
+        if (last != null) {
+          latitud = last.latitude;
+          longitud = last.longitude;
+        }
+      }
 
       // Crear repositorio
       final repository = PedidoRepository();
@@ -1435,7 +1471,8 @@ class PedidosTableView extends StatelessWidget {
       if (result.success) {
         if (context.mounted) {
           NotificationService.showSuccess(
-            AppLocalizations.of(context).orderMarkedFailedSuccess(pedido.id.toString()),
+            AppLocalizations.of(context)
+                .orderMarkedFailedSuccess(pedido.id.toString()),
             context: context,
           );
         }
@@ -1443,7 +1480,8 @@ class PedidosTableView extends StatelessWidget {
       } else {
         if (context.mounted) {
           NotificationService.showError(
-            AppLocalizations.of(context).errorMarkingOrderFailed(result.error ?? ''),
+            AppLocalizations.of(context)
+                .errorMarkingOrderFailed(result.error ?? ''),
             context: context,
           );
         }
