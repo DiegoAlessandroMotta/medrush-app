@@ -15,8 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libwebp-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql mbstring xml zip bcmath gd \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Composer
