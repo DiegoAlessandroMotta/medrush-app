@@ -129,13 +129,13 @@ class ProcessPedidosCsv implements ShouldQueue
           );
 
           if ($validatedData['ubicacion_recojo'] !== null) {
-            $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_recojo']));
+            $validatedData['ubicacion_recojo'] = AsPoint::toMySqlRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_recojo']));
           } else {
-            $validatedData['ubicacion_recojo'] = AsPoint::toRawExpression(AsPoint::pointFromArray($this->ubicacionRecojo));
+            $validatedData['ubicacion_recojo'] = AsPoint::toMySqlRawExpression(AsPoint::pointFromArray($this->ubicacionRecojo));
           }
 
           if (isset($validatedData['ubicacion_entrega']) && $validatedData['ubicacion_entrega'] !== null) {
-            $validatedData['ubicacion_entrega'] = AsPoint::toRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_entrega']));
+            $validatedData['ubicacion_entrega'] = AsPoint::toMySqlRawExpression(AsPoint::pointFromArray($validatedData['ubicacion_entrega']));
           } else {
             $validatedData['ubicacion_entrega'] = null;
           }
