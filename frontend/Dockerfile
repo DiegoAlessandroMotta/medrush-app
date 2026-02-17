@@ -12,10 +12,11 @@ COPY pubspec.* ./
 RUN flutter pub get
 COPY . .
 # No usar --wasm: por defecto se compila a JavaScript (dart2js). Máxima compatibilidad.
+# Usamos --pwa-strategy=none para desactivar el Service Worker y evitar problemas de caché (versión fantasma).
 RUN if [ -n "$API_BASE_URL" ]; then \
-      flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL"; \
+      flutter build web --release --pwa-strategy=none --dart-define=API_BASE_URL="$API_BASE_URL"; \
     else \
-      flutter build web --release; \
+      flutter build web --release --pwa-strategy=none; \
     fi
 
 # Stage 2: Serve with Nginx
