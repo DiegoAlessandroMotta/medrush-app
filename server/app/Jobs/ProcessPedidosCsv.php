@@ -122,7 +122,7 @@ class ProcessPedidosCsv implements ShouldQueue
         } else {
           $validatedData = $validator->validated();
 
-          $validatedData['id'] = Str::orderedUuid();
+          $validatedData['id'] = Str::orderedUuid()->toString();
 
           $validatedData['codigo_barra'] = OrderCodeGenerator::generateOrderCode(
             offset: $csvRowIndex,
@@ -190,7 +190,7 @@ class ProcessPedidosCsv implements ShouldQueue
 
     try {
       $dataToInsert = $records->map(function ($record) {
-        $now = now();
+        $now = now()->toDateTimeString();
         return array_merge($record, [
           'created_at' => $now,
           'updated_at' => $now,
