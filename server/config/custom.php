@@ -3,7 +3,7 @@
 return [
 
   'admin' => [
-    'email' => env('ADMIN_MAIL', 'admin@example.com'),
+    'email' => env('ADMIN_MAIL', 'admin@medrush.cc'),
     'password' => env('ADMIN_PASSWORD', 'password'),
   ],
 

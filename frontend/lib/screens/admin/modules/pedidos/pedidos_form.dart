@@ -95,7 +95,9 @@ class _EntregasFormState extends State<EntregasForm> {
   void initState() {
     super.initState();
     _initializeData();
-    _loadDropdownData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDropdownData();
+    });
   }
 
   @override
