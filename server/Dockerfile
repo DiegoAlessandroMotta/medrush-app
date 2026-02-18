@@ -1,52 +1,29 @@
-# Backend Laravel - MedRush API
-# En VPS: montar volumen persistente para imagenes/archivos/firmas, ej.:
-#   -v /ruta/en/vps/medrush-storage:/var/www/html/storage
-FROM php:8.2-cli
+FROM php:8.2-fpm-bookworm
 
-# System deps + PHP extensions (gd con WebP para avatares, fotos entrega, firmas, etc.)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    unzip \
-    curl \
-    libzip-dev \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libwebp-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip bcmath gd \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
-# Composer
+RUN apt-get update && apt-get install -y \
+  libpng-dev libpq-dev libzip-dev zip unzip git curl \
+  libmagickwand-dev --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN usermod -u ${USER_ID} www-data && groupmod -g ${GROUP_ID} www-data
+RUN docker-php-ext-install pdo_pgsql pgsql zip gd bcmath intl pcntl
+RUN pecl install imagick && docker-php-ext-enable imagick
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-ENV COMPOSER_ALLOW_SUPERUSER=1
 
-WORKDIR /var/www/html
+RUN mkdir -p /var/www/laravel-app && chown www-data:www-data /var/www/laravel-app
+WORKDIR /var/www/laravel-app
 
-# Dependencies
-COPY composer.json composer.lock ./
+USER www-data
+
+COPY --chown=www-data:www-data composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
-COPY . .
+COPY --chown=www-data:www-data . .
 
-# Entrypoint: migrate + seed + serve (todo listo al arrancar)
-COPY docker/entrypoint.sh /entrypoint.sh
-COPY docker/entrypoint-worker.sh /entrypoint-worker.sh
-RUN chmod +x /entrypoint.sh /entrypoint-worker.sh
+RUN composer dump-autoload --optimize
 
-RUN composer dump-autoload --optimize \
-    && (php artisan config:clear || true) \
-    && mkdir -p storage/framework/{cache,sessions,views} \
-    && mkdir -p storage/logs bootstrap/cache \
-    && mkdir -p storage/app/private_uploads storage/app/private storage/temp \
-    && chmod -R 775 storage bootstrap/cache
-
-EXPOSE 8000
-
-HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8000/api/health || exit 1
-
-ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE 9000

@@ -25,6 +25,7 @@ Thumbs.db
 _ide_helper.php
 .temp
 
-# Service account JSON (INCLUIDO POR SOLICITUD)
-# /storage/services/google/service-account.json
-# neat-episode-*.json
+# Service account JSON (no subir a GitHub)
+/storage/services/google/service-account.json
+neat-episode-*.json
+docker-compose.override.yml
