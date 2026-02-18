@@ -117,7 +117,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
       } else {
         setState(() {
           _error = result.error ??
-            AppLocalizations.of(context).errorLoadingOrdersUnknown;
+              AppLocalizations.of(context).errorLoadingOrdersUnknown;
           _isLoading = false;
         });
         logError('Error al cargar pedidos: ${result.error}');
@@ -182,7 +182,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 heroTag: 'fab_print_barcodes',
                 onPressed: _mostrarPantallaImpresion,
                 backgroundColor: MedRushTheme.primaryBlue,
-                tooltip: AppLocalizations.of(context).printShippingLabelsTooltip,
+                tooltip:
+                    AppLocalizations.of(context).printShippingLabelsTooltip,
                 child: const Icon(LucideIcons.printer),
               ),
             ),
@@ -353,7 +354,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
               },
               decoration: InputDecoration(
                 filled: false,
-                hintText: AppLocalizations.of(context).searchOrdersByClientCodePhone,
+                hintText:
+                    AppLocalizations.of(context).searchOrdersByClientCodePhone,
                 hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -444,7 +446,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                             Expanded(
                               child: Builder(
                                 builder: (context) => Text(
-                                  StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+                                  StatusHelpers.estadoPedidoTexto(
+                                      estado, AppLocalizations.of(context)),
                                   style: const TextStyle(
                                     fontSize: MedRushTheme.fontSizeBodyMedium,
                                     color: MedRushTheme.textPrimary,
@@ -694,7 +697,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
               },
               decoration: InputDecoration(
                 filled: false,
-                hintText: AppLocalizations.of(context).searchOrdersByClientCodePhone,
+                hintText:
+                    AppLocalizations.of(context).searchOrdersByClientCodePhone,
                 hintStyle: const TextStyle(
                   color: MedRushTheme.textSecondary,
                   fontSize: MedRushTheme.fontSizeBodyMedium,
@@ -783,7 +787,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                               Expanded(
                                 child: Builder(
                                   builder: (context) => Text(
-                                    StatusHelpers.estadoPedidoTexto(estado, AppLocalizations.of(context)),
+                                    StatusHelpers.estadoPedidoTexto(
+                                        estado, AppLocalizations.of(context)),
                                     style: const TextStyle(
                                       fontSize: MedRushTheme.fontSizeBodyMedium,
                                       color: MedRushTheme.textPrimary,
@@ -1270,7 +1275,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        StatusHelpers.estadoPedidoTexto(pedido.estado, AppLocalizations.of(context)),
+                        StatusHelpers.estadoPedidoTexto(
+                            pedido.estado, AppLocalizations.of(context)),
                         style: const TextStyle(
                           fontSize: MedRushTheme.fontSizeBodySmall,
                           color: MedRushTheme.textInverse,
@@ -1293,7 +1299,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     const SizedBox(width: 4),
                     Text(
                       StatusHelpers
-                          .obtenerFechaRelativaSegunPrioridadOptimizada(pedido, AppLocalizations.of(context)),
+                          .obtenerFechaRelativaSegunPrioridadOptimizada(
+                              pedido, AppLocalizations.of(context)),
                       style: const TextStyle(
                         fontSize: MedRushTheme.fontSizeBodySmall,
                         color: MedRushTheme.textSecondary,
@@ -1653,7 +1660,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context).confirmDeleteOrderQuestion(pedido.id),
+              AppLocalizations.of(context)
+                  .confirmDeleteOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -1817,129 +1825,216 @@ class _EntregasScreenState extends State<EntregasScreen> {
 
       final repartidores = result.data!;
       Usuario? seleccionado;
+      bool isAssigning = false;
 
       await showDialog(
         context: context,
-        builder: (context) => StatefulBuilder(
-          builder: (context, setState) => AlertDialog(
-            title: Row(
-              children: [
-                const Icon(
-                  LucideIcons.userPlus,
-                  color: MedRushTheme.primaryGreen,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context).assignDriver),
-              ],
-            ),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (sbContext, localSetState) {
+            return AlertDialog(
+              title: Row(
                 children: [
-                  Text(
-                    AppLocalizations.of(context).selectDriverForOrder(pedido.pacienteNombre),
-                    style: const TextStyle(
-                      fontSize: MedRushTheme.fontSizeBodyMedium,
-                      color: MedRushTheme.textSecondary,
-                    ),
+                  const Icon(
+                    LucideIcons.userPlus,
+                    color: MedRushTheme.primaryGreen,
+                    size: 24,
                   ),
-                  const SizedBox(height: 16),
-                  if (repartidores.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        AppLocalizations.of(context).noDriversAvailable,
-                        style: const TextStyle(
-                          color: MedRushTheme.textSecondary,
-                        ),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: repartidores.length,
-                        itemBuilder: (context, index) {
-                          final r = repartidores[index];
-                          final isSelected = seleccionado?.id == r.id;
-                          return ListTile(
-                            leading: _buildRepartidorAvatar(r),
-                            title: Text(r.nombre),
-                            subtitle:
-                                r.telefono != null ? Text(r.telefono!) : null,
-                            selected: isSelected,
-                            onTap: () {
-                              setState(() {
-                                seleccionado = r;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context).assignDriver),
                 ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context).cancel),
-              ),
-              if (repartidores.isNotEmpty)
-                ElevatedButton(
-                  onPressed: seleccionado != null
-                      ? () async {
-                          final repartidorNombre = seleccionado!.nombre;
-                          // Capturamos el contexto del diálogo para validarlo tras el gap async
-                          final dialogContext = context;
-
-                          try {
-                            final result = await _repository.asignarPedido(
-                              pedido.id,
-                              seleccionado!.id,
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)
+                          .selectDriverForOrder(pedido.pacienteNombre),
+                      style: const TextStyle(
+                        fontSize: MedRushTheme.fontSizeBodyMedium,
+                        color: MedRushTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (repartidores.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          AppLocalizations.of(context).noDriversAvailable,
+                          style: const TextStyle(
+                            color: MedRushTheme.textSecondary,
+                          ),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: 200,
+                        child: ListView.separated(
+                          itemCount: repartidores.length,
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final r = repartidores[index];
+                            final isSelected = seleccionado?.id == r.id;
+                            return ListTile(
+                              leading: _buildRepartidorAvatar(r),
+                              title: Text(
+                                r.nombre,
+                                style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? MedRushTheme.primaryGreen
+                                      : MedRushTheme.textPrimary,
+                                ),
+                              ),
+                              subtitle: r.telefono != null
+                                  ? Text(
+                                      r.telefono!,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? MedRushTheme.primaryGreen
+                                                .withValues(alpha: 0.8)
+                                            : MedRushTheme.textSecondary,
+                                      ),
+                                    )
+                                  : null,
+                              trailing: isSelected
+                                  ? const Icon(LucideIcons.check,
+                                      color: MedRushTheme.primaryGreen)
+                                  : const Icon(LucideIcons.circle,
+                                      color: MedRushTheme.borderLight),
+                              selected: isSelected,
+                              selectedTileColor: MedRushTheme.primaryGreen
+                                  .withValues(alpha: 0.1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    MedRushTheme.borderRadiusMd),
+                                side: isSelected
+                                    ? const BorderSide(
+                                        color: MedRushTheme.primaryGreen)
+                                    : BorderSide.none,
+                              ),
+                              onTap: isAssigning
+                                  ? null
+                                  : () {
+                                      try {
+                                        localSetState(() {
+                                          seleccionado = r;
+                                        });
+                                      } catch (e) {
+                                        debugPrint('Error seleccionando: $e');
+                                      }
+                                    },
                             );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isAssigning
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(AppLocalizations.of(context).cancel),
+                ),
+                if (repartidores.isNotEmpty)
+                  ElevatedButton(
+                    onPressed: (seleccionado != null && !isAssigning)
+                        ? () async {
+                            final repartidorNombre = seleccionado!.nombre;
 
-                            if (!mounted || !dialogContext.mounted) {
-                              return;
-                            }
+                            localSetState(() {
+                              isAssigning = true;
+                            });
 
-                            if (result.success) {
-                              Navigator.of(dialogContext).pop();
-                              final l10n = AppLocalizations.of(dialogContext);
-                              NotificationService.showSuccess(
-                                l10n.driverAssignedSuccess(repartidorNombre),
-                                context: dialogContext,
+                            try {
+                              final result = await _repository.asignarPedido(
+                                pedido.id,
+                                seleccionado!.id,
                               );
-                              await _loadPedidos();
-                            } else {
+
+                              if (!mounted || !dialogContext.mounted) {
+                                return;
+                              }
+
+                              if (result.success && result.data != null) {
+                                // Actualizar lista localmente
+                                this.setState(() {
+                                  final index = _pedidosFiltrados
+                                      .indexWhere((p) => p.id == pedido.id);
+                                  if (index != -1) {
+                                    _pedidosFiltrados[index] = result.data!;
+                                  }
+                                });
+
+                                Navigator.of(dialogContext).pop();
+                                final l10n = AppLocalizations.of(dialogContext);
+                                NotificationService.showSuccess(
+                                  l10n.driverAssignedSuccess(repartidorNombre),
+                                  context: dialogContext,
+                                );
+
+                                await _loadPedidos();
+                              } else {
+                                localSetState(() {
+                                  isAssigning = false;
+                                });
+                                final l10n = AppLocalizations.of(dialogContext);
+                                NotificationService.showError(
+                                  l10n.errorWithDetail(result.error ?? ''),
+                                  context: dialogContext,
+                                );
+                              }
+                            } catch (e) {
+                              localSetState(() {
+                                isAssigning = false;
+                              });
+                              if (!mounted || !dialogContext.mounted) {
+                                return;
+                              }
                               final l10n = AppLocalizations.of(dialogContext);
                               NotificationService.showError(
-                                l10n.errorWithDetail(result.error ?? ''),
+                                l10n.errorAssigningDriver(e.toString()),
                                 context: dialogContext,
                               );
                             }
-                          } catch (e) {
-                            if (!mounted || !dialogContext.mounted) {
-                              return;
-                            }
-                            final l10n = AppLocalizations.of(dialogContext);
-                            NotificationService.showError(
-                              l10n.errorAssigningDriver(e.toString()),
-                              context: dialogContext,
-                            );
                           }
+                        : null,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return Colors.grey.shade300;
                         }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: MedRushTheme.primaryGreen,
-                    foregroundColor: MedRushTheme.textInverse,
+                        return MedRushTheme.primaryGreen;
+                      }),
+                      foregroundColor:
+                          WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return Colors.grey.shade600;
+                        }
+                        return MedRushTheme.textInverse;
+                      }),
+                    ),
+                    child: isAssigning
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(AppLocalizations.of(context).confirmAssignment),
                   ),
-                  child: Text(AppLocalizations.of(context).confirmAssignment),
-                ),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       );
     } catch (e) {
@@ -2017,7 +2112,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context).confirmCancelOrderQuestion(pedido.id),
+              AppLocalizations.of(context)
+                  .confirmCancelOrderQuestion(pedido.id),
               style: const TextStyle(
                 fontSize: MedRushTheme.fontSizeBodyMedium,
                 color: MedRushTheme.textPrimary,
@@ -2099,7 +2195,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
       if (result.success) {
         if (mounted) {
           NotificationService.showSuccess(
-            AppLocalizations.of(context).orderCanceledSuccess(pedido.id.toString()),
+            AppLocalizations.of(context)
+                .orderCanceledSuccess(pedido.id.toString()),
             context: context,
           );
         }
@@ -2107,7 +2204,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
       } else {
         if (mounted) {
           NotificationService.showError(
-            AppLocalizations.of(context).errorCancelingOrder(result.error ?? ''),
+            AppLocalizations.of(context)
+                .errorCancelingOrder(result.error ?? ''),
             context: context,
           );
         }
@@ -2153,7 +2251,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context).selectFailureReasonForOrder(pedido.id),
+                  AppLocalizations.of(context)
+                      .selectFailureReasonForOrder(pedido.id),
                   style: const TextStyle(
                     fontSize: MedRushTheme.fontSizeBodyMedium,
                     color: MedRushTheme.textPrimary,
@@ -2180,7 +2279,9 @@ class _EntregasScreenState extends State<EntregasScreen> {
                           ),
                           const SizedBox(width: MedRushTheme.spacingXs),
                           Builder(
-                            builder: (context) => Text(StatusHelpers.motivoFallaTexto(motivo, AppLocalizations.of(context))),
+                            builder: (context) => Text(
+                                StatusHelpers.motivoFallaTexto(
+                                    motivo, AppLocalizations.of(context))),
                           ),
                         ],
                       ),
@@ -2198,7 +2299,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
                 TextFormField(
                   controller: observacionesController,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).observationsOptionalLabel,
+                    labelText:
+                        AppLocalizations.of(context).observationsOptionalLabel,
                     border: const OutlineInputBorder(),
                     hintText: AppLocalizations.of(context).failureDetailsHint,
                   ),
@@ -2305,7 +2407,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
       if (result.success) {
         if (mounted) {
           NotificationService.showSuccess(
-            AppLocalizations.of(context).orderMarkedFailedSuccess(pedido.id.toString()),
+            AppLocalizations.of(context)
+                .orderMarkedFailedSuccess(pedido.id.toString()),
             context: context,
           );
         }
@@ -2313,7 +2416,8 @@ class _EntregasScreenState extends State<EntregasScreen> {
       } else {
         if (mounted) {
           NotificationService.showError(
-            AppLocalizations.of(context).errorMarkingOrderFailed(result.error ?? ''),
+            AppLocalizations.of(context)
+                .errorMarkingOrderFailed(result.error ?? ''),
             context: context,
           );
         }

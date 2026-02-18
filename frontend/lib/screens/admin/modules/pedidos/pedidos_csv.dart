@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:material_table_view/material_table_view.dart';
 import 'package:medrush/l10n/app_localizations.dart';
 import 'package:medrush/models/farmacia.model.dart';
 import 'package:medrush/repositories/farmacia.repository.dart';
 import 'package:medrush/repositories/pedido.repository.dart';
+import 'package:medrush/screens/admin/widgets/csv_import/csv_data_preview_table.dart';
+import 'package:medrush/screens/admin/widgets/csv_import/csv_upload_zone.dart';
+import 'package:medrush/screens/admin/widgets/csv_import/csv_validation_status.dart';
 import 'package:medrush/services/csv.service.dart';
 import 'package:medrush/services/notification_service.dart';
 import 'package:medrush/theme/theme.dart';
@@ -62,6 +64,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
   final PedidoRepository _pedidoRepository = PedidoRepository();
 
   List<Map<String, dynamic>> _csvData = [];
+  List<String> _validationErrors = [];
+  List<String> _validationWarnings = [];
   List<Farmacia> _farmacias = [];
   Farmacia? _selectedFarmacia;
   bool _isLoading = false;
@@ -164,6 +168,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
             _fileName = fileName;
             _error = null;
           });
+
+          _validateData();
 
           logInfo('CSV cargado: $fileName con ${csvData.length} registros');
         }
@@ -490,78 +496,115 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       return _parseCoordinates(ubicacion) != null;
     }).length;
 
-    return Container(
-      margin: const EdgeInsets.all(MedRushTheme.spacingLg),
-      padding: const EdgeInsets.all(MedRushTheme.spacingMd),
-      decoration: BoxDecoration(
-        color: MedRushTheme.surface,
-        borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
-        border: Border.all(color: MedRushTheme.borderLight),
-        boxShadow: const [
-          BoxShadow(
-            color: MedRushTheme.shadowLight,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return CsvValidationStatus(
+      totalRows: totalRows,
+      validRows: validRows,
+    );
+  }
+
+  void _validateData() {
+    // Validar errores (datos requeridos faltantes o formatos inválidos)
+    final validationResult = CsvService.validateCsvData(_csvData);
+    _validationErrors = validationResult.errors;
+
+    // Validar advertencias (datos opcionales faltantes - "datos posibles")
+    _validationWarnings = [];
+    int missingOptionalCount = 0;
+
+    // Contar cuántos campos opcionales están vacíos en total
+    for (final row in _csvData) {
+      for (final field in CsvService.optionalFields) {
+        if (row[field]?.toString().trim().isEmpty ?? true) {
+          missingOptionalCount++;
+        }
+      }
+    }
+
+    if (missingOptionalCount > 0) {
+      _validationWarnings.add(
+          'Faltan $missingOptionalCount datos opcionales (posibles) en los registros importados.');
+    }
+
+    setState(() {});
+  }
+
+  void _showValidationDetails() {
+    final hasErrors = _validationErrors.isNotEmpty;
+    final hasWarnings = _validationWarnings.isNotEmpty;
+
+    if (!hasErrors && !hasWarnings) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              hasErrors ? Icons.error : Icons.warning,
+              color: hasErrors ? Colors.red : Colors.orange,
+            ),
+            const SizedBox(width: MedRushTheme.spacingSm),
+            Text(hasErrors ? 'Errores de Validación' : 'Advertencias de Datos'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                AppLocalizations.of(context).validationProgressTitle,
-                style: const TextStyle(
-                  fontSize: MedRushTheme.fontSizeBodyLarge,
-                  fontWeight: MedRushTheme.fontWeightBold,
-                  color: MedRushTheme.textPrimary,
+              if (hasErrors) ...[
+                const Text(
+                  'Se encontraron los siguientes errores que impiden la carga:',
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MedRushTheme.spacingMd,
-                  vertical: MedRushTheme.spacingXs,
+                const SizedBox(height: MedRushTheme.spacingSm),
+                ..._validationErrors.map((e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.cancel, size: 16, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                              child: Text(e,
+                                  style: const TextStyle(fontSize: 12))),
+                        ],
+                      ),
+                    )),
+                const Divider(),
+              ],
+              if (hasWarnings) ...[
+                const Text(
+                  'Aviso sobre datos opcionales faltantes:',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.orange),
                 ),
-                decoration: BoxDecoration(
-                  color: MedRushTheme.primaryGreen,
-                  borderRadius:
-                      BorderRadius.circular(MedRushTheme.borderRadiusMd),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)
-                      .recordsValidCount(totalRows, validRows),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: MedRushTheme.fontSizeBodySmall,
-                    fontWeight: MedRushTheme.fontWeightBold,
-                  ),
-                ),
-              ),
+                const SizedBox(height: MedRushTheme.spacingSm),
+                ..._validationWarnings.map((w) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info,
+                              size: 16, color: Colors.orange),
+                          const SizedBox(width: 8),
+                          Expanded(
+                              child: Text(w,
+                                  style: const TextStyle(fontSize: 12))),
+                        ],
+                      ),
+                    )),
+              ],
             ],
           ),
-          const SizedBox(height: MedRushTheme.spacingMd),
-          LinearProgressIndicator(
-            value: totalRows > 0 ? validRows / totalRows : 0,
-            backgroundColor: MedRushTheme.backgroundSecondary,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              validRows == totalRows
-                  ? MedRushTheme.primaryGreen
-                  : MedRushTheme.primaryBlue,
-            ),
-          ),
-          const SizedBox(height: MedRushTheme.spacingSm),
-          Text(
-            validRows == totalRows
-                ? AppLocalizations.of(context).allRecordsHaveValidCoordinates
-                : AppLocalizations.of(context)
-                    .recordsNeedValidCoordinates(totalRows - validRows),
-            style: TextStyle(
-              fontSize: MedRushTheme.fontSizeBodySmall,
-              color: validRows == totalRows
-                  ? MedRushTheme.primaryGreen
-                  : MedRushTheme.textSecondary,
-            ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Entendido'),
           ),
         ],
       ),
@@ -570,41 +613,60 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
   Widget _buildStatsFAB() {
     final totalRows = _csvData.length;
+    final hasErrors = _validationErrors.isNotEmpty;
+    final hasWarnings = _validationWarnings.isNotEmpty;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: MedRushTheme.spacingMd,
-        vertical: MedRushTheme.spacingSm,
-      ),
-      decoration: BoxDecoration(
-        color: MedRushTheme.primaryGreen,
-        borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: MedRushTheme.primaryGreen.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            LucideIcons.database,
-            color: Colors.white,
-            size: 16,
-          ),
-          const SizedBox(width: MedRushTheme.spacingXs),
-          Text(
-            '$totalRows registros',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: MedRushTheme.fontSizeBodyMedium,
-              fontWeight: MedRushTheme.fontWeightBold,
+    Color bgColor = MedRushTheme.primaryGreen;
+    IconData icon = LucideIcons.database;
+    String text = '$totalRows registros';
+
+    if (hasErrors) {
+      bgColor = Colors.red;
+      icon = Icons.error;
+      text = '$totalRows regs. (Error)';
+    } else if (hasWarnings) {
+      bgColor = Colors.orange;
+      icon = Icons.warning;
+      text = '$totalRows regs. (Info)';
+    }
+
+    return GestureDetector(
+      onTap: (hasErrors || hasWarnings) ? _showValidationDetails : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: MedRushTheme.spacingMd,
+          vertical: MedRushTheme.spacingSm,
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: bgColor.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 16,
+            ),
+            const SizedBox(width: MedRushTheme.spacingXs),
+            Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: MedRushTheme.fontSizeBodyMedium,
+                fontWeight: MedRushTheme.fontWeightBold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -671,28 +733,28 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
         // Barra de progreso/estado
         _buildProgressBar(),
 
-        // Contenido principal con scroll
+        // Contenido principal
         Expanded(
-          child: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.95,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Layout de 2 columnas para archivo CSV y farmacia
-                  _buildTopControls(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Layout de 2 columnas para archivo CSV y farmacia
+                _buildTopControls(),
+
+                // Mostrar espacio solo si hay archivo cargado
+                if (_fileName != null)
                   const SizedBox(height: MedRushTheme.spacingXl),
 
-                  // Preview de datos
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
+                // Preview de datos
+                if (_fileName != null)
+                  Expanded(
                     child: _buildDataPreview(),
-                  ),
-                ],
-              ),
+                  )
+                else
+                  const SizedBox.shrink(),
+              ],
             ),
           ),
         ),
@@ -755,114 +817,7 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
   /// Área de drag & drop principal centrada
   Widget _buildMainDragDropArea() {
-    return GestureDetector(
-      onTap: _pickCsvFile,
-      child: Container(
-        width: double.infinity,
-        height: 400, // Aumentado para pantalla completa
-        decoration: BoxDecoration(
-          color: MedRushTheme.backgroundPrimary,
-          borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
-          border: Border.all(
-            color: MedRushTheme.borderLight,
-            width: 2,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: MedRushTheme.shadowLight,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icono de nube verde
-            Container(
-              padding: const EdgeInsets.all(MedRushTheme.spacingXl),
-              decoration: BoxDecoration(
-                color: MedRushTheme.primaryGreen.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                LucideIcons.upload,
-                size: 100,
-                color: MedRushTheme.primaryGreen,
-              ),
-            ),
-            const SizedBox(height: MedRushTheme.spacingXl),
-
-            // Texto principal
-            Text(
-              AppLocalizations.of(context).dragDropCsvHere,
-              style: const TextStyle(
-                fontSize: MedRushTheme.fontSizeTitleLarge,
-                fontWeight: MedRushTheme.fontWeightBold,
-                color: MedRushTheme.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: MedRushTheme.spacingMd),
-
-            // Texto secundario en verde
-            Text(
-              AppLocalizations.of(context).orClickToSelectFile,
-              style: const TextStyle(
-                fontSize: MedRushTheme.fontSizeBodyLarge,
-                color: MedRushTheme.primaryGreen,
-                fontWeight: MedRushTheme.fontWeightMedium,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: MedRushTheme.spacingLg),
-
-            // Información adicional
-            Container(
-              padding: const EdgeInsets.all(MedRushTheme.spacingMd),
-              decoration: BoxDecoration(
-                color: MedRushTheme.surface,
-                borderRadius:
-                    BorderRadius.circular(MedRushTheme.borderRadiusMd),
-                border: Border.all(color: MedRushTheme.borderLight),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        LucideIcons.info,
-                        size: 16,
-                        color: MedRushTheme.textSecondary,
-                      ),
-                      const SizedBox(width: MedRushTheme.spacingXs),
-                      Text(
-                        AppLocalizations.of(context).fileInfoTitle,
-                        style: const TextStyle(
-                          fontSize: MedRushTheme.fontSizeBodyMedium,
-                          fontWeight: MedRushTheme.fontWeightMedium,
-                          color: MedRushTheme.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: MedRushTheme.spacingSm),
-                  Text(
-                    AppLocalizations.of(context).fileSizeFormatHint,
-                    style: const TextStyle(
-                      fontSize: MedRushTheme.fontSizeBodySmall,
-                      color: MedRushTheme.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return CsvUploadZone(onTap: _pickCsvFile);
   }
 
   /// Barra de estado del archivo cargado
@@ -992,44 +947,8 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
 
   Widget _buildDataPreview() {
     if (_csvData.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(MedRushTheme.spacingLg),
-        decoration: BoxDecoration(
-          color: MedRushTheme.surface,
-          borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
-          border: Border.all(color: MedRushTheme.borderLight),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                LucideIcons.fileText,
-                size: 64,
-                color: MedRushTheme.textSecondary,
-              ),
-              const SizedBox(height: MedRushTheme.spacingLg),
-              Text(
-                AppLocalizations.of(context).noDataToShow,
-                style: const TextStyle(
-                  fontSize: MedRushTheme.fontSizeTitleMedium,
-                  fontWeight: MedRushTheme.fontWeightBold,
-                  color: MedRushTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: MedRushTheme.spacingSm),
-              Text(
-                AppLocalizations.of(context).selectCsvFileToPreview,
-                style: const TextStyle(
-                  fontSize: MedRushTheme.fontSizeBodyMedium,
-                  color: MedRushTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
+      // Si no hay datos, mostrar mensaje (esto usualmente no se verá porque está condicionado en _buildContent)
+      return const SizedBox.shrink();
     }
 
     return DecoratedBox(
@@ -1040,7 +959,72 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(MedRushTheme.borderRadiusLg),
-        child: _buildDataTable(),
+        child: CsvDataPreviewTable(
+          csvData: _csvData,
+          cellBuilder: (header, value, row) {
+            final isEmpty = value.isEmpty;
+
+            // Si es la columna de "requiere_firma_especial", mostrar checkbox
+            if (header.toLowerCase().contains('requiere_firma') ||
+                header.toLowerCase().contains('firma_especial')) {
+              final boolValue = _parseBooleanValue(value);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
+                child: Center(
+                  child: Checkbox(
+                    value: boolValue,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _csvData[row][header] = newValue.toString();
+                      });
+                    },
+                    activeColor: MedRushTheme.primaryGreen,
+                    checkColor: MedRushTheme.surface,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              );
+            }
+
+            // Si es una columna de ubicación, hacer clickeable para Google Maps
+            if (_isLocationColumn(header)) {
+              return _buildLocationCell(value, isEmpty);
+            }
+
+            // Si es la columna de tipo de pedido, mostrar dropdown
+            if (_isTipoPedidoColumn(header)) {
+              return _buildTipoPedidoCell(value, row, header);
+            }
+
+            // Texto normal
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: isEmpty
+                        ? MedRushTheme.textSecondary
+                        : MedRushTheme.textPrimary,
+                    fontSize: MedRushTheme.fontSizeBodySmall,
+                    fontStyle: isEmpty ? FontStyle.italic : FontStyle.normal,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            );
+          },
+          formatHeaderText: _formatHeaderText,
+        ),
       ),
     );
   }
@@ -1283,180 +1267,6 @@ class _PedidosCsvScreenState extends State<PedidosCsvScreen> {
         ),
       );
     }
-  }
-
-  Widget _buildDataTable() {
-    if (_csvData.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final headers = _csvData.first.keys.toList();
-    final maxRowsToShow = 50;
-    final columnWidth = 200.0;
-    final rowHeight = 56.0;
-
-    // Crear columnas para TableView
-    final columns = headers
-        .map((header) => TableColumn(
-              width: columnWidth,
-            ))
-        .toList();
-
-    return TableView.builder(
-      columns: columns,
-      rowCount:
-          _csvData.length > maxRowsToShow ? maxRowsToShow : _csvData.length,
-      rowHeight: rowHeight,
-      style: const TableViewStyle(
-        dividers: TableViewDividersStyle(
-          vertical: TableViewVerticalDividersStyle.symmetric(
-            TableViewVerticalDividerStyle(
-              color: MedRushTheme.borderLight,
-            ),
-          ),
-          horizontal: TableViewHorizontalDividersStyle.symmetric(
-            TableViewHorizontalDividerStyle(
-              color: MedRushTheme.borderLight,
-            ),
-          ),
-        ),
-        scrollbars: TableViewScrollbarsStyle.symmetric(
-          TableViewScrollbarStyle(
-            interactive: true,
-            enabled: TableViewScrollbarEnabled.always,
-            thumbVisibility: WidgetStatePropertyAll(true),
-            trackVisibility: WidgetStatePropertyAll(true),
-          ),
-        ),
-      ),
-      headerBuilder: (context, contentBuilder) => contentBuilder(
-        context,
-        (context, column) => Container(
-          height: rowHeight,
-          decoration: const BoxDecoration(
-            color: MedRushTheme.backgroundSecondary,
-            border: Border(
-              bottom: BorderSide(
-                color: MedRushTheme.borderLight,
-              ),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                _formatHeaderText(headers[column]),
-                style: const TextStyle(
-                  fontWeight: MedRushTheme.fontWeightBold,
-                  color: MedRushTheme.textPrimary,
-                  fontSize: MedRushTheme.fontSizeBodySmall,
-                  letterSpacing: 0.5,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-      ),
-      headerHeight: rowHeight,
-      rowBuilder: (context, row, contentBuilder) {
-        final rowData = _csvData[row];
-        final isEven = row % 2 == 0;
-
-        return Container(
-          height: rowHeight,
-          color: isEven ? MedRushTheme.surface : MedRushTheme.backgroundPrimary,
-          child: contentBuilder(
-            context,
-            (context, column) {
-              final header = headers[column];
-              final value = rowData[header]?.toString() ?? '';
-              final isEmpty = value.isEmpty;
-
-              // Si es la columna de "requiere_firma_especial", mostrar checkbox
-              if (header.toLowerCase().contains('requiere_firma') ||
-                  header.toLowerCase().contains('firma_especial')) {
-                final boolValue = _parseBooleanValue(value);
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 12.0,
-                  ),
-                  child: Center(
-                    child: Checkbox(
-                      value: boolValue,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _csvData[row][header] = newValue.toString();
-                        });
-                      },
-                      activeColor: MedRushTheme.primaryGreen,
-                      checkColor: MedRushTheme.surface,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                );
-              }
-
-              // Si es una columna de ubicación, hacer clickeable para Google Maps
-              if (_isLocationColumn(header)) {
-                return _buildLocationCell(value, isEmpty);
-              }
-
-              // Si es la columna de tipo de pedido, mostrar dropdown
-              if (_isTipoPedidoColumn(header)) {
-                return _buildTipoPedidoCell(value, row, header);
-              }
-
-              // Para otras columnas, mostrar texto normal
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 12.0,
-                ),
-                child: Tooltip(
-                  message:
-                      isEmpty ? AppLocalizations.of(context).emptyField : value,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isEmpty)
-                        const Icon(
-                          LucideIcons.minus,
-                          color: MedRushTheme.textSecondary,
-                          size: 12,
-                        )
-                      else
-                        Expanded(
-                          child: Text(
-                            value,
-                            style: TextStyle(
-                              color: isEmpty
-                                  ? MedRushTheme.textSecondary
-                                  : MedRushTheme.textPrimary,
-                              fontSize: MedRushTheme.fontSizeBodySmall,
-                              fontStyle:
-                                  isEmpty ? FontStyle.italic : FontStyle.normal,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
   }
 
   /// Botón de procesar

@@ -857,87 +857,188 @@ class PedidosTableView extends StatelessWidget {
       final List<Usuario> repartidores = res.data ?? [];
 
       Usuario? seleccionado;
+      bool isAssigning = false;
 
       await showDialog(
         context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context).assignDriverTitle),
-            content: SizedBox(
-              width: 420,
-              height: 380,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: repartidores.isEmpty
-                        ? Center(
-                            child: Text(
-                                AppLocalizations.of(context).noActiveDrivers))
-                        : ListView.builder(
-                            itemCount: repartidores.length,
-                            itemBuilder: (context, index) {
-                              final r = repartidores[index];
-                              final isSelected = seleccionado?.id == r.id;
-                              return ListTile(
-                                leading: _buildRepartidorAvatar(r),
-                                title: Text(r.nombre),
-                                subtitle: r.telefono != null
-                                    ? Text(r.telefono!)
-                                    : null,
-                                selected: isSelected,
-                                onTap: () {
-                                  seleccionado = r;
-                                  Navigator.of(context).pop();
+        builder: (dialogContext) {
+          return StatefulBuilder(
+            builder: (sbContext, localSetState) {
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    const Icon(
+                      LucideIcons.userPlus,
+                      color: MedRushTheme.primaryGreen,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(AppLocalizations.of(context).assignDriverTitle),
+                  ],
+                ),
+                content: SizedBox(
+                  width: 420,
+                  height: 380,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)
+                            .selectDriverForOrder(pedido.pacienteNombre),
+                        style: const TextStyle(
+                          color: MedRushTheme.textSecondary,
+                          fontSize: MedRushTheme.fontSizeBodyMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: repartidores.isEmpty
+                            ? Center(
+                                child: Text(AppLocalizations.of(context)
+                                    .noActiveDrivers))
+                            : ListView.separated(
+                                itemCount: repartidores.length,
+                                separatorBuilder: (context, index) =>
+                                    const Divider(height: 1),
+                                itemBuilder: (context, index) {
+                                  final r = repartidores[index];
+                                  final isSelected = seleccionado?.id == r.id;
+                                  return ListTile(
+                                    leading: _buildRepartidorAvatar(r),
+                                    title: Text(
+                                      r.nombre,
+                                      style: TextStyle(
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? MedRushTheme.primaryGreen
+                                            : MedRushTheme.textPrimary,
+                                      ),
+                                    ),
+                                    subtitle: r.telefono != null
+                                        ? Text(r.telefono!)
+                                        : null,
+                                    trailing: isSelected
+                                        ? const Icon(LucideIcons.check,
+                                            color: MedRushTheme.primaryGreen)
+                                        : null,
+                                    selected: isSelected,
+                                    selectedTileColor: MedRushTheme.primaryGreen
+                                        .withValues(alpha: 0.1),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          MedRushTheme.borderRadiusMd),
+                                      side: isSelected
+                                          ? const BorderSide(
+                                              color: MedRushTheme.primaryGreen)
+                                          : BorderSide.none,
+                                    ),
+                                    onTap: isAssigning
+                                        ? null
+                                        : () {
+                                            localSetState(() {
+                                              seleccionado = r;
+                                            });
+                                          },
+                                  );
                                 },
-                              );
-                            },
-                          ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: isAssigning
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(),
+                    child: Text(AppLocalizations.of(context).cancel),
+                  ),
+                  ElevatedButton(
+                    onPressed: (seleccionado != null && !isAssigning)
+                        ? () async {
+                            final repartidorNombre = seleccionado!.nombre;
+                            localSetState(() {
+                              isAssigning = true;
+                            });
+
+                            try {
+                              final repo = PedidoRepository();
+                              final result = await repo.asignarPedido(
+                                  pedido.id, seleccionado!.id);
+
+                              if (!dialogContext.mounted) {
+                                return;
+                              }
+
+                              if (result.success) {
+                                Navigator.of(dialogContext).pop();
+
+                                // Usamos el context padre si sigue montado para mostrar notificación
+                                if (context.mounted) {
+                                  NotificationService.showSuccess(
+                                    AppLocalizations.of(context)
+                                        .orderAssignedToName(repartidorNombre),
+                                    context: context,
+                                  );
+                                  // Recargar la lista
+                                  onRefresh();
+                                }
+                              } else {
+                                localSetState(() {
+                                  isAssigning = false;
+                                });
+                                final l10n = AppLocalizations.of(dialogContext);
+                                NotificationService.showError(
+                                  '${l10n.errorAssigningOrder}: ${result.error ?? l10n.unknownError}',
+                                  context: dialogContext,
+                                );
+                              }
+                            } catch (e) {
+                              localSetState(() {
+                                isAssigning = false;
+                              });
+                              if (dialogContext.mounted) {
+                                NotificationService.showError(
+                                  e.toString(),
+                                  context: dialogContext,
+                                );
+                              }
+                            }
+                          }
+                        : null,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return Colors.grey.shade300;
+                        }
+                        return MedRushTheme.primaryGreen;
+                      }),
+                      foregroundColor:
+                          WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.disabled)) {
+                          return Colors.grey.shade600;
+                        }
+                        return MedRushTheme.textInverse;
+                      }),
+                    ),
+                    child: isAssigning
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(AppLocalizations.of(context).confirmAssignment),
                   ),
                 ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context).cancel),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (seleccionado == null) {
-                    Navigator.of(context).pop();
-                    return;
-                  }
-                  final repo = PedidoRepository();
-                  final result =
-                      await repo.asignarPedido(pedido.id, seleccionado!.id);
-                  if (!context.mounted) {
-                    return;
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                  if (result.success && context.mounted) {
-                    NotificationService.showSuccess(
-                      AppLocalizations.of(context)
-                          .orderAssignedToName(seleccionado!.nombre),
-                      context: context,
-                    );
-                    onRefresh();
-                  } else if (context.mounted) {
-                    final l10n = AppLocalizations.of(context);
-                    NotificationService.showError(
-                      '${l10n.errorAssigningOrder}: ${result.error ?? l10n.unknownError}',
-                      context: context,
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MedRushTheme.primaryGreen,
-                  foregroundColor: MedRushTheme.textInverse,
-                ),
-                child: Text(AppLocalizations.of(context).confirmAssignment),
-              ),
-            ],
+              );
+            },
           );
         },
       );
