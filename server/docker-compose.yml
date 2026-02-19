@@ -3,6 +3,8 @@ services:
     build:
       context: .
     restart: always
+    env_file:
+      - .env
     volumes:
       - storage-data:/var/www/laravel-app/storage/app
 
@@ -10,6 +12,8 @@ services:
     build:
       context: .
     restart: always
+    env_file:
+      - .env
     command: php artisan queue:work --tries=3 --timeout=600
     depends_on:
       - api
@@ -20,6 +24,8 @@ services:
     build:
       context: .
     restart: always
+    env_file:
+      - .env
     command: php artisan reverb:start --host=0.0.0.0 --port=9000
     depends_on:
       - api
