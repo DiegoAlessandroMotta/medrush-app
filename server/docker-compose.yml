@@ -7,6 +7,9 @@ services:
       - .env
     volumes:
       - storage-data:/var/www/laravel-app/storage/app
+    networks:
+      - dokploy-network
+      - default
 
   worker:
     build:
@@ -19,6 +22,9 @@ services:
       - api
     volumes:
       - storage-data:/var/www/laravel-app/storage/app
+    networks:
+      - dokploy-network
+      - default
 
   reverb:
     build:
@@ -29,6 +35,13 @@ services:
     command: php artisan reverb:start --host=0.0.0.0 --port=9000
     depends_on:
       - api
+    networks:
+      - dokploy-network
+      - default
 
 volumes:
   storage-data:
+
+networks:
+  dokploy-network:
+    external: true
