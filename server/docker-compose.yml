@@ -7,6 +7,12 @@ services:
       - .env
     volumes:
       - storage-data:/var/www/laravel-app/storage/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - dokploy-network
       - default
@@ -32,6 +38,12 @@ services:
     restart: always
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     command: php artisan reverb:start --host=0.0.0.0 --port=9000
     depends_on:
       - api

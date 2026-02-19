@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DirectionsController;
 use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Api\GoogleServicesHealthController;
+use App\Http\Controllers\Api\ReverbHealthController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\Download\DownloadController;
@@ -380,6 +381,7 @@ Route::post('/client-errors/report', [ClientErrorController::class, 'report'])
   ->middleware('throttle:client-errors-report');
 
 Route::get('/health/google-services', GoogleServicesHealthController::class);
+Route::get('/health/reverb', ReverbHealthController::class);
 
 Route::middleware('signed')->group(function () {
   Route::prefix('downloads')->group(function () {
@@ -398,24 +400,24 @@ Route::prefix('downloads')->group(function () {
 
 // Route for Docker Healthcheck
 Route::get('/health', function () {
-    try {
-        DB::connection()->getPdo();
-        return response()->json([
-            'status' => 'ok',
-            'database' => 'connected',
-            'timestamp' => now()->toIso8601String(),
-            'server' => gethostname(),
-            'php' => phpversion(),
-            'laravel' => app()->version(),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'database' => 'disconnected',
-            'message' => $e->getMessage(),
-            'timestamp' => now()->toIso8601String(),
-        ], 500);
-    }
+  try {
+    DB::connection()->getPdo();
+    return response()->json([
+      'status' => 'ok',
+      'database' => 'connected',
+      'timestamp' => now()->toIso8601String(),
+      'server' => gethostname(),
+      'php' => phpversion(),
+      'laravel' => app()->version(),
+    ]);
+  } catch (\Exception $e) {
+    return response()->json([
+      'status' => 'error',
+      'database' => 'disconnected',
+      'message' => $e->getMessage(),
+      'timestamp' => now()->toIso8601String(),
+    ], 500);
+  }
 });
 
 // TODO: BORRAR ESTAS RUTAS EN PRODUCCIÓN - Solo para debugging
