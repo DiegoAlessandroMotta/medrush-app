@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN install-php-extensions pdo_pgsql pgsql zip gd bcmath intl pcntl imagick opcache
 
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY docker/Caddyfile /etc/caddy/Caddyfile
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
